@@ -11,7 +11,7 @@ void configure_benchmark(string fe_device, string be_device, string consumption_
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
         perror("getcwd() error");
-        return 1;
+        return;
     }
     
     string cm_cwd = cwd;
