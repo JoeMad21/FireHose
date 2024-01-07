@@ -17,7 +17,7 @@ void configure_benchmark(string fe_device, string be_device, string consumption_
     
     string cm_cwd = cwd;
 
-    string cm_compiler = "--std=C++11";
+    string cm_compiler = "--std=c++11";
     string cm_firehose = "firehose_main.cpp";
     string cm_library_loc = "-L./device_libraries";
     string cm_library = "";
