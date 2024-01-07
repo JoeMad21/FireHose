@@ -1,6 +1,18 @@
-#include <iostream>
+#include <omp.h>
 
 int main() {
-    std::cout << "Hello World!";
-    return 0;
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+            func1();
+        }
+
+        #pragma omp section
+        {
+            func2();
+        }
+    }
+
+    return 0;  
 }
