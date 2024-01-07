@@ -45,7 +45,7 @@ void configure_benchmark(string fe_device, string be_device, string consumption_
     }
     else {
         // Child process
-        execlp("g++", cm_compiler.c_str(), cm_firehose.c_str(), cm_library_loc.c_str(), cm_library.c_str(), cm_output.c_str());
+        execlp("g++", cm_compiler.c_str(), cm_firehose.c_str(), cm_library_loc.c_str(), cm_library.c_str(), cm_output.c_str(), NULL);
         // If execvp returns, an error occurred
         std::cerr << "Error executing compiler" << std::endl;
         _exit(1);  // Use _exit in child to avoid flushing buffers
@@ -62,7 +62,7 @@ cout << "Welcome to the FireHose Interface. What device will be the front-end?" 
 cout << "1. CPU" << endl;
 cout << "2. Graphcore IPU" << endl;
 cout << "Selected Device: ";
-cin >> device;
+cin >> fe_device;
 cout << endl;
 
 switch(device) {
@@ -79,7 +79,7 @@ switch(device) {
 }
 
 int be_device = 0;
-cm_be_device = "";
+string cm_be_device = "";
 cout << "What device will be the back-end?" << endl;
 cout << "1. Graphcore IPU" << endl;
 cout << "2. UPMEM DPU" << endl;
@@ -101,7 +101,7 @@ switch(device) {
 }
 
 int consumption_task = 0;
-cm_consumption_task = "";
+string cm_consumption_task = "";
 bool source_control = false;
 cout << "What consumption task would you like to do on the back-end?" << endl;
 cout << "1. Matrix multiplication" << endl;
@@ -134,7 +134,7 @@ switch(consumption_task) {
 }
 
 source = 0;
-cm_source = "";
+string cm_source = "";
 if(source_control) {
 
     int source = 0;
