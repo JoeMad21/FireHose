@@ -45,7 +45,7 @@ void configure_benchmark(string fe_device, string be_device, string consumption_
     }
     else {
         // Child process
-        execlp("g++", cm_compiler.c_str(), cm_firehose.c_str(), cm_library_loc.c_str(), cm_library.c_str(), cm_output.c_str(), NULL);
+        execlp("g++", "g++", cm_compiler.c_str(), cm_firehose.c_str(), cm_library_loc.c_str(), cm_library.c_str(), cm_output.c_str(), NULL);
         // If execvp returns, an error occurred
         std::cerr << "Error executing compiler" << std::endl;
         _exit(1);  // Use _exit in child to avoid flushing buffers
