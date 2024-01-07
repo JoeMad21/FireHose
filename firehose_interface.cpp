@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void configure_benchmark(string fe_device, string be_device, string consumption_task, string source) {
+void configure_benchmark(int fe_device, int be_device, int consumption_task, int source) {
 
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
@@ -21,10 +21,14 @@ void configure_benchmark(string fe_device, string be_device, string consumption_
     string cm_firehose = "firehose_main.cpp";
     string cm_library_loc = "-L./device_libraries";
     string cm_library = "";
-    if (be_device == "-be_ipu") {
-       cm_library = "-lipu";
-    }
-    else {
+    switch(be_device) {
+    case 1: 
+        cm_library = "-lipu";
+        break;
+
+    //Add new devices here as support grows
+    default:
+        cout << "error: no be_device argument passed..." << endl;
         return;
     }
     string cm_output = "-o firehose";
@@ -57,7 +61,6 @@ void configure_benchmark(string fe_device, string be_device, string consumption_
 int main() {
 
 int fe_device = 0;
-string cm_fe_device = "";
 cout << "Welcome to the FireHose Interface. What device will be the front-end?" << endl;
 cout << "1. CPU" << endl;
 cout << "2. Graphcore IPU" << endl;
@@ -67,7 +70,6 @@ cin >> fe_device;
 switch(fe_device) {
     case 1: 
         cout << "CPU Selected" << endl;
-        cm_fe_device = "-fe_cpu";
         break;
 
     //Add new devices here as support grows
@@ -79,7 +81,6 @@ switch(fe_device) {
 cout << endl;
 
 int be_device = 0;
-string cm_be_device = "";
 cout << "What device will be the back-end?" << endl;
 cout << "1. Graphcore IPU" << endl;
 cout << "2. UPMEM DPU" << endl;
@@ -89,7 +90,6 @@ cin >> be_device;
 switch(be_device) {
     case 1: 
         cout << "IPU Selected" << endl;
-        cm_be_device = "-be_ipu";
         break;
 
     //Add new devices here as support grows
@@ -101,7 +101,6 @@ switch(be_device) {
 cout << endl;
 
 int consumption_task = 0;
-string cm_consumption_task = "";
 bool source_control = false;
 cout << "What consumption task would you like to do on the back-end?" << endl;
 cout << "1. Matrix multiplication" << endl;
@@ -113,13 +112,11 @@ cin >> consumption_task;
 switch(consumption_task) {
     case 1: 
         cout << "Matrix Multiplication Selected" << endl;
-        cm_consumption_task = "-matmul";
         source_control = true;
         break;
 
     case 2: 
         cout << "Tensor Decomposition Selected" << endl;
-        cm_consumption_task = "-tensor_decomp";
         source_control = true;
         break;
 
@@ -127,14 +124,12 @@ switch(consumption_task) {
 
     default:
         cout << "No consumption task selected, ending program..." << endl;
-        source_control = false;
         return 0;
         break;
 }
 cout << endl;
 
 int source = 0;
-string cm_source = "";
 if(source_control) {
 
     int source = 0;
@@ -147,7 +142,6 @@ if(source_control) {
     switch(source) {
       case 1:
         cout << "Random Generation Selected" << endl;
-        cm_source = "-random_gen";
         break;
 
         //Add new generation methods here
@@ -162,6 +156,6 @@ cout << endl;
 
 cout << "Compiling code..." << endl;
 
-configure_benchmark(cm_fe_device, cm_be_device, cm_consumption_task, cm_source);
+configure_benchmark(fe_device, be_device, consumption_task, source);
 
 }
