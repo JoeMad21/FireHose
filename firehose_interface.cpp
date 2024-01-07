@@ -133,7 +133,7 @@ switch(consumption_task) {
         break;
 }
 
-source = 0;
+int source = 0;
 string cm_source = "";
 if(source_control) {
 
@@ -147,7 +147,7 @@ if(source_control) {
     switch(source) {
       case 1:
         cout << "Random Generation Selected" << endl;
-        cm_source = "-random_gen"
+        cm_source = "-random_gen";
         break;
 
         //Add new generation methods here
