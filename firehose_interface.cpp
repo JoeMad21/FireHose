@@ -63,7 +63,6 @@ cout << "1. CPU" << endl;
 cout << "2. Graphcore IPU" << endl;
 cout << "Selected Device: ";
 cin >> fe_device;
-cout << endl;
 
 switch(fe_device) {
     case 1: 
@@ -77,6 +76,7 @@ switch(fe_device) {
         cout << "No device selected, ending program..." << endl;
         return 0;
 }
+cout << endl;
 
 int be_device = 0;
 string cm_be_device = "";
@@ -85,7 +85,6 @@ cout << "1. Graphcore IPU" << endl;
 cout << "2. UPMEM DPU" << endl;
 cout << "Selected Device: ";
 cin >> be_device;
-cout << endl;
 
 switch(be_device) {
     case 1: 
@@ -99,6 +98,7 @@ switch(be_device) {
         cout << "No device selected, ending program..." << endl;
         return 0;
 }
+cout << endl;
 
 int consumption_task = 0;
 string cm_consumption_task = "";
@@ -109,7 +109,6 @@ cout << "2. Tensor Decomposition" << endl;
 cout << "3. Hashing" << endl;
 cout << "Consumption Task: ";
 cin >> consumption_task;
-cout << endl;
 
 switch(consumption_task) {
     case 1: 
@@ -132,6 +131,7 @@ switch(consumption_task) {
         return 0;
         break;
 }
+cout << endl;
 
 int source = 0;
 string cm_source = "";
@@ -158,6 +158,7 @@ if(source_control) {
         break;
     }
 }
+cout << endl;
 
 cout << "Compiling code..." << endl;
 
