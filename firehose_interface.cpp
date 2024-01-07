@@ -65,7 +65,7 @@ cout << "Selected Device: ";
 cin >> fe_device;
 cout << endl;
 
-switch(device) {
+switch(fe_device) {
     case 1: 
         cout << "CPU Selected" << endl;
         cm_fe_device = "-fe_cpu";
@@ -84,10 +84,10 @@ cout << "What device will be the back-end?" << endl;
 cout << "1. Graphcore IPU" << endl;
 cout << "2. UPMEM DPU" << endl;
 cout << "Selected Device: ";
-cin >> device;
+cin >> be_device;
 cout << endl;
 
-switch(device) {
+switch(be_device) {
     case 1: 
         cout << "IPU Selected" << endl;
         cm_be_device = "-be_ipu";
@@ -114,13 +114,13 @@ cout << endl;
 switch(consumption_task) {
     case 1: 
         cout << "Matrix Multiplication Selected" << endl;
-        cm_consumption_task = "-matmul"
+        cm_consumption_task = "-matmul";
         source_control = true;
         break;
 
     case 2: 
         cout << "Tensor Decomposition Selected" << endl;
-        cm_consumption_task = "-tensor_decomp"
+        cm_consumption_task = "-tensor_decomp";
         source_control = true;
         break;
 
