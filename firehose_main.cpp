@@ -1,4 +1,4 @@
-#include "firehose_ipu.hpp"
+#include "device_libraries/firehose_ipu.hpp"
 
 int main() {
 
