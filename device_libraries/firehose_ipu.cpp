@@ -97,7 +97,7 @@ void tensorDecomp() {
     auto output_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 0");
     auto output_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 1");
 
-    auto identity_tensor = graph.addConstant(poplar::FLOAT, {rows, cols}, {1, 0, 0, 0, 1, 0, 0, 0, 1}, "Output Tensor 1");
+    auto identity_tensor = graph.addConstant<float>(poplar::FLOAT, {rows, cols}, {1, 0, 0, 0, 1, 0, 0, 0, 1}, "Output Tensor 1");
 
     poputil::mapTensorLinearly(graph, input_tensor0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0);
