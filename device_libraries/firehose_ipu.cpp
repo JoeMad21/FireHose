@@ -148,7 +148,7 @@ void tensorDecomp() {
     poplar::Graph graph(device.getTarget());
 
     // Programs
-    std::vector<poplar::program::Program> progs;
+    std::vector<poplar::program::Program> progs(Progs::NUM_PROGRAMS);
 
     // Flags
     bool flag = false;
