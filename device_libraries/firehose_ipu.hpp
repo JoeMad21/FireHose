@@ -5,7 +5,7 @@
 #include <poputil/TileMapping.hpp>
 
 #include <poplin/codelets.hpp>
-#include <poplin/experimental/codelets.hpp>
+#include <poplin/experimental/QRFactorization.hpp>
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols);
 
