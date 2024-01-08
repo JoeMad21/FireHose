@@ -1,7 +1,6 @@
 #include "firehose_ipu.hpp"
 
 enum Progs {
-    //INIT_FLAGS,
     STREAM_INPUTS,
     CONSUMPTION_TASK,
     STREAM_RESULTS,
@@ -120,8 +119,8 @@ void frontEnd_TensorDecomp(bool& flag, int& rows, int& cols, int& exp_size, std:
         }
 
         while(flag) {}
-        printMatrix(cpu_output0);
-        printMatrix(cpu_output1);
+        printMatrix("QMatrix", cpu_output0, cols);
+        printMatrix("RMatrix", cpu_output1, cols);
         sleep(1);
     }
 }
