@@ -222,9 +222,9 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    poplin::experimental::addCodelets(graph);
+    poplin::addCodelets(graph);
 
-    auto con_out = poplin::QRFactorization(graph, consumption_tensor_in, identity_tensor, seq);
+    auto con_out = poplin::experimental::QRFactorization(graph, consumption_tensor_in, identity_tensor, seq);
 
     progs[CONSUMPTION_TASK] = seq;
 
@@ -245,7 +245,7 @@ void tensorDecomp() {
     graph.connect(output_io0["strm_in"], consumption_tensor_out1);
     graph.connect(output_io0["strm_out"], output_tensor1);
 
-    poplar::compileGraph(g, progs);
+    poplar::compileGraph(graph, progs);
     poplar::Engine engine(std::move(exe));
     engine.load(device);
 
