@@ -142,7 +142,7 @@ void tensorDecomp() {
     
     // Get an IPU Device
     poplar::DeviceManager manager = DeviceManager::createDeviceManager();
-    auto device = manager.acquireAvailableDevice(1);
+    device = manager.acquireAvailableDevice(1);
 
     /* Expose Shared Memory */
 
