@@ -214,7 +214,7 @@ void tensorDecomp() {
     progs[STREAM_INPUTS] = seq;
 
     graph.connect(input_io0["strm_in"], input_tensor0);
-    graph.connect(input_io0["strm_out"], consumption_tensor_in);
+    graph.connect(input_io0["strm_out"], consumption_tensor_in0);
 
     /* Consumption Task Program */
 
