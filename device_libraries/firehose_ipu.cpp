@@ -103,7 +103,7 @@ void tensorDecomp() {
     auto output_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 0");
     auto output_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 1");
 
-    auto identity_tensor = graph.addConstant<float>(poplar::FLOAT, {rows, cols}, {1, 0, 0, 0, 1, 0, 0, 0, 1}, "Output Tensor 1");
+    auto identity_tensor = graph.addVariable(poplar::FLOAT, {rows, cols}, "Output Tensor 1");
 
     poputil::mapTensorLinearly(graph, input_tensor0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0);
@@ -113,7 +113,7 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor1);
 
     // Vertices
-    auto consumption_task_cs = g.addComputeSet("Consumption Task CS");
+    auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
     auto input_io0 = graph.addVertex(consumption_task_cs, "IO Input Vertex 0");
     auto output_io0 = graph.addVertex(consumption_task_cs, "IO Output Vertex 0");
     auto output_io1 = graph.addVertex(consumption_task_cs, "IO Output Vertex 1");
