@@ -69,7 +69,12 @@ void tensorDecomp() {
     
     // Get an IPU Device
     auto manager = poplar::DeviceManager::createDeviceManager();
-    auto device = manager.getDevices(poplar::TargetType::IPU, 1);
+    auto hwDevices = manager.getDevices(poplar::TargetType::IPU, 1);
+    auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
+
+    if (it != hwDevices.end()) {
+        device = std::move(*it);
+    }
 
     /* Expose Shared Memory */
 
