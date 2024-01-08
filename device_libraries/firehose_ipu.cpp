@@ -113,9 +113,10 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor1);
 
     // Vertices
-    auto input_io0 = graph.addVertex(graph.getDefaultComputeSet(), "IO Input Vertex 0");
-    auto output_io0 = graph.addVertex(graph.getDefaultComputeSet(), "IO Output Vertex 0");
-    auto output_io1 = graph.addVertex(graph.getDefaultComputeSet(), "IO Output Vertex 1");
+    auto consumption_task_cs = g.addComputeSet("Consumption Task CS");
+    auto input_io0 = graph.addVertex(consumption_task_cs, "IO Input Vertex 0");
+    auto output_io0 = graph.addVertex(consumption_task_cs, "IO Output Vertex 0");
+    auto output_io1 = graph.addVertex(consumption_task_cs, "IO Output Vertex 1");
 
     graph.setTileMapping(input_io0, 3);
     graph.setTileMapping(output_io0, 4);
