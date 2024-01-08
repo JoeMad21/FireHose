@@ -141,7 +141,7 @@ void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, int& exp_size) {
 void tensorDecomp() {
     
     // Get an IPU Device
-    DeviceManager manager = DeviceManager::createDeviceManager();
+    poplar::DeviceManager manager = DeviceManager::createDeviceManager();
     auto device = manager.acquireAvailableDevice(1);
 
     /* Expose Shared Memory */
