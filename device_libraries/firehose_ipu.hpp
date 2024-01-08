@@ -1,25 +1,25 @@
 #include <vector>
 #include <random>
-#include "utils.h"
 #include <unistd.h>
 
 #include <poputil/TileMapping.hpp>
 
 #include <poplin/codelets.hpp>
-//#include <poplin/MatMul.hpp>
+#include <poplin/experimental/codelets.hpp>
 
-//#include <poprand/codelets.hpp>
-//#include <poprand/RandomGen.hpp>
+void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols);
 
+void frontEnd_TensorDecomp(bool& flag, int& rows, int& cols, int& exp_size, std::vector<float>& cpu_input0, std::vector<float>& cpu_output0, std::vector<float>& cpu_output1);
 
-void buildStreamPrograms(poplar::Graph& g, std::vector<poplar::program::Program>& progs, int num_transfers, int packet_size);
+void backEnd_TensorDecomp(poplar::Engine engine, bool& flag, int& exp_size) {
 
-void buildConsumptionTaskProgram(poplar::Graph& g, std::vector<poplar::program::Program>& progs);
+    for (int i = 0; i < exp_size; i++) {
+        while(!flag) {}
+        flag = false;
+        engine.run(STREAM_INPUTS);
+        engine.run(CONSUMPTION_TASK);
+        engine.run(STREAM_RESULTS);
+    }
+}
 
-poplar::Engine createEngine(poplar::Device& device, poplar::Executable& exe);
-
-void addStreamsToEngine(poplar::Engine& engine);
-
-void runProgsOnEngine(poplar::Engine& engine);
-
-void executeTensorDecomp(poplar::Graph& g);
+void tensorDecomp() 

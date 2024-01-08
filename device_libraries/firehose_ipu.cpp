@@ -1,10 +1,12 @@
 #include "firehose_ipu.hpp"
+#include <omp.h>
 
 enum Progs {
-  STREAM_INPUTS,
-  CONSUMPTION_TASK,
-  STREAM_RESULTS,
-  NUM_PROGRAMS
+    //INIT_FLAGS,
+    STREAM_INPUTS,
+    CONSUMPTION_TASK,
+    STREAM_RESULTS,
+    NUM_PROGRAMS
 };
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
@@ -24,124 +26,239 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 
 }
 
-//Add tensor arguments
-void buildStreamPrograms(poplar::Graph& g, std::vector<poplar::program::Program>& progs, int num_transfers, int packet_size) {
+//void buildFlagProgram(poplar::Graph& g, std::vector<poplar::program::Program>& progs) {
+    //auto seq = poplar::program::Sequence();
 
-    // Add Tensors
-    auto source_tensor = g.addVariable(poplar::FLOAT, {packet_size}, "Source Matrix")
-    auto q_tensor = g.addVariable(poplar::FLOAT, {packet_size}, "QMatrix")
-    auto r_tensor = g.addVariable(poplar::FLOAT, {packet_size}, "RMatrix")
+    //seq.add(poplar::program::Copy(flag_strm, ready_flag));
+    //seq.add(poplar::program::Copy(elements_strm, num_elements));
+
+    //progs[INIT_FLAGS] = seq;
+//}
+
+//void buildIOInProgram(poplar::Graph& g, std::vector<poplar::program::Program>& progs, int num_transfers) {
+
+    //auto seq = poplar::program::Sequence();
+
+    //for(int i = 0; i < num_transfers; i++) {
+        //seq.add(poplar::program::Copy(source_stream, source_tensor));
+    //}
+
+    //progs[STREAM_INPUTS] = seq;
+
+    //seq = poplar::program::Sequence();
+
+    //graph.connect(v["strm_in"], source_tensor);
+    //graph.connect(v["ready_flag"], ready_flag);
+    //graph.connect(v["num_elements"], )
+    //graph.connect(v["strm_out"], result);
+//}
+
+//Add tensor arguments
+//void buildCTTensorDecompProgram(poplar::Graph& g, std::vector<poplar::program::Program>& progs) {
+
+    //poplin::addCodelets(g);
+    //auto qr_out = poplin::qr();
+    //seq.add(poplar::program::Copy(mult_out,tensor));
+    //Connect to codely that does anomaly detection
+    //auto anomalyCS = g.addComputeSet("anomalyCS");
+
+    //for (unsigned i = 5; i < 100; ++i){
+        //auto v = g.addVertex(anomalyCS,);
+        //g.setTileMapping(v, i);
+    //}
+
+//}
+
+//poplar::Engine createEngine(poplar::Device& device, poplar::Executable& exe) {
+  //poplar::Engine engine(std::move(exe));
+  //engine.load(device);
+
+  //return engine;
+//}
+
+//void addStreamToEngine(poplar::Engine& engine, std::string name, std::vector<std::vector<float>>& cpu_vectors) {
+    //for(int i = 0; i < max; i++) {
+        //engine.connectStream(names[i], cpu_vectors[i].data());
+    //}
+//}
+
+//void runProgsOnEngine(poplar::Engine& engine) {
+    //engine.run(STREAM_INPUTS);
+    //engine.run(CONSUMPTION_TASK);
+    //engine.run(STREAM_RESULTS);
+//}
+
+//void executeTensorDecomp(poplar::Graph& g, std::vector<poplar::program::Program>& progs) {
+
+    //buildStreamPrograms(g, progs, num_transfers, packet_size);
+    //buildConsumptionTaskProgram(g, progs);
+
+    //poplar::compileGraph(g, progs);
+
+//}
+
+void frontEnd_TensorDecomp(bool& flag, int& rows, int& cols, int& exp_size, std::vector<float>& cpu_input0, std::vector<float>& cpu_output0, std::vector<float>& cpu_output1) {
+
+    /* Create data to input into back-end */
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            cpu_input0[j+(cols*i)] = distribution(gen);
+        }
+    }
+
+    flag = true;
+    /* Loop to create multiple matrices and decompose */
+    for (int i = 0; i < exp_size; i++) {
+        
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                cpu_input0[j+(cols*i)] = distribution(gen);
+            }
+        }
+
+        while(flag) {}
+        printMatrix(cpu_output0);
+        printMatrix(cpu_output1);
+        sleep(1);
+    }
+}
+
+void backEnd_TensorDecomp(poplar::Engine engine, bool& flag, int& exp_size) {
+
+    for (int i = 0; i < exp_size; i++) {
+        while(!flag) {}
+        flag = false;
+        engine.run(STREAM_INPUTS);
+        engine.run(CONSUMPTION_TASK);
+        engine.run(STREAM_RESULTS);
+    }
+}
+
+void tensorDecomp() {
+    
+    // Get an IPU Device
+    DeviceManager manager = DeviceManager::createDeviceManager();
+    auto device = manager.acquireAvailableDevice(1);
+
+    /* Expose Shared Memory */
+
+    // Graph
+    poplar::Graph graph(device.getTarget());
+
+    // Programs
+    std::vector<poplar::program::Program> progs;
+
+    // Flags
+    bool flag = false;
+
+    // Parameters
+    int rows = 3;
+    int cols = 3;
+    int packet_size = 9;
+    int num_transfers = (rows*cols) /packet_size;
+    int exp_size = 3;
+
+    // Tensors
+    auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
+    auto consumption_tensor_in0 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Input 0");
+    auto consumption_tensor_out0 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 0");
+    auto consumption_tensor_out1 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 1");
+    auto output_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 0");
+    auto output_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 1");
+
+    auto identity_tensor = graph.addConstant(poplar::FLOAT, {rows, cols}, {1, 0, 0, 0, 1, 0, 0, 0, 1}, "Output Tensor 1");
+
+    poputil::mapTensorLinearly(graph, input_tensor0);
+    poputil::mapTensorLinearly(graph, consumption_tensor_in0);
+    poputil::mapTensorLinearly(graph, consumption_tensor_out0);
+    poputil::mapTensorLinearly(graph, consumption_tensor_out1);
+    poputil::mapTensorLinearly(graph, output_tensor0);
+    poputil::mapTensorLinearly(graph, output_tensor1);
+
+    // Vertices
+    auto input_io0 = graph.addVertex(graph.getDefaultComputeSet(), "IO Input Vertex 0");
+    auto output_io0 = graph.addVertex(graph.getDefaultComputeSet(), "IO Output Vertex 0");
+    auto output_io1 = graph.addVertex(graph.getDefaultComputeSet(), "IO Output Vertex 1");
+
+    graph.setTileMapping(input_io0, 3);
+    graph.setTileMapping(output_io0, 4);
+    graph.setTileMapping(output_io1, 5);
+
+
+
+    // Streams
+    auto input_strm0 = graph.addHostToDeviceFIFO("Input Stream 0", poplar::FLOAT, packet_size);
+    auto output_strm0 = graph.addDeviceToHostFIFO("Output Stream 0", poplar::FLOAT, packet_size);
+    auto output_strm1 = graph.addDeviceToHostFIFO("Output Stream 1", poplar::FLOAT, packet_size);
+
+    // Misc
+    //auto ready_flag = graph.addVariable(poplar::INT, {1}, "Ready Flag");
+    //auto num_elements = graph.addVariable(poplar::INT, {1}, "Number of elements");
+
+    poputil::mapTensorLinearly(graph, ready_flag);
+    poputil::mapTensorLinearly(graph, num_elements);
+
+    // CPU Vectors
+    std::vector<float> cpu_input0(rows*cols);
+    std::vector<float> cpu_output0(rows*cols);
+    std::vector<float> cpu_output1(rows*cols);
 
     auto seq = poplar::program::Sequence();
 
     for(int i = 0; i < num_transfers; i++) {
-        seq.add(poplar::program::Copy(source_stream, source_tensor));
-        seq.add();
+        seq.add(poplar::program::Copy(input_strm0, input_tensor0));
     }
 
     progs[STREAM_INPUTS] = seq;
 
+    graph.connect(input_io0["strm_in"], input_tensor0);
+    graph.connect(input_io0["strm_out"], consumption_tensor_in);
+
+    /* Consumption Task Program */
+
+    seq = poplar::program::Sequence();
+
+    poplin::experimental::addCodelets(graph);
+
+    auto con_out = poplin::QRFactorization(graph, consumption_tensor_in, identity_tensor, seq);
+
+    progs[CONSUMPTION_TASK] = seq;
+
+    /* Stream Outputs Program */
+
     seq = poplar::program::Sequence();
 
     for(int i = 0; i < num_transfers; i++) {
-        seq.add(poplar::program::Copy(q_tensor, q_stream));
-        seq.add(poplar::program::Copy(r_tensor, r_stream));
-    }
-    
-    progs[READ_RESULTS] = seq;
-}
-
-//Add tensor arguments
-void buildCTTensorDecompProgram(poplar::Graph& g, std::vector<poplar::program::Program>& progs) {
-
-    poplin::addCodelets(g);
-    auto qr_out = poplin::qr();
-    seq.add(poplar::program::Copy(mult_out,tensor));
-    //Connect to codely that does anomaly detection
-    auto anomalyCS = g.addComputeSet("anomalyCS");
-
-    for (unsigned i = 5; i < 100; ++i){
-        auto v = g.addVertex(anomalyCS,);
-        g.setTileMapping(v, i);
+        seq.add(poplar::program::Copy(output_tensor0, output_strm0));
+        seq.add(poplar::program::Copy(output_tensor1, output_strm1));
     }
 
-}
+    progs[STREAM_INPUTS] = seq;
 
-poplar::Engine createEngine(poplar::Device& device, poplar::Executable& exe) {
-  poplar::Engine engine(std::move(exe));
-  engine.load(device);
+    graph.connect(output_io0["strm_in"], consumption_tensor_out0);
+    graph.connect(output_io0["strm_out"], output_tensor0);
 
-  return engine;
-}
-
-void addStreamsToEngine(poplar::Engine& engine, std::vector<string>& names, std::vector<std::vector<float>>& cpu_vectors) {
-    for(int i = 0; i < max; i++) {
-        engine.connectStream(names[i], cpu_vectors[i].data());
-    }
-}
-
-void runProgsOnEngine(poplar::Engine& engine) {
-    engine.run(STREAM_INPUTS);
-    engine.run(CONSUMPTION_TASK);
-    engine.run(STREAM_RESULTS);
-}
-
-void executeTensorDecomp(poplar::Graph& g, std::vector<poplar::program::Program>& progs) {
-
-    buildStreamPrograms(g, progs, num_transfers, packet_size);
-    buildConsumptionTaskProgram(g, progs);
+    graph.connect(output_io0["strm_in"], consumption_tensor_out1);
+    graph.connect(output_io0["strm_out"], output_tensor1);
 
     poplar::compileGraph(g, progs);
+    poplar::Engine engine(std::move(exe));
+    engine.load(device);
 
-}
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+            frontEnd_TensorDecomp();
+        }
 
-void frontEnd_TensorDecomp(poplar::Graph& g, std::vector<poplar::program::Program>& progs, int rows, int cols, int packet_size, bool flag) {
-
-    // Create data to input into back-end
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
-    std::vector<float> source_matrix(rows*cols);
-
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            source_matrix[j+(cols*i)] = distribution(gen);
+        #pragma omp section
+        {
+            backEnd_TensorDecomp();
         }
     }
-
-    // Create buffer to store results from back-end
-    std::vector<float> qmatrix(rows*cols);
-    std::vector<float> rmatrix(rows*cols)
-
-    int num_transfers = rows*cols / packet_size;
-
-    std::vector<string> names = {"source_matrix", "qmatrix", "rmatrix"};
-    std::vector<std::vector<float>> cpu_vectors = {source_matrix, qmatrix, rmatrix};
-
-    while(!be_flag) {}
-
-    buildStreamPrograms(g, progs, num_transfers, packet_size);
-
-    fe_flag = true;
-
-    printMatrix("QMatrix", qmatrix, cols);
-    printMatrix("RMatrix", rmatrix, cols);
-}
-
-void backEnd_TensorDecomp(int rows, int cols) {
-
-    addStreamsToEngine(engine, names, cpu_vectors);
-
-    be_flag = true;
-
-    while(!fe_flag) {}
-
-    buildCTTensorDecompProgram(g, progs);
-
-    createEngine(device, exe);
-
-    runProgsOnEngine(engine);
-
-    executeTensorDecomp(g, progs);
-
 }
