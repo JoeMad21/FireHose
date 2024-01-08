@@ -127,7 +127,7 @@ void frontEnd_TensorDecomp(bool& flag, int& rows, int& cols, int& exp_size, std:
     }
 }
 
-void backEnd_TensorDecomp(poplar::Engine engine, bool& flag, int& exp_size) {
+void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, int& exp_size) {
 
     for (int i = 0; i < exp_size; i++) {
         while(!flag) {}
@@ -253,12 +253,12 @@ void tensorDecomp() {
     {
         #pragma omp section
         {
-            frontEnd_TensorDecomp();
+            frontEnd_TensorDecomp(flag, rows, cols, exp_size, cpu_input0, cpu_output0, cpu_output1);
         }
 
         #pragma omp section
         {
-            backEnd_TensorDecomp();
+            backEnd_TensorDecomp(engine, flag, exp_size);
         }
     }
 }
