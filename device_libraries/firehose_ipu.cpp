@@ -199,8 +199,8 @@ void tensorDecomp() {
     //auto ready_flag = graph.addVariable(poplar::INT, {1}, "Ready Flag");
     //auto num_elements = graph.addVariable(poplar::INT, {1}, "Number of elements");
 
-    poputil::mapTensorLinearly(graph, ready_flag);
-    poputil::mapTensorLinearly(graph, num_elements);
+    //poputil::mapTensorLinearly(graph, ready_flag);
+    //poputil::mapTensorLinearly(graph, num_elements);
 
     // CPU Vectors
     std::vector<float> cpu_input0(rows*cols);
