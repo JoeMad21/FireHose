@@ -73,7 +73,7 @@ void tensorDecomp() {
     auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
 
     if (it != hwDevices.end()) {
-        device = std::move(*it);
+        poplar::Device device = std::move(*it);
     }
 
     /* Expose Shared Memory */
