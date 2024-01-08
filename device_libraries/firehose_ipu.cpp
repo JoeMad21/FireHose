@@ -156,11 +156,11 @@ void tensorDecomp() {
     bool flag = false;
 
     // Parameters
-    int rows = 3;
-    int cols = 3;
-    int packet_size = 9;
-    int num_transfers = (rows*cols) /packet_size;
-    int exp_size = 3;
+    long unsigned int rows = 3;
+    long unsigned int cols = 3;
+    long unsigned int packet_size = 9;
+    long unsigned int num_transfers = (rows*cols) /packet_size;
+    long unsigned int exp_size = 3;
 
     // Tensors
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
