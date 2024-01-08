@@ -158,7 +158,7 @@ void tensorDecomp() {
 
     poplin::addCodelets(graph);
 
-    auto con_out = poplin::experimental::QRFactorization(graph, consumption_tensor_in0, identity_tensor, seq);
+    poplin::experimental::QRFactorization(graph, consumption_tensor_in0, identity_tensor, seq);
 
     progs[Progs::CONSUMPTION_TASK] = seq;
 
