@@ -1,5 +1,4 @@
 #include "firehose_ipu.hpp"
-#include <omp.h>
 
 enum Progs {
     //INIT_FLAGS,

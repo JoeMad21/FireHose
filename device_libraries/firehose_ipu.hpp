@@ -1,6 +1,8 @@
+#include <iostream>
 #include <vector>
 #include <random>
 #include <unistd.h>
+#include <omp.h>
 
 #include <poplar/DeviceManager.hpp>
 #include <poplar/Engine.hpp>
