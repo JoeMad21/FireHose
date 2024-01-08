@@ -130,9 +130,9 @@ void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, int& exp_size) {
     for (int i = 0; i < exp_size; i++) {
         while(!flag) {}
         flag = false;
-        engine.run(STREAM_INPUTS);
-        engine.run(CONSUMPTION_TASK);
-        engine.run(STREAM_RESULTS);
+        engine.run(Progs::STREAM_INPUTS);
+        engine.run(Progs::CONSUMPTION_TASK);
+        engine.run(Progs::STREAM_RESULTS);
     }
 }
 
@@ -211,7 +211,7 @@ void tensorDecomp() {
         seq.add(poplar::program::Copy(input_strm0, input_tensor0));
     }
 
-    progs[STREAM_INPUTS] = seq;
+    progs[Progs::STREAM_INPUTS] = seq;
 
     graph.connect(input_io0["strm_in"], input_tensor0);
     graph.connect(input_io0["strm_out"], consumption_tensor_in0);
@@ -224,7 +224,7 @@ void tensorDecomp() {
 
     auto con_out = poplin::experimental::QRFactorization(graph, consumption_tensor_in0, identity_tensor, seq);
 
-    progs[CONSUMPTION_TASK] = seq;
+    progs[Progs::CONSUMPTION_TASK] = seq;
 
     /* Stream Outputs Program */
 
@@ -235,7 +235,7 @@ void tensorDecomp() {
         seq.add(poplar::program::Copy(output_tensor1, output_strm1));
     }
 
-    progs[STREAM_INPUTS] = seq;
+    progs[Progs::STREAM_INPUTS] = seq;
 
     graph.connect(output_io0["strm_in"], consumption_tensor_out0);
     graph.connect(output_io0["strm_out"], output_tensor0);
