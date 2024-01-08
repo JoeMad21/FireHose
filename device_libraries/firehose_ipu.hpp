@@ -2,7 +2,13 @@
 #include <random>
 #include <unistd.h>
 
+#include <poplar/DeviceManager.hpp>
+#include <poplar/Engine.hpp>
+#include <poplar/Graph.hpp>
+#include <poplar/IPUModel.hpp>
+
 #include <poputil/TileMapping.hpp>
+#include <poplar/Engine.hpp>
 
 #include <poplin/codelets.hpp>
 #include <poplin/experimental/QRFactorization.hpp>
