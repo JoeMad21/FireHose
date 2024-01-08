@@ -34,7 +34,7 @@ void buildCTTensorDecompProgram(poplar::Graph& g, std::vector<poplar::program::P
 
     poplin::addCodelets(g);
     auto qr_out = poplin::qr();
-    seq.add(poplar::program::Copy(mult_out,gTensors.getTensor(2)));
+    seq.add(poplar::program::Copy(mult_out,tensor));
     //Connect to codely that does anomaly detection
     auto anomalyCS = g.addComputeSet("anomalyCS");
 
