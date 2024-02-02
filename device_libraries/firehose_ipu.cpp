@@ -121,6 +121,8 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor0);
     poputil::mapTensorLinearly(graph, output_tensor1);
 
+    poputil::mapTensorLinearly(graph, identity_tensor);
+
     // Add standard codelets
     popops::addCodelets(graph);
 
