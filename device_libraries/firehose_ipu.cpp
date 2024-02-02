@@ -62,7 +62,7 @@ void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, long unsigned int&
         flag = false;
         engine.run(Progs::STREAM_INPUTS);
         engine.run(Progs::ALIGN_INPUTS);
-        //engine.run(Progs::CONSUMPTION_TASK);
+        engine.run(Progs::CONSUMPTION_TASK);
         engine.run(Progs::ALIGN_OUTPUTS);
         engine.run(Progs::STREAM_RESULTS);
     }
@@ -203,7 +203,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    progs[Progs::STREAM_INPUTS] = seq;
+    progs[Progs::STREAM_OUTPUTS] = seq;
 
     for(int i = 0; i < num_transfers; i++) {
         seq.add(poplar::program::Copy(output_tensor0, output_strm0));
