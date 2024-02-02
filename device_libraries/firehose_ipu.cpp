@@ -139,7 +139,6 @@ void tensorDecomp() {
     // Misc
     //auto ready_flag = graph.addVariable(poplar::INT, {1}, "Ready Flag");
     //auto num_elements = graph.addVariable(poplar::INT, {1}, "Number of elements");
-    std::vector<std::size_t> dimShape = {rows, cols};
 
     //poputil::mapTensorLinearly(graph, ready_flag);
     //poputil::mapTensorLinearly(graph, num_elements);
@@ -166,7 +165,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, poplar::Tensor::reshape(consumption_tensor_in0, dimShape)));
+    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, poplar::Tensor::reshape(consumption_tensor_in0, {3,3})));
     graph.setTileMapping(consumption_tensor_in0_exp, 3);
 
     progs[Progs::ALIGN_INPUTS] = seq;
