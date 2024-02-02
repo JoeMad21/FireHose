@@ -64,7 +64,7 @@ void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, long unsigned int&
         engine.run(Progs::ALIGN_INPUTS);
         engine.run(Progs::CONSUMPTION_TASK);
         engine.run(Progs::ALIGN_OUTPUTS);
-        engine.run(Progs::STREAM_RESULTS);
+        engine.run(Progs::STREAM_OUTPUTS);
     }
 }
 
