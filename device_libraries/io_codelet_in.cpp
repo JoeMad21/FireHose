@@ -16,7 +16,7 @@ Output<Vector<Vector<float>>> strm_out;
             int row = 0;
             int col = 0;
             int dim = 3;
-            for (unsigned i = 0; i < strm_in.size(); i) {
+            for (unsigned i = 0; i < strm_in.size(); i++) {
                 strm_out[row][col] = strm_in[i];
 
                 if (col == dim-1) {
