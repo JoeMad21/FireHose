@@ -14,12 +14,12 @@ clean_app:
 	rm firehose
 
 clean_lib:
-	rm mylib.o
+	rm ./device_libraries/mylib.o
 
 clean_logs:
 	rm tensor_decomp_test_*
 
 clean:
 	rm firehose
-	rm mylib.o
+	rm ./device_libraries/mylib.o
 	rm tensor_decomp_test_*
