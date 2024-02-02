@@ -166,7 +166,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(consumption_tensor_in0_exp = poplar::reshape(consumption_tensor_in0, dimShape));
+    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, poplar::reshape(consumption_tensor_in0, dimShape)));
     graph.setTileMapping(consumption_tensor_in0_exp, 3);
 
     progs[Progs::ALIGN_INPUTS] = seq;
@@ -185,10 +185,11 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(consumption_tensor_out0_flat = poplar::flatten(consumption_tensor_out0));
+    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, poplar::reshape(consumption_tensor_in0, dimShape)));
+    seq.add(poplar::program::Copy(consumption_tensor_out0_flat, poplar::flatten(consumption_tensor_out0)));
     graph.setTileMapping(consumption_tensor_out0_flat, 4);
 
-    seq.add(consumption_tensor_out1_flat = poplar::flatten(consumption_tensor_out1));
+    seq.add(poplar::program::Copy(consumption_tensor_out1_flat, poplar::flatten(consumption_tensor_out1)));
     graph.setTileMapping(consumption_tensor_out0_flat, 5);
 
     progs[Progs::ALIGN_OUTPUTS] = seq;
@@ -207,7 +208,7 @@ void tensorDecomp() {
     graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
     graph.connect(output_io0["strm_out"], output_tensor0);
 
-    graph.connect(output_io0["strm_in"], consumption_tensor_out1_flats);
+    graph.connect(output_io0["strm_in"], consumption_tensor_out1_flat);
     graph.connect(output_io0["strm_out"], output_tensor1);
 
     auto exe = poplar::compileGraph(graph, progs);
