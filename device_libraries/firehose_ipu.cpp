@@ -213,8 +213,8 @@ void tensorDecomp() {
     graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
     graph.connect(output_io0["strm_out"], output_tensor0);
 
-    graph.connect(output_io0["strm_in"], consumption_tensor_out1_flat);
-    graph.connect(output_io0["strm_out"], output_tensor1);
+    graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
+    graph.connect(output_io1["strm_out"], output_tensor1);
 
     auto exe = poplar::compileGraph(graph, progs);
     poplar::Engine engine(std::move(exe));
