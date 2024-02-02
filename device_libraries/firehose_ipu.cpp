@@ -165,7 +165,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, poplar::Tensor::reshape(consumption_tensor_in0, {3,3})));
+    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, consumption_tensor_in0.reshape(dimShape)));
     graph.setTileMapping(consumption_tensor_in0_exp, 3);
 
     progs[Progs::ALIGN_INPUTS] = seq;
@@ -184,10 +184,10 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(poplar::program::Copy(consumption_tensor_out0_flat, poplar::flatten(consumption_tensor_out0)));
+    seq.add(poplar::program::Copy(consumption_tensor_out0_flat, consumption_tensor_out0.flatten()));
     graph.setTileMapping(consumption_tensor_out0_flat, 4);
 
-    seq.add(poplar::program::Copy(consumption_tensor_out1_flat, poplar::flatten(consumption_tensor_out1)));
+    seq.add(poplar::program::Copy(consumption_tensor_out1_flat, consumption_tensor_out1.flatten()));
     graph.setTileMapping(consumption_tensor_out0_flat, 5);
 
     progs[Progs::ALIGN_OUTPUTS] = seq;
