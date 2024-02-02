@@ -166,7 +166,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, poplar::Tensor::reshape(consumption_tensor_in0, dimShape)));
+    seq.add(poplar::Tensor::reshape(consumption_tensor_in0, dimShape));
     graph.setTileMapping(consumption_tensor_in0_exp, 3);
 
     progs[Progs::ALIGN_INPUTS] = seq;
