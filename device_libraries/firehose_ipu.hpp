@@ -10,6 +10,7 @@
 #include <poplar/Engine.hpp>
 #include <poplar/Graph.hpp>
 #include <poplar/IPUModel.hpp>
+#include <poplar/Tensor.hpp>
 
 #include <poputil/TileMapping.hpp>
 #include <poplar/Engine.hpp>
