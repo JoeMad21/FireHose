@@ -139,6 +139,7 @@ void tensorDecomp() {
     // Misc
     //auto ready_flag = graph.addVariable(poplar::INT, {1}, "Ready Flag");
     //auto num_elements = graph.addVariable(poplar::INT, {1}, "Number of elements");
+    std::vector<std::size_t> dimShape = {rows, cols};
 
     //poputil::mapTensorLinearly(graph, ready_flag);
     //poputil::mapTensorLinearly(graph, num_elements);
