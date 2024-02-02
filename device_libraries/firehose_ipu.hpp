@@ -12,7 +12,7 @@
 #include <poplar/IPUModel.hpp>
 #include <poplar/Tensor.hpp>
 
-#include <popops/Reduce.hpp>
+#include <popops/codelets.hpp>
 
 #include <poputil/TileMapping.hpp>
 #include <poplar/Engine.hpp>

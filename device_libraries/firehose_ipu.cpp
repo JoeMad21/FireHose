@@ -118,6 +118,9 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor0);
     poputil::mapTensorLinearly(graph, output_tensor1);
 
+    // Add standard codelets
+    popops::addCodelets(graph);
+
     // Add custom codelets
     graph.addCodelets("./device_libraries/io_codelet.gp");
 
