@@ -13,9 +13,11 @@ Output<Vector<float>> strm_out;
 // Compute function
     bool compute() {
         //if (ready_flag[0]) {
-            for (unsigned i = 0; i < strm_in.size(); i++) {
-                strm_out[i] = strm_in[i];
+            for (unsigned i = 0; i < strm_in.size(); ++i) {
+                for (unsigned j = 0; j < strm_in[i].size(); ++j) {
+                    strm_in[i][j] = strm_out[i][j];
             }
+        }
         //}
         return true;
     }
