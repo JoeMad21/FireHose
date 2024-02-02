@@ -111,11 +111,14 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor0);
     poputil::mapTensorLinearly(graph, output_tensor1);
 
+    // Add custom codelets
+    graph.addCodelets("io_codelet.o");
+
     // Vertices
     auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
-    auto input_io0 = graph.addVertex(consumption_task_cs, "IO Input Vertex 0");
-    auto output_io0 = graph.addVertex(consumption_task_cs, "IO Output Vertex 0");
-    auto output_io1 = graph.addVertex(consumption_task_cs, "IO Output Vertex 1");
+    auto input_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
+    auto output_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
+    auto output_io1 = graph.addVertex(consumption_task_cs, "IOVertex");
 
     graph.setTileMapping(input_io0, 3);
     graph.setTileMapping(output_io0, 4);
