@@ -99,8 +99,11 @@ void tensorDecomp() {
     // Tensors
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
     auto consumption_tensor_in0 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Input 0");
+    auto consumption_tensor_in0_exp = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Input 0 Expanded");
     auto consumption_tensor_out0 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 0");
+    auto consumption_tensor_out0_flat = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 0 Flattened");
     auto consumption_tensor_out1 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 1");
+    auto consumption_tensor_out1_flat = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 1 Flattened");
     auto output_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 0");
     auto output_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 1");
 
@@ -163,7 +166,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(auto consumption_tensor_in0_exp = poplar::reshape(consumption_tensor_in0, dimShape));
+    seq.add(consumption_tensor_in0_exp = poplar::reshape(consumption_tensor_in0, dimShape));
     graph.setTileMapping(consumption_tensor_in0_exp, 3);
 
     progs[Progs::ALIGN_INPUTS] = seq;
@@ -182,10 +185,10 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(auto consumption_tensor_out0_flat = poplar::flatten(consumption_tensor_out0));
+    seq.add(consumption_tensor_out0_flat = poplar::flatten(consumption_tensor_out0));
     graph.setTileMapping(consumption_tensor_out0_flat, 4);
 
-    seq.add(auto consumption_tensor_out1_flat = poplar::flatten(consumption_tensor_out1));
+    seq.add(consumption_tensor_out1_flat = poplar::flatten(consumption_tensor_out1));
     graph.setTileMapping(consumption_tensor_out0_flat, 5);
 
     progs[Progs::ALIGN_OUTPUTS] = seq;
