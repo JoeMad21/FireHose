@@ -27,6 +27,8 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 }
 
 void frontEnd_TensorDecomp(bool& flag, long unsigned int& rows, long unsigned int& cols, long unsigned int& exp_size, std::vector<float>& cpu_input0, std::vector<float>& cpu_output0, std::vector<float>& cpu_output1) {
+    std::cout << "FRONT-END" << std::endl;
+    
     /* Create data to input into back-end */
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -56,6 +58,7 @@ void frontEnd_TensorDecomp(bool& flag, long unsigned int& rows, long unsigned in
 }
 
 void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, long unsigned int& exp_size) {
+    std::cout << "BACK-END" << std::endl;
 
     for (int i = 0; i < exp_size; i++) {
         while(!flag) {}
