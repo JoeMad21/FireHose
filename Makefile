@@ -9,3 +9,17 @@ libipu.a: mylib.o
 mylib.o:
 	popc -o ./device_libraries/io_codelet.o ./device_libraries/io_codelet.cpp
 	$(CC) -c ./device_libraries/firehose_ipu.cpp -o ./device_libraries/mylib.o
+
+clean_app:
+	rm firehose
+
+clean_lib:
+	rm mylib.o
+
+clean_logs:
+	rm tensor_decomp_test_*
+
+clean:
+	rm firehose
+	rm mylib.o
+	rm tensor_decomp_test_*
