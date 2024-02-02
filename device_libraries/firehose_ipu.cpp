@@ -96,13 +96,13 @@ void tensorDecomp() {
 
     // Tensors
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
-    auto consumption_tensor_in0 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Input 0");
-    auto consumption_tensor_out0 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 0");
-    auto consumption_tensor_out1 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 1");
+    auto consumption_tensor_in0 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Input 0");
+    auto consumption_tensor_out0 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Output 0");
+    auto consumption_tensor_out1 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Output 1");
     auto output_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 0");
     auto output_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 1");
 
-    auto identity_tensor = graph.addVariable(poplar::FLOAT, {rows, cols}, "Output Tensor 1");
+    auto identity_tensor = graph.addVariable(poplar::FLOAT, {rows*cols}, "Output Tensor 1");
 
     poputil::mapTensorLinearly(graph, input_tensor0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0);
@@ -112,14 +112,13 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor1);
 
     // Add custom codelets
-    graph.addCodelets("./device_libraries/io_codelet_in.gp");
-    graph.addCodelets("./device_libraries/io_codelet_out.gp");
+    graph.addCodelets("./device_libraries/io_codelet.gp");
 
     // Vertices
     auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
-    auto input_io0 = graph.addVertex(consumption_task_cs, "IOVertexIN");
-    auto output_io0 = graph.addVertex(consumption_task_cs, "IOVertexOUT");
-    auto output_io1 = graph.addVertex(consumption_task_cs, "IOVertexOUT");
+    auto input_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
+    auto output_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
+    auto output_io1 = graph.addVertex(consumption_task_cs, "IOVertex");
 
     graph.setTileMapping(input_io0, 3);
     graph.setTileMapping(output_io0, 4);
