@@ -2,7 +2,9 @@
 
 enum Progs {
     STREAM_INPUTS,
+    ALIGN_INPUTS,
     CONSUMPTION_TASK,
+    ALIGN_OUTPUTS,
     STREAM_RESULTS,
     NUM_PROGRAMS
 };
@@ -97,12 +99,12 @@ void tensorDecomp() {
     // Tensors
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
     auto consumption_tensor_in0 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Input 0");
-    auto consumption_tensor_out0 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Output 0");
-    auto consumption_tensor_out1 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Output 1");
+    auto consumption_tensor_out0 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 0");
+    auto consumption_tensor_out1 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 1");
     auto output_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 0");
     auto output_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 1");
 
-    auto identity_tensor = graph.addVariable(poplar::FLOAT, {rows*cols}, "Output Tensor 1");
+    auto identity_tensor = graph.addVariable(poplar::FLOAT, {rows, cols}, "Identity Tensor");
 
     poputil::mapTensorLinearly(graph, input_tensor0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0);
@@ -134,6 +136,7 @@ void tensorDecomp() {
     // Misc
     //auto ready_flag = graph.addVariable(poplar::INT, {1}, "Ready Flag");
     //auto num_elements = graph.addVariable(poplar::INT, {1}, "Number of elements");
+    std::vector<std::size_t> dimShape = {rows, cols};
 
     //poputil::mapTensorLinearly(graph, ready_flag);
     //poputil::mapTensorLinearly(graph, num_elements);
@@ -142,6 +145,8 @@ void tensorDecomp() {
     std::vector<float> cpu_input0(rows*cols);
     std::vector<float> cpu_output0(rows*cols);
     std::vector<float> cpu_output1(rows*cols);
+
+    /* Stream Inputs Program */
 
     auto seq = poplar::program::Sequence();
 
@@ -154,31 +159,52 @@ void tensorDecomp() {
     graph.connect(input_io0["strm_in"], input_tensor0);
     graph.connect(input_io0["strm_out"], consumption_tensor_in0);
 
+    /* Align Consumption Inputs Program */
+
+    seq = poplar::program::Sequence();
+
+    seq.add(auto consumption_tensor_in0_exp = poplar::reshape(consumption_tensor_in0, dimShape));
+    graph.setTileMapping(consumption_tensor_in0_exp, 3);
+
+    progs[Progs::ALIGN_INPUTS] = seq;
+
     /* Consumption Task Program */
 
     seq = poplar::program::Sequence();
 
     poplin::addCodelets(graph);
 
-    poplin::experimental::QRFactorization(graph, consumption_tensor_in0, identity_tensor, seq);
+    poplin::experimental::QRFactorization(graph, consumption_tensor_in0_exp, identity_tensor, seq);
 
     progs[Progs::CONSUMPTION_TASK] = seq;
+
+    /* Align Consumption Outputs Program */
+
+    seq = poplar::program::Sequence();
+
+    seq.add(auto consumption_tensor_out0_flat = poplar::flatten(consumption_tensor_out0));
+    graph.setTileMapping(consumption_tensor_out0_flat, 4);
+
+    seq.add(auto consumption_tensor_out1_flat = poplar::flatten(consumption_tensor_out1));
+    graph.setTileMapping(consumption_tensor_out0_flat, 5);
+
+    progs[Progs::ALIGN_OUTPUTS] = seq;
 
     /* Stream Outputs Program */
 
     seq = poplar::program::Sequence();
+
+    progs[Progs::STREAM_INPUTS] = seq;
 
     for(int i = 0; i < num_transfers; i++) {
         seq.add(poplar::program::Copy(output_tensor0, output_strm0));
         seq.add(poplar::program::Copy(output_tensor1, output_strm1));
     }
 
-    progs[Progs::STREAM_INPUTS] = seq;
-
-    graph.connect(output_io0["strm_in"], consumption_tensor_out0);
+    graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
     graph.connect(output_io0["strm_out"], output_tensor0);
 
-    graph.connect(output_io0["strm_in"], consumption_tensor_out1);
+    graph.connect(output_io0["strm_in"], consumption_tensor_out1_flats);
     graph.connect(output_io0["strm_out"], output_tensor1);
 
     auto exe = poplar::compileGraph(graph, progs);
