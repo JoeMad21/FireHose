@@ -2,7 +2,7 @@
 
 using namespace poplar;
 
-class IOVertexIN : public Vertex {
+class IOVertex : public Vertex {
 public:
 
 Input<Vector<float>> strm_in;
