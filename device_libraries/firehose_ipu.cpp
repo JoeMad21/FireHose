@@ -145,6 +145,7 @@ void tensorDecomp() {
     //auto ready_flag = graph.addVariable(poplar::INT, {1}, "Ready Flag");
     //auto num_elements = graph.addVariable(poplar::INT, {1}, "Number of elements");
     std::vector<std::size_t> dimShape = {rows, cols};
+    std::vector<std::size_t> flatShape = {rows*cols};
 
     //poputil::mapTensorLinearly(graph, ready_flag);
     //poputil::mapTensorLinearly(graph, num_elements);
@@ -190,10 +191,10 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(poplar::program::Copy(consumption_tensor_out0.flatten(), consumption_tensor_out0_flat));
+    seq.add(poplar::program::Copy(consumption_tensor_out0.reshape(flatShape), consumption_tensor_out0_flat));
     graph.setTileMapping(consumption_tensor_out0_flat, 4);
 
-    seq.add(poplar::program::Copy(consumption_tensor_out1.flatten(), consumption_tensor_out1_flat));
+    seq.add(poplar::program::Copy(consumption_tensor_out1.reshape(flatShape), consumption_tensor_out1_flat));
     graph.setTileMapping(consumption_tensor_out0_flat, 5);
 
     progs[Progs::ALIGN_OUTPUTS] = seq;
