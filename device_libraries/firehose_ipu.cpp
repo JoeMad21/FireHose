@@ -37,6 +37,7 @@ void frontEnd_TensorDecomp(bool& flag, long unsigned int& rows, long unsigned in
             cpu_input0[j+(cols*i)] = distribution(gen);
         }
     }
+    printMatrix("GenMatrix", cpu_input0, cols);
 
     flag = true;
     /* Loop to create multiple matrices and decompose */
