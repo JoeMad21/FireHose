@@ -112,13 +112,14 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor1);
 
     // Add custom codelets
-    graph.addCodelets("device_libraries/io_codelet.gp");
+    graph.addCodelets("io_codelet_in.gp");
+    graph.addCodelets("io_codelet_out.gp");
 
     // Vertices
     auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
-    auto input_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
-    auto output_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
-    auto output_io1 = graph.addVertex(consumption_task_cs, "IOVertex");
+    auto input_io0 = graph.addVertex(consumption_task_cs, "IOVertexIN");
+    auto output_io0 = graph.addVertex(consumption_task_cs, "IOVertexOUT");
+    auto output_io1 = graph.addVertex(consumption_task_cs, "IOVertexOUT");
 
     graph.setTileMapping(input_io0, 3);
     graph.setTileMapping(output_io0, 4);
