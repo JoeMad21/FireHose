@@ -225,6 +225,8 @@ void tensorDecomp() {
     poplar::Engine engine(std::move(exe));
     engine.load(device);
 
+    std::cout << "HERE" << std::endl;
+
     //#pragma omp parallel sections
     //{
         //#pragma omp section
