@@ -160,6 +160,8 @@ void tensorDecomp() {
     std::vector<float> cpu_output0(rows*cols);
     std::vector<float> cpu_output1(rows*cols);
 
+    return;
+
     /* Stream Inputs Program */
 
     // auto seq = poplar::program::Sequence();
