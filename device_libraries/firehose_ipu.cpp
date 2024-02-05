@@ -76,7 +76,7 @@ void tensorDecomp() {
     auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
     poplar::Device device;
 
-    //if (it != hwDevices.end()) {
+    if (it != hwDevices.end()) {
         device = std::move(*it);
     }
 
