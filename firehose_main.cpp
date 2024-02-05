@@ -2,7 +2,7 @@
 
 int main() {
     std::cout << "BEGIN" << std::endl;
-    tensorDecomp();
+    //tensorDecomp();
     std::cout << "END" << std::endl;
     return 0;
 }
