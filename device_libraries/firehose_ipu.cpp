@@ -72,13 +72,18 @@ void tensorDecomp() {
     std::cout << "START" << std::endl;
     // Get an IPU Device
     auto manager = poplar::DeviceManager::createDeviceManager();
+    std::cout << "CHECK1" << std::endl;
     auto hwDevices = manager.getDevices(poplar::TargetType::IPU, 1);
+    std::cout << "CHECK2" << std::endl;
     auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
+    std::cout << "CHECK3" << std::endl;
     poplar::Device device;
+    std::cout << "CHECK4" << std::endl;
 
     if (it != hwDevices.end()) {
         device = std::move(*it);
     }
+    std::cout << "CHECK5" << std::endl;
 
     /* Expose Shared Memory */
 
@@ -97,8 +102,6 @@ void tensorDecomp() {
     long unsigned int packet_size = 9;
     long unsigned int num_transfers = (rows*cols) /packet_size;
     long unsigned int exp_size = 1;
-
-    std::cout << "CHECK1" << std::endl;
 
     // Tensors
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
@@ -125,8 +128,6 @@ void tensorDecomp() {
 
     poputil::mapTensorLinearly(graph, identity_tensor);
 
-    std::cout << "CHECK2" << std::endl;
-
     // Add standard codelets
     popops::addCodelets(graph);
 
@@ -142,8 +143,6 @@ void tensorDecomp() {
     graph.setTileMapping(input_io0, 3);
     graph.setTileMapping(output_io0, 4);
     graph.setTileMapping(output_io1, 5);
-
-    std::cout << "CHECK3" << std::endl;
 
     // Streams
     auto input_strm0 = graph.addHostToDeviceFIFO("Input Stream 0", poplar::FLOAT, packet_size);
@@ -163,8 +162,6 @@ void tensorDecomp() {
     std::vector<float> cpu_input0(rows*cols);
     std::vector<float> cpu_output0(rows*cols);
     std::vector<float> cpu_output1(rows*cols);
-
-    std::cout << "CHECK4" << std::endl;
 
     return;
 
