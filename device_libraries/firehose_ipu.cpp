@@ -69,7 +69,7 @@ void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, long unsigned int&
 }
 
 void tensorDecomp() {
-    
+    std::cout << "START" << std::endl;
     // Get an IPU Device
     auto manager = poplar::DeviceManager::createDeviceManager();
     auto hwDevices = manager.getDevices(poplar::TargetType::IPU, 1);
