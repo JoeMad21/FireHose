@@ -72,26 +72,23 @@ void tensorDecomp() {
     std::cout << "START" << std::endl;
     // Get an IPU Device
     auto manager = poplar::DeviceManager::createDeviceManager();
-    std::cout << "CHECK1" << std::endl;
     auto hwDevices = manager.getDevices(poplar::TargetType::IPU, 1);
-    std::cout << "CHECK2" << std::endl;
     auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
-    std::cout << "CHECK3" << std::endl;
     poplar::Device device;
-    std::cout << "CHECK4" << std::endl;
 
     if (it != hwDevices.end()) {
         device = std::move(*it);
     }
-    std::cout << "CHECK5" << std::endl;
 
     /* Expose Shared Memory */
 
     // Graph
     poplar::Graph graph(device.getTarget());
+    std::cout << "CHECK1" << std::endl;
 
     // Programs
     std::vector<poplar::program::Program> progs(Progs::NUM_PROGRAMS);
+    std::cout << "CHECK2" << std::endl;
 
     // Flags
     bool flag = false;
@@ -102,6 +99,7 @@ void tensorDecomp() {
     long unsigned int packet_size = 9;
     long unsigned int num_transfers = (rows*cols) /packet_size;
     long unsigned int exp_size = 1;
+    std::cout << "CHECK3" << std::endl;
 
     // Tensors
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
@@ -127,6 +125,7 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor1);
 
     poputil::mapTensorLinearly(graph, identity_tensor);
+    std::cout << "CHECK4" << std::endl;
 
     // Add standard codelets
     popops::addCodelets(graph);
