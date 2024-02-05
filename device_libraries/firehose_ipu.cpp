@@ -98,6 +98,8 @@ void tensorDecomp() {
     long unsigned int num_transfers = (rows*cols) /packet_size;
     long unsigned int exp_size = 1;
 
+    std::cout << "CHECK1" << std::endl;
+
     // Tensors
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
     auto consumption_tensor_in0 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Input 0");
@@ -123,6 +125,8 @@ void tensorDecomp() {
 
     poputil::mapTensorLinearly(graph, identity_tensor);
 
+    std::cout << "CHECK2" << std::endl;
+
     // Add standard codelets
     popops::addCodelets(graph);
 
@@ -139,7 +143,7 @@ void tensorDecomp() {
     graph.setTileMapping(output_io0, 4);
     graph.setTileMapping(output_io1, 5);
 
-
+    std::cout << "CHECK3" << std::endl;
 
     // Streams
     auto input_strm0 = graph.addHostToDeviceFIFO("Input Stream 0", poplar::FLOAT, packet_size);
@@ -159,6 +163,8 @@ void tensorDecomp() {
     std::vector<float> cpu_input0(rows*cols);
     std::vector<float> cpu_output0(rows*cols);
     std::vector<float> cpu_output1(rows*cols);
+
+    std::cout << "CHECK4" << std::endl;
 
     return;
 
