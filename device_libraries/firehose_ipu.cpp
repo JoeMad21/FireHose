@@ -225,16 +225,16 @@ void tensorDecomp() {
     poplar::Engine engine(std::move(exe));
     engine.load(device);
 
-    #pragma omp parallel sections
-    {
-        #pragma omp section
-        {
-            frontEnd_TensorDecomp(flag, rows, cols, exp_size, cpu_input0, cpu_output0, cpu_output1);
-        }
+    //#pragma omp parallel sections
+    //{
+        //#pragma omp section
+        //{
+            //frontEnd_TensorDecomp(flag, rows, cols, exp_size, cpu_input0, cpu_output0, cpu_output1);
+        //}
 
-        #pragma omp section
-        {
-            backEnd_TensorDecomp(engine, flag, exp_size);
-        }
-    }
+        //#pragma omp section
+        //{
+            //backEnd_TensorDecomp(engine, flag, exp_size);
+        //}
+    //}
 }
