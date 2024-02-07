@@ -2,6 +2,7 @@
 #include <sys/wait.h>
 #include <iostream>
 #include <string>
+#include <fstream>
 
 #define PATH_MAX 2048
 
