@@ -160,7 +160,8 @@ void tensorDecomp() {
 
     std::cout << "Adding Streams..." << std::endl;
     // Streams
-    auto input_strm0 = graph.addHostToDeviceFIFO("Input Stream 0", poplar::FLOAT, packet_size);
+    auto input_strm0 = graph.addHostToDeviceFIFO("Input Stream 0", input_tensor0.elementType(), input_tensor0.numElements());
+    engine.connectStream("Input Stream 0", input_tensor0.data());
     auto output_strm0 = graph.addDeviceToHostFIFO("Output Stream 0", poplar::FLOAT, packet_size);
     auto output_strm1 = graph.addDeviceToHostFIFO("Output Stream 1", poplar::FLOAT, packet_size);
 
@@ -184,9 +185,11 @@ void tensorDecomp() {
 
     auto seq = poplar::program::Sequence();
 
-    for(int i = 0; i < num_transfers; i++) {
-        seq.add(poplar::program::Copy(input_strm0, input_tensor0));
-    }
+    //for(int i = 0; i < num_transfers; i++) {
+        //seq.add(poplar::program::Copy(input_strm0, input_tensor0));
+    //}
+
+    seq.add(engine.writeTensor("Input Stream 0", cpu_input0.data(), cpu_input0.data() + cpu_input0.size()));
 
     progs[Progs::STREAM_INPUTS] = seq;
 
