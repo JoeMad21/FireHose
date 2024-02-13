@@ -118,6 +118,7 @@ void tensorDecomp() {
 
     std::cout << "Added Tensors!" << std::endl;
 
+    std::cout << "Mapping Tensors..." << std::endl;
     poputil::mapTensorLinearly(graph, input_tensor0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0_exp);
@@ -130,26 +131,40 @@ void tensorDecomp() {
 
     poputil::mapTensorLinearly(graph, identity_tensor);
 
+    std::cout << "Mapped Tensors!" << std::endl;
+
+    std::cout << "Adding Codelets..." << std::endl;
     // Add standard codelets
     popops::addCodelets(graph);
 
     // Add custom codelets
     graph.addCodelets("./device_libraries/io_codelet.gp");
 
+    std::cout << "Added Codelets!" << std::endl;
+
+    std::cout << "Adding Vertices..." << std::endl;
     // Vertices
     auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
     auto input_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
     auto output_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
     auto output_io1 = graph.addVertex(consumption_task_cs, "IOVertex");
 
+    std::cout << "Added Vertices!" << std::endl;
+
+    std::cout << "Mapping Vertices..." << std::endl;
     graph.setTileMapping(input_io0, 3);
     graph.setTileMapping(output_io0, 4);
     graph.setTileMapping(output_io1, 5);
 
+    std::cout << "Mapped Vertices!" << std::endl;
+
+    std::cout << "Adding Streams..." << std::endl;
     // Streams
     auto input_strm0 = graph.addHostToDeviceFIFO("Input Stream 0", poplar::FLOAT, packet_size);
     auto output_strm0 = graph.addDeviceToHostFIFO("Output Stream 0", poplar::FLOAT, packet_size);
     auto output_strm1 = graph.addDeviceToHostFIFO("Output Stream 1", poplar::FLOAT, packet_size);
+
+    std::cout << "Added Streams!" << std::endl;
 
     // Misc
     //auto ready_flag = graph.addVariable(poplar::INT, {1}, "Ready Flag");
@@ -164,8 +179,6 @@ void tensorDecomp() {
     std::vector<float> cpu_input0(rows*cols);
     std::vector<float> cpu_output0(rows*cols);
     std::vector<float> cpu_output1(rows*cols);
-
-    return;
 
     /* Stream Inputs Program */
 
