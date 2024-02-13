@@ -26,47 +26,47 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 
 }
 
-void frontEnd_TensorDecomp(bool& flag, long unsigned int& rows, long unsigned int& cols, long unsigned int& exp_size, std::vector<float>& cpu_input0, std::vector<float>& cpu_output0, std::vector<float>& cpu_output1) {
-    /* Create data to input into back-end */
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+// void frontEnd_TensorDecomp(bool& flag, long unsigned int& rows, long unsigned int& cols, long unsigned int& exp_size, std::vector<float>& cpu_input0, std::vector<float>& cpu_output0, std::vector<float>& cpu_output1) {
+//     /* Create data to input into back-end */
+//     std::random_device rd;
+//     std::mt19937 gen(rd());
+//     std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            cpu_input0[j+(cols*i)] = distribution(gen);
-        }
-    }
-    printMatrix("GenMatrix", cpu_input0, cols);
+//     for (int i = 0; i < rows; i++) {
+//         for (int j = 0; j < cols; j++) {
+//             cpu_input0[j+(cols*i)] = distribution(gen);
+//         }
+//     }
+//     printMatrix("GenMatrix", cpu_input0, cols);
 
-    flag = true;
-    /* Loop to create multiple matrices and decompose */
-    for (int i = 0; i < exp_size; i++) {
+//     flag = true;
+//     /* Loop to create multiple matrices and decompose */
+//     for (int i = 0; i < exp_size; i++) {
         
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                cpu_input0[j+(cols*i)] = distribution(gen);
-            }
-        }
+//         for (int i = 0; i < rows; i++) {
+//             for (int j = 0; j < cols; j++) {
+//                 cpu_input0[j+(cols*i)] = distribution(gen);
+//             }
+//         }
 
-        while(flag) {}
-        printMatrix("QMatrix", cpu_output0, cols);
-        printMatrix("RMatrix", cpu_output1, cols);
-        sleep(1);
-    }
-}
+//         while(flag) {}
+//         printMatrix("QMatrix", cpu_output0, cols);
+//         printMatrix("RMatrix", cpu_output1, cols);
+//         sleep(1);
+//     }
+// }
 
-void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, long unsigned int& exp_size) {
-    for (int i = 0; i < exp_size; i++) {
-        while(!flag) {}
-        flag = false;
-        engine.run(Progs::STREAM_INPUTS);
-        engine.run(Progs::ALIGN_INPUTS);
-        engine.run(Progs::CONSUMPTION_TASK);
-        engine.run(Progs::ALIGN_OUTPUTS);
-        engine.run(Progs::STREAM_OUTPUTS);
-    }
-}
+// void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, long unsigned int& exp_size) {
+//     for (int i = 0; i < exp_size; i++) {
+//         while(!flag) {}
+//         flag = false;
+//         engine.run(Progs::STREAM_INPUTS);
+//         engine.run(Progs::ALIGN_INPUTS);
+//         engine.run(Progs::CONSUMPTION_TASK);
+//         engine.run(Progs::ALIGN_OUTPUTS);
+//         engine.run(Progs::STREAM_OUTPUTS);
+//     }
+// }
 
 void tensorDecomp() {
     std::cout << "Getting Device..." << std::endl;
@@ -251,12 +251,46 @@ void tensorDecomp() {
     {
         #pragma omp section
         {
-            frontEnd_TensorDecomp(flag, rows, cols, exp_size, cpu_input0, cpu_output0, cpu_output1);
+            /* Create data to input into back-end */
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    cpu_input0[j+(cols*i)] = distribution(gen);
+                }
+            }
+            printMatrix("GenMatrix", cpu_input0, cols);
+
+            flag = true;
+            /* Loop to create multiple matrices and decompose */
+            for (int i = 0; i < exp_size; i++) {
+        
+                for (int i = 0; i < rows; i++) {
+                    for (int j = 0; j < cols; j++) {
+                        cpu_input0[j+(cols*i)] = distribution(gen);
+                    }
+                }
+
+            while(flag) {}
+            printMatrix("QMatrix", cpu_output0, cols);
+            printMatrix("RMatrix", cpu_output1, cols);
+            sleep(1);
+            }
         }
 
         #pragma omp section
         {
-            backEnd_TensorDecomp(engine, flag, exp_size);
+            for (int i = 0; i < exp_size; i++) {
+                while(!flag) {}
+                flag = false;
+                engine.run(Progs::STREAM_INPUTS);
+                engine.run(Progs::ALIGN_INPUTS);
+                engine.run(Progs::CONSUMPTION_TASK);
+                engine.run(Progs::ALIGN_OUTPUTS);
+                engine.run(Progs::STREAM_OUTPUTS);
+            }
         }
     }
     return;
