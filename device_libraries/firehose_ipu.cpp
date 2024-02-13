@@ -245,7 +245,7 @@ void tensorDecomp() {
     poplar::Engine engine(std::move(exe));
     engine.load(device);
 
-    engine.connectStream("Input Stream 0", input_tensor0);
+    engine.connectStream("Input Stream 0", cpu_input0.data(), hostBuffer.data() + hostBuffer.size());
 
     std::cout << "Loaded Device" << std::endl;
 
