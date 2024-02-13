@@ -84,11 +84,9 @@ void tensorDecomp() {
 
     // Graph
     poplar::Graph graph(device.getTarget());
-    std::cout << "CHECK1" << std::endl;
 
     // Programs
     std::vector<poplar::program::Program> progs(Progs::NUM_PROGRAMS);
-    std::cout << "CHECK2" << std::endl;
 
     // Flags
     bool flag = false;
@@ -99,7 +97,6 @@ void tensorDecomp() {
     long unsigned int packet_size = 9;
     long unsigned int num_transfers = (rows*cols) /packet_size;
     long unsigned int exp_size = 1;
-    std::cout << "CHECK3" << std::endl;
 
     // Tensors
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
@@ -125,7 +122,6 @@ void tensorDecomp() {
     poputil::mapTensorLinearly(graph, output_tensor1);
 
     poputil::mapTensorLinearly(graph, identity_tensor);
-    std::cout << "CHECK4" << std::endl;
 
     // Add standard codelets
     popops::addCodelets(graph);
@@ -166,70 +162,70 @@ void tensorDecomp() {
 
     /* Stream Inputs Program */
 
-    // auto seq = poplar::program::Sequence();
+    auto seq = poplar::program::Sequence();
 
-    // for(int i = 0; i < num_transfers; i++) {
-    //     seq.add(poplar::program::Copy(input_strm0, input_tensor0));
-    // }
+    for(int i = 0; i < num_transfers; i++) {
+        seq.add(poplar::program::Copy(input_strm0, input_tensor0));
+    }
 
-    // progs[Progs::STREAM_INPUTS] = seq;
+    progs[Progs::STREAM_INPUTS] = seq;
 
-    // graph.connect(input_io0["strm_in"], input_tensor0);
-    // graph.connect(input_io0["strm_out"], consumption_tensor_in0);
+    graph.connect(input_io0["strm_in"], input_tensor0);
+    graph.connect(input_io0["strm_out"], consumption_tensor_in0);
 
-    // /* Align Consumption Inputs Program */
+    /* Align Consumption Inputs Program */
 
-    // seq = poplar::program::Sequence();
+    seq = poplar::program::Sequence();
 
-    // seq.add(poplar::program::Copy(consumption_tensor_in0_exp, consumption_tensor_in0.reshape(dimShape)));
-    // graph.setTileMapping(consumption_tensor_in0_exp, 3);
+    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, consumption_tensor_in0.reshape(dimShape)));
+    graph.setTileMapping(consumption_tensor_in0_exp, 3);
 
-    // progs[Progs::ALIGN_INPUTS] = seq;
+    progs[Progs::ALIGN_INPUTS] = seq;
 
-    // /* Consumption Task Program */
+    /* Consumption Task Program */
 
-    // seq = poplar::program::Sequence();
+    seq = poplar::program::Sequence();
 
-    // poplin::addCodelets(graph);
+    poplin::addCodelets(graph);
 
-    // poplin::experimental::QRFactorization(graph, consumption_tensor_in0_exp, consumption_tensor_out0, seq);
+    poplin::experimental::QRFactorization(graph, consumption_tensor_in0_exp, consumption_tensor_out0, seq);
 
-    // progs[Progs::CONSUMPTION_TASK] = seq;
+    progs[Progs::CONSUMPTION_TASK] = seq;
 
-    // /* Align Consumption Outputs Program */
+    /* Align Consumption Outputs Program */
 
-    // seq = poplar::program::Sequence();
+    seq = poplar::program::Sequence();
 
-    // seq.add(poplar::program::Copy(consumption_tensor_out0.reshape(flatShape), consumption_tensor_out0_flat));
-    // graph.setTileMapping(consumption_tensor_out0_flat, 4);
+    seq.add(poplar::program::Copy(consumption_tensor_out0.reshape(flatShape), consumption_tensor_out0_flat));
+    graph.setTileMapping(consumption_tensor_out0_flat, 4);
 
-    // seq.add(poplar::program::Copy(consumption_tensor_out1.reshape(flatShape), consumption_tensor_out1_flat));
-    // graph.setTileMapping(consumption_tensor_out0_flat, 5);
+    seq.add(poplar::program::Copy(consumption_tensor_out1.reshape(flatShape), consumption_tensor_out1_flat));
+    graph.setTileMapping(consumption_tensor_out0_flat, 5);
 
-    // progs[Progs::ALIGN_OUTPUTS] = seq;
+    progs[Progs::ALIGN_OUTPUTS] = seq;
 
-    // /* Stream Outputs Program */
+    /* Stream Outputs Program */
 
-    // seq = poplar::program::Sequence();
+    seq = poplar::program::Sequence();
 
-    // progs[Progs::STREAM_OUTPUTS] = seq;
+    progs[Progs::STREAM_OUTPUTS] = seq;
 
-    // for(int i = 0; i < num_transfers; i++) {
-    //     seq.add(poplar::program::Copy(output_tensor0, output_strm0));
-    //     seq.add(poplar::program::Copy(output_tensor1, output_strm1));
-    // }
+    for(int i = 0; i < num_transfers; i++) {
+        seq.add(poplar::program::Copy(output_tensor0, output_strm0));
+        seq.add(poplar::program::Copy(output_tensor1, output_strm1));
+    }
 
-    // graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
-    // graph.connect(output_io0["strm_out"], output_tensor0);
+    graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
+    graph.connect(output_io0["strm_out"], output_tensor0);
 
-    // graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
-    // graph.connect(output_io1["strm_out"], output_tensor1);
+    graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
+    graph.connect(output_io1["strm_out"], output_tensor1);
 
-    // auto exe = poplar::compileGraph(graph, progs);
-    // poplar::Engine engine(std::move(exe));
-    // engine.load(device);
+    auto exe = poplar::compileGraph(graph, progs);
+    poplar::Engine engine(std::move(exe));
+    engine.load(device);
 
-    // std::cout << "HERE" << std::endl;
+    std::cout << "HERE" << std::endl;
 
     //#pragma omp parallel sections
     //{
@@ -243,4 +239,5 @@ void tensorDecomp() {
             //backEnd_TensorDecomp(engine, flag, exp_size);
         //}
     //}
+    return;
 }
