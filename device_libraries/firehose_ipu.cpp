@@ -69,7 +69,7 @@ void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, long unsigned int&
 }
 
 void tensorDecomp() {
-    std::cout << "START" << std::endl;
+    std::cout << "Getting Device..." << std::endl;
     // Get an IPU Device
     auto manager = poplar::DeviceManager::createDeviceManager();
     auto hwDevices = manager.getDevices(poplar::TargetType::IPU, 1);
@@ -80,10 +80,14 @@ void tensorDecomp() {
         device = std::move(*it);
     }
 
+    std::cout << "Got Device!" << std::endl;
+
     /* Expose Shared Memory */
 
     // Graph
+    std::cout << "Creating Graph..." << std::endl;
     poplar::Graph graph(device.getTarget());
+    std::cout << "Created Graph!" << std::endl;
 
     // Programs
     std::vector<poplar::program::Program> progs(Progs::NUM_PROGRAMS);
@@ -99,6 +103,7 @@ void tensorDecomp() {
     long unsigned int exp_size = 1;
 
     // Tensors
+    std::cout << "Adding Tensors..." << std::endl;
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
     auto consumption_tensor_in0 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Input 0");
     auto consumption_tensor_in0_exp = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Input 0 Expanded");
@@ -110,6 +115,8 @@ void tensorDecomp() {
     auto output_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 1");
 
     auto identity_tensor = graph.addVariable(poplar::FLOAT, {rows, cols}, "Identity Tensor");
+
+    std::cout << "Added Tensors!" << std::endl;
 
     poputil::mapTensorLinearly(graph, input_tensor0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0);
@@ -225,7 +232,7 @@ void tensorDecomp() {
     poplar::Engine engine(std::move(exe));
     engine.load(device);
 
-    std::cout << "HERE" << std::endl;
+    std::cout << "Loaded Device" << std::endl;
 
     //#pragma omp parallel sections
     //{
