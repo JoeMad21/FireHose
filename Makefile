@@ -19,7 +19,12 @@ clean_lib:
 clean_logs:
 	rm tensor_decomp_test_*
 
-clean:
-	rm firehose
-	rm ./device_libraries/mylib.o
-	rm tensor_decomp_test_*
+clean: clean_app clean_lib clean_logs
+
+get:
+	git pull
+
+run:
+	sbatch demo.batch
+
+super: clean get all run
