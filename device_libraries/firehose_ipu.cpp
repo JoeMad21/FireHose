@@ -246,6 +246,8 @@ void tensorDecomp() {
     engine.load(device);
 
     engine.connectStream("Input Stream 0", cpu_input0.data(), cpu_input0.data() + cpu_input0.size());
+    engine.connectStream("Output Stream 0", cpu_output0.data(), cpu_output0.data() + cpu_output0.size());
+    engine.connectStream("Output Stream 1", cpu_output1.data(), cpu_output1.data() + cpu_output0.size());
 
     std::cout << "Loaded Device" << std::endl;
 
@@ -288,10 +290,10 @@ void tensorDecomp() {
                 while(!flag) {}
                 flag = false;
                 engine.run(Progs::STREAM_INPUTS);
-                //engine.run(Progs::ALIGN_INPUTS);
-                //engine.run(Progs::CONSUMPTION_TASK);
-                //engine.run(Progs::ALIGN_OUTPUTS);
-                //engine.run(Progs::STREAM_OUTPUTS);
+                engine.run(Progs::ALIGN_INPUTS);
+                engine.run(Progs::CONSUMPTION_TASK);
+                engine.run(Progs::ALIGN_OUTPUTS);
+                engine.run(Progs::STREAM_OUTPUTS);
             }
         }
     }
