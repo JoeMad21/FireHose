@@ -285,7 +285,7 @@ void tensorDecomp() {
             for (int i = 0; i < exp_size; i++) {
                 while(!flag) {}
                 flag = false;
-                //engine.run(Progs::STREAM_INPUTS);
+                engine.run(Progs::STREAM_INPUTS);
                 //engine.run(Progs::ALIGN_INPUTS);
                 //engine.run(Progs::CONSUMPTION_TASK);
                 //engine.run(Progs::ALIGN_OUTPUTS);
