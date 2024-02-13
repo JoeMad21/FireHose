@@ -184,11 +184,9 @@ void tensorDecomp() {
 
     auto seq = poplar::program::Sequence();
 
-    //for(int i = 0; i < num_transfers; i++) {
-        //seq.add(poplar::program::Copy(input_strm0, input_tensor0));
-    //}
-
-    seq.add(engine.writeTensor("Input Stream 0", cpu_input0.data(), cpu_input0.data() + cpu_input0.size()));
+    for(int i = 0; i < num_transfers; i++) {
+        seq.add(poplar::program::Copy(input_strm0, input_tensor0));
+    }
 
     progs[Progs::STREAM_INPUTS] = seq;
 
