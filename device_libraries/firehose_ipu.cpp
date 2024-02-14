@@ -190,7 +190,7 @@ void tensorDecomp() {
         seq.add(poplar::program::Copy(input_strm0, input_tensor0));
     }
 
-    seq.add(poplar::program::Execute executeProgram(io_in));
+    seq.add(poplar::program::Execute(io_in));
 
     progs[Progs::STREAM_INPUTS] = seq;
 
@@ -238,7 +238,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(poplar::program::Execute executeProgram(io_out));
+    seq.add(poplar::program::Execute(io_out));
 
     for(int i = 0; i < num_transfers; i++) {
         seq.add(poplar::program::Copy(output_tensor0, output_strm0));
