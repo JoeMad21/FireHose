@@ -230,7 +230,7 @@ void tensorDecomp() {
 
     /* Stream Outputs Program */
 
-    graph.connect(output_io0["strm_in"], consumption_tensor_out0.reshape(flatShape));
+    graph.connect(output_io0["strm_in"], consumption_tensor_in0_exp.reshape(flatShape));
     graph.connect(output_io0["strm_out"], output_tensor0);
 
     graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
