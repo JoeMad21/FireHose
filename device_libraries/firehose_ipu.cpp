@@ -212,7 +212,7 @@ void tensorDecomp() {
 
     poplin::addCodelets(graph);
 
-    poplin::experimental::QRFactorization(graph, consumption_tensor_in0_exp, consumption_tensor_out0, seq);
+    seq.add(poplin::experimental::QRFactorization(graph, consumption_tensor_in0_exp, consumption_tensor_out0, seq));
 
     progs[Progs::CONSUMPTION_TASK] = seq;
 
