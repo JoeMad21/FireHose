@@ -144,10 +144,12 @@ void tensorDecomp() {
 
     std::cout << "Adding Vertices..." << std::endl;
     // Vertices
-    auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
-    auto input_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
-    auto output_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
-    auto output_io1 = graph.addVertex(consumption_task_cs, "IOVertex");
+    //auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
+    auto io_in = graph.addComputeSet("IO in CS");
+    auto io_out = graph.addComputeSet("IO out CS");
+    auto input_io0 = graph.addVertex(io_in, "IOVertex");
+    auto output_io0 = graph.addVertex(io_out, "IOVertex");
+    auto output_io1 = graph.addVertex(io_out, "IOVertex");
 
     std::cout << "Added Vertices!" << std::endl;
 
@@ -188,6 +190,8 @@ void tensorDecomp() {
         seq.add(poplar::program::Copy(input_strm0, input_tensor0));
     }
 
+    seq.add(poplar::program::Execute executeProgram(io_in));
+
     progs[Progs::STREAM_INPUTS] = seq;
 
     graph.connect(input_io0["strm_in"], input_tensor0);
@@ -226,7 +230,15 @@ void tensorDecomp() {
 
     /* Stream Outputs Program */
 
+    graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
+    graph.connect(output_io0["strm_out"], output_tensor0);
+
+    graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
+    graph.connect(output_io1["strm_out"], output_tensor1);
+
     seq = poplar::program::Sequence();
+
+    seq.add(poplar::program::Execute executeProgram(io_out));
 
     for(int i = 0; i < num_transfers; i++) {
         seq.add(poplar::program::Copy(output_tensor0, output_strm0));
@@ -234,12 +246,6 @@ void tensorDecomp() {
     }
 
     progs[Progs::STREAM_OUTPUTS] = seq;
-
-    graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
-    graph.connect(output_io0["strm_out"], output_tensor0);
-
-    graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
-    graph.connect(output_io1["strm_out"], output_tensor1);
 
     auto exe = poplar::compileGraph(graph, progs);
     poplar::Engine engine(std::move(exe));
