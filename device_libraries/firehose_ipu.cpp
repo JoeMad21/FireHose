@@ -197,7 +197,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, consumption_tensor_in0.reshape(dimShape)));
+    seq.add(poplar::program::Copy(consumption_tensor_in0.reshape(dimShape), consumption_tensor_in0_exp));
     graph.setTileMapping(consumption_tensor_in0_exp, 3);
 
     progs[Progs::ALIGN_INPUTS] = seq;
@@ -253,7 +253,7 @@ void tensorDecomp() {
 
     std::cout << "Loaded Device" << std::endl;
 
-    for (int i = 0; i < 5; i++) {
+    //for (int i = 0; i < 5; i++) {
     //#pragma omp parallel sections
     //{
         //#pragma omp section
@@ -270,7 +270,7 @@ void tensorDecomp() {
             }
             printMatrix("GenMatrix", cpu_input0, cols);
 
-            flag = true;
+            //flag = true;
             /* Loop to create multiple matrices and decompose */
             //for (int i = 0; i < exp_size; i++) {
         
@@ -280,13 +280,13 @@ void tensorDecomp() {
                     //}
                 //}
             //sleep(1);
-            }
+            //}
         //}
 
         //#pragma omp section
         //{
             //for (int i = 0; i < exp_size; i++) {
-                flag = false;
+                //flag = false;
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::ALIGN_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
