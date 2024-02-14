@@ -253,11 +253,11 @@ void tensorDecomp() {
 
     std::cout << "Loaded Device" << std::endl;
 
-    for (int i = 0; i < 3; i++) {
-    #pragma omp parallel sections
-    {
-        #pragma omp section
-        {
+    for (int i = 0; i < 5; i++) {
+    //#pragma omp parallel sections
+    //{
+        //#pragma omp section
+        //{
             /* Create data to input into back-end */
             std::random_device rd;
             std::mt19937 gen(rd());
@@ -272,31 +272,32 @@ void tensorDecomp() {
 
             flag = true;
             /* Loop to create multiple matrices and decompose */
-            for (int i = 0; i < exp_size; i++) {
+            //for (int i = 0; i < exp_size; i++) {
         
-                for (int i = 0; i < rows; i++) {
-                    for (int j = 0; j < cols; j++) {
-                        cpu_input0[j+(cols*i)] = distribution(gen);
-                    }
-                }
-            printMatrix("QMatrix", cpu_output0, cols);
-            printMatrix("RMatrix", cpu_output1, cols);
-            sleep(1);
+                //for (int i = 0; i < rows; i++) {
+                    //for (int j = 0; j < cols; j++) {
+                        //cpu_input0[j+(cols*i)] = distribution(gen);
+                    //}
+                //}
+            //sleep(1);
             }
-        }
+        //}
 
-        #pragma omp section
-        {
-            for (int i = 0; i < exp_size; i++) {
+        //#pragma omp section
+        //{
+            //for (int i = 0; i < exp_size; i++) {
                 flag = false;
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::ALIGN_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::ALIGN_OUTPUTS);
                 engine.run(Progs::STREAM_OUTPUTS);
-            }
-        }
+            //}
+
+            printMatrix("QMatrix", cpu_output0, cols);
+            printMatrix("RMatrix", cpu_output1, cols);
+        //}
     }
-    }
+    //}
     return;
 }
