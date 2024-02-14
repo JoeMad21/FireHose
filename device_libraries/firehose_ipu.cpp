@@ -245,12 +245,15 @@ void tensorDecomp() {
     poplar::Engine engine(std::move(exe));
     engine.load(device);
 
+    /* Connect Streams */
+
     engine.connectStream("Input Stream 0", cpu_input0.data(), cpu_input0.data() + cpu_input0.size());
     engine.connectStream("Output Stream 0", cpu_output0.data(), cpu_output0.data() + cpu_output0.size());
     engine.connectStream("Output Stream 1", cpu_output1.data(), cpu_output1.data() + cpu_output1.size());
 
     std::cout << "Loaded Device" << std::endl;
 
+    for (int i = 0; i < 3; i++) {
     #pragma omp parallel sections
     {
         #pragma omp section
@@ -276,8 +279,6 @@ void tensorDecomp() {
                         cpu_input0[j+(cols*i)] = distribution(gen);
                     }
                 }
-
-            while(flag) {}
             printMatrix("QMatrix", cpu_output0, cols);
             printMatrix("RMatrix", cpu_output1, cols);
             sleep(1);
@@ -287,7 +288,6 @@ void tensorDecomp() {
         #pragma omp section
         {
             for (int i = 0; i < exp_size; i++) {
-                while(!flag) {}
                 flag = false;
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::ALIGN_INPUTS);
@@ -296,6 +296,7 @@ void tensorDecomp() {
                 engine.run(Progs::STREAM_OUTPUTS);
             }
         }
+    }
     }
     return;
 }
