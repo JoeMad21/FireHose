@@ -297,7 +297,7 @@ void tensorDecomp() {
             printMatrix("QMatrix", cpu_output0, cols);
             printMatrix("RMatrix", cpu_output1, cols);
         //}
-    }
+    //}
     //}
     return;
 }
