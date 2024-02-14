@@ -230,7 +230,7 @@ void tensorDecomp() {
 
     /* Stream Outputs Program */
 
-    graph.connect(output_io0["strm_in"], consumption_tensor_in0);
+    graph.connect(output_io0["strm_in"], consumption_tensor_in0_exp.reshape(flatShape));
     graph.connect(output_io0["strm_out"], output_tensor0);
 
     graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
@@ -294,7 +294,7 @@ void tensorDecomp() {
             //for (int i = 0; i < exp_size; i++) {
                 //flag = false;
                 engine.run(Progs::STREAM_INPUTS);
-                //engine.run(Progs::ALIGN_INPUTS);
+                engine.run(Progs::ALIGN_INPUTS);
                 //engine.run(Progs::CONSUMPTION_TASK);
                 //engine.run(Progs::ALIGN_OUTPUTS);
                 engine.run(Progs::STREAM_OUTPUTS);
