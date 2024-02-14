@@ -228,12 +228,12 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    progs[Progs::STREAM_OUTPUTS] = seq;
-
     for(int i = 0; i < num_transfers; i++) {
         seq.add(poplar::program::Copy(output_tensor0, output_strm0));
         seq.add(poplar::program::Copy(output_tensor1, output_strm1));
     }
+
+    progs[Progs::STREAM_OUTPUTS] = seq;
 
     graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
     graph.connect(output_io0["strm_out"], output_tensor0);
