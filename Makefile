@@ -30,7 +30,7 @@ run:
 super: clean get all run
 
 help:
-	printf 'rm firehose'
+	printf "rm firehose\nrm ./device_libraries/mylib.o"
 	echo 'rm ./device_libraries/mylib.o'
 	echo 'rm tensor_decomp_test_*'
 	echo 'git pull'
