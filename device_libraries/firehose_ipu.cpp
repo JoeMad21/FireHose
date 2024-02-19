@@ -105,8 +105,11 @@ void tensorDecomp() {
     // Tensors
     std::cout << "Adding Tensors..." << std::endl;
     auto input_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 0");
+    auto input_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Input Tensor 1");
     auto consumption_tensor_in0 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Input 0");
     auto consumption_tensor_in0_exp = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Input 0 Expanded");
+    auto consumption_tensor_in1 = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Input 1");
+    auto consumption_tensor_in1_exp = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Input 1 Expanded");
     auto consumption_tensor_out0 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 0");
     auto consumption_tensor_out0_flat = graph.addVariable(poplar::FLOAT, {rows*cols}, "Consumption Task Output 0 Flattened");
     auto consumption_tensor_out1 = graph.addVariable(poplar::FLOAT, {rows, cols}, "Consumption Task Output 1");
@@ -114,22 +117,20 @@ void tensorDecomp() {
     auto output_tensor0 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 0");
     auto output_tensor1 = graph.addVariable(poplar::FLOAT, {packet_size}, "Output Tensor 1");
 
-    auto identity_tensor = graph.addVariable(poplar::FLOAT, {rows, cols}, "Identity Tensor");
-
     std::cout << "Added Tensors!" << std::endl;
 
     std::cout << "Mapping Tensors..." << std::endl;
     poputil::mapTensorLinearly(graph, input_tensor0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0_exp);
+    poputil::mapTensorLinearly(graph, consumption_tensor_in1);
+    poputil::mapTensorLinearly(graph, consumption_tensor_in1_exp);
     poputil::mapTensorLinearly(graph, consumption_tensor_out0);
     poputil::mapTensorLinearly(graph, consumption_tensor_out0_flat);
     poputil::mapTensorLinearly(graph, consumption_tensor_out1);
     poputil::mapTensorLinearly(graph, consumption_tensor_out1_flat);
     poputil::mapTensorLinearly(graph, output_tensor0);
     poputil::mapTensorLinearly(graph, output_tensor1);
-
-    poputil::mapTensorLinearly(graph, identity_tensor);
 
     std::cout << "Mapped Tensors!" << std::endl;
 
@@ -147,22 +148,25 @@ void tensorDecomp() {
     //auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
     auto io_in = graph.addComputeSet("IO in CS");
     auto io_out = graph.addComputeSet("IO out CS");
-    auto input_io0 = graph.addVertex(io_in, "IOVertex");
-    auto output_io0 = graph.addVertex(io_out, "IOVertex");
-    auto output_io1 = graph.addVertex(io_out, "IOVertex");
+    auto input_io0 = graph.addVertex(io_in, "IOVertex IN0");
+    auto input_io1 = graph.addVertex(io_in, "IOVertex IN1");
+    auto output_io0 = graph.addVertex(io_out, "IOVertex OUT0");
+    auto output_io1 = graph.addVertex(io_out, "IOVertex OUT1");
 
     std::cout << "Added Vertices!" << std::endl;
 
     std::cout << "Mapping Vertices..." << std::endl;
     graph.setTileMapping(input_io0, 3);
-    graph.setTileMapping(output_io0, 4);
-    graph.setTileMapping(output_io1, 5);
+    graph.setTileMapping(input_io1, 4);
+    graph.setTileMapping(output_io0, 5);
+    graph.setTileMapping(output_io1, 6);
 
     std::cout << "Mapped Vertices!" << std::endl;
 
     std::cout << "Adding Streams..." << std::endl;
     // Streams
     auto input_strm0 = graph.addHostToDeviceFIFO("Input Stream 0", input_tensor0.elementType(), input_tensor0.numElements());
+    auto input_strm1 = graph.addHostToDeviceFIFO("Input Stream 1", input_tensor1.elementType(), input_tensor1.numElements());
     auto output_strm0 = graph.addDeviceToHostFIFO("Output Stream 0", poplar::FLOAT, packet_size);
     auto output_strm1 = graph.addDeviceToHostFIFO("Output Stream 1", poplar::FLOAT, packet_size);
 
@@ -179,6 +183,7 @@ void tensorDecomp() {
 
     // CPU Vectors
     std::vector<float> cpu_input0(rows*cols);
+    std::vector<float> cpu_input1(rows*cols);
     std::vector<float> cpu_output0(rows*cols);
     std::vector<float> cpu_output1(rows*cols);
 
@@ -190,19 +195,25 @@ void tensorDecomp() {
         seq.add(poplar::program::Copy(input_strm0, input_tensor0));
     }
 
+    for(int i = 0; i < num_transfers; i++) {
+        seq.add(poplar::program::Copy(input_strm1, input_tensor1));
+    }
+
     seq.add(poplar::program::Execute(io_in));
 
     progs[Progs::STREAM_INPUTS] = seq;
 
     graph.connect(input_io0["strm_in"], input_tensor0);
     graph.connect(input_io0["strm_out"], consumption_tensor_in0);
+    graph.connect(input_io0["strm_in"], input_tensor1);
+    graph.connect(input_io0["strm_out"], consumption_tensor_in1);
 
     /* Align Consumption Inputs Program */
 
     seq = poplar::program::Sequence();
 
     seq.add(poplar::program::Copy(consumption_tensor_in0.reshape(dimShape), consumption_tensor_in0_exp));
-    graph.setTileMapping(consumption_tensor_in0_exp, 3);
+    seq.add(poplar::program::Copy(consumption_tensor_in1.reshape(dimShape), consumption_tensor_in1_exp));
 
     progs[Progs::ALIGN_INPUTS] = seq;
 
@@ -212,7 +223,10 @@ void tensorDecomp() {
 
     poplin::addCodelets(graph);
 
-    poplin::experimental::QRFactorization(graph, consumption_tensor_in0_exp, consumption_tensor_out0, seq);
+    poplin::experimental::QRFactorization(graph, consumption_tensor_in0_exp, consumption_tensor_in1_exp, seq);
+
+    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, consumption_tensor_out0));
+    seq.add(poplar::program::Copy(consumption_tensor_in1_exp, consumption_tensor_out1));
 
     progs[Progs::CONSUMPTION_TASK] = seq;
 
@@ -221,16 +235,14 @@ void tensorDecomp() {
     seq = poplar::program::Sequence();
 
     seq.add(poplar::program::Copy(consumption_tensor_out0.reshape(flatShape), consumption_tensor_out0_flat));
-    graph.setTileMapping(consumption_tensor_out0_flat, 4);
 
     seq.add(poplar::program::Copy(consumption_tensor_out1.reshape(flatShape), consumption_tensor_out1_flat));
-    graph.setTileMapping(consumption_tensor_out0_flat, 5);
 
     progs[Progs::ALIGN_OUTPUTS] = seq;
 
     /* Stream Outputs Program */
 
-    graph.connect(output_io0["strm_in"], consumption_tensor_in0_exp.reshape(flatShape));
+    graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
     graph.connect(output_io0["strm_out"], output_tensor0);
 
     graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
@@ -259,11 +271,24 @@ void tensorDecomp() {
 
     std::cout << "Loaded Device" << std::endl;
 
-    //for (int i = 0; i < 5; i++) {
-    //#pragma omp parallel sections
-    //{
-        //#pragma omp section
-        //{
+    for (int i = 0; i < 5; i++) {
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    if (i==j) {
+                        cpu_input1[j+(cols*i)] = 1;
+                    }
+                    else {
+                        cpu_input1[j+(cols*i)] = 0;
+                    }
+                }
+            }
+
+
             /* Create data to input into back-end */
             std::random_device rd;
             std::mt19937 gen(rd());
@@ -276,34 +301,33 @@ void tensorDecomp() {
             }
             printMatrix("GenMatrix", cpu_input0, cols);
 
-            //flag = true;
+            flag = true;
             /* Loop to create multiple matrices and decompose */
-            //for (int i = 0; i < exp_size; i++) {
+            for (int i = 0; i < exp_size; i++) {
         
-                //for (int i = 0; i < rows; i++) {
-                    //for (int j = 0; j < cols; j++) {
-                        //cpu_input0[j+(cols*i)] = distribution(gen);
-                    //}
-                //}
-            //sleep(1);
-            //}
-        //}
+                for (int i = 0; i < rows; i++) {
+                    for (int j = 0; j < cols; j++) {
+                        cpu_input0[j+(cols*i)] = distribution(gen);
+                    }
+                }
+            }
+        }
 
-        //#pragma omp section
-        //{
-            //for (int i = 0; i < exp_size; i++) {
-                //flag = false;
+        #pragma omp section
+        {
+            for (int i = 0; i < exp_size; i++) {
+                flag = false;
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::ALIGN_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
-                //engine.run(Progs::ALIGN_OUTPUTS);
+                engine.run(Progs::ALIGN_OUTPUTS);
                 engine.run(Progs::STREAM_OUTPUTS);
-            //}
+            }
 
             printMatrix("QMatrix", cpu_output0, cols);
             printMatrix("RMatrix", cpu_output1, cols);
-        //}
-    //}
-    //}
+        }
+    }
+    }
     return;
 }
