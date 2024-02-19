@@ -294,22 +294,15 @@ void tensorDecomp() {
             std::mt19937 gen(rd());
             std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < cols; j++) {
-                    cpu_input0[j+(cols*i)] = distribution(gen);
-                }
-            }
-            printMatrix("GenMatrix", cpu_input0, cols);
-
-            flag = true;
             /* Loop to create multiple matrices and decompose */
-            for (int i = 0; i < exp_size; i++) {
-        
+            for (int t = 0; t < exp_size; t++) {
                 for (int i = 0; i < rows; i++) {
                     for (int j = 0; j < cols; j++) {
                         cpu_input0[j+(cols*i)] = distribution(gen);
                     }
                 }
+                flag = true;
+                while(flag) {}
             }
         }
 
@@ -322,6 +315,7 @@ void tensorDecomp() {
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::ALIGN_OUTPUTS);
                 engine.run(Progs::STREAM_OUTPUTS);
+                while (!flag) {}
             }
 
             printMatrix("QMatrix", cpu_output0, cols);
