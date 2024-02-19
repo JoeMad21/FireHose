@@ -144,10 +144,12 @@ void tensorDecomp() {
 
     std::cout << "Adding Vertices..." << std::endl;
     // Vertices
-    auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
-    auto input_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
-    auto output_io0 = graph.addVertex(consumption_task_cs, "IOVertex");
-    auto output_io1 = graph.addVertex(consumption_task_cs, "IOVertex");
+    //auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
+    auto io_in = graph.addComputeSet("IO in CS");
+    auto io_out = graph.addComputeSet("IO out CS");
+    auto input_io0 = graph.addVertex(io_in, "IOVertex");
+    auto output_io0 = graph.addVertex(io_out, "IOVertex");
+    auto output_io1 = graph.addVertex(io_out, "IOVertex");
 
     std::cout << "Added Vertices!" << std::endl;
 
@@ -188,6 +190,8 @@ void tensorDecomp() {
         seq.add(poplar::program::Copy(input_strm0, input_tensor0));
     }
 
+    seq.add(poplar::program::Execute(io_in));
+
     progs[Progs::STREAM_INPUTS] = seq;
 
     graph.connect(input_io0["strm_in"], input_tensor0);
@@ -197,7 +201,7 @@ void tensorDecomp() {
 
     seq = poplar::program::Sequence();
 
-    seq.add(poplar::program::Copy(consumption_tensor_in0_exp, consumption_tensor_in0.reshape(dimShape)));
+    seq.add(poplar::program::Copy(consumption_tensor_in0.reshape(dimShape), consumption_tensor_in0_exp));
     graph.setTileMapping(consumption_tensor_in0_exp, 3);
 
     progs[Progs::ALIGN_INPUTS] = seq;
@@ -226,24 +230,28 @@ void tensorDecomp() {
 
     /* Stream Outputs Program */
 
+    graph.connect(output_io0["strm_in"], consumption_tensor_in0_exp.reshape(flatShape));
+    graph.connect(output_io0["strm_out"], output_tensor0);
+
+    graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
+    graph.connect(output_io1["strm_out"], output_tensor1);
+
     seq = poplar::program::Sequence();
 
-    progs[Progs::STREAM_OUTPUTS] = seq;
+    seq.add(poplar::program::Execute(io_out));
 
     for(int i = 0; i < num_transfers; i++) {
         seq.add(poplar::program::Copy(output_tensor0, output_strm0));
         seq.add(poplar::program::Copy(output_tensor1, output_strm1));
     }
 
-    graph.connect(output_io0["strm_in"], consumption_tensor_out0_flat);
-    graph.connect(output_io0["strm_out"], output_tensor0);
-
-    graph.connect(output_io1["strm_in"], consumption_tensor_out1_flat);
-    graph.connect(output_io1["strm_out"], output_tensor1);
+    progs[Progs::STREAM_OUTPUTS] = seq;
 
     auto exe = poplar::compileGraph(graph, progs);
     poplar::Engine engine(std::move(exe));
     engine.load(device);
+
+    /* Connect Streams */
 
     engine.connectStream("Input Stream 0", cpu_input0.data(), cpu_input0.data() + cpu_input0.size());
     engine.connectStream("Output Stream 0", cpu_output0.data(), cpu_output0.data() + cpu_output0.size());
@@ -251,10 +259,11 @@ void tensorDecomp() {
 
     std::cout << "Loaded Device" << std::endl;
 
-    #pragma omp parallel sections
-    {
-        #pragma omp section
-        {
+    //for (int i = 0; i < 5; i++) {
+    //#pragma omp parallel sections
+    //{
+        //#pragma omp section
+        //{
             /* Create data to input into back-end */
             std::random_device rd;
             std::mt19937 gen(rd());
@@ -267,38 +276,34 @@ void tensorDecomp() {
             }
             printMatrix("GenMatrix", cpu_input0, cols);
 
-            flag = true;
+            //flag = true;
             /* Loop to create multiple matrices and decompose */
-            for (int i = 0; i < exp_size; i++) {
+            //for (int i = 0; i < exp_size; i++) {
         
-                for (int i = 0; i < rows; i++) {
-                    for (int j = 0; j < cols; j++) {
-                        cpu_input0[j+(cols*i)] = distribution(gen);
-                    }
-                }
+                //for (int i = 0; i < rows; i++) {
+                    //for (int j = 0; j < cols; j++) {
+                        //cpu_input0[j+(cols*i)] = distribution(gen);
+                    //}
+                //}
+            //sleep(1);
+            //}
+        //}
 
-            while(flag) {}
-            printMatrix("QMatrix", cpu_output0, cols);
-            printMatrix("RMatrix", cpu_output1, cols);
-            sleep(1);
-            }
-        }
-
-        #pragma omp section
-        {
-            for (int i = 0; i < exp_size; i++) {
-                while(!flag) {}
-                flag = false;
-                engine.writeTensor("Input Stream 0", cpu_input0.data(), cpu_input0.data() + cpu_input0.size());
+        //#pragma omp section
+        //{
+            //for (int i = 0; i < exp_size; i++) {
+                //flag = false;
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::ALIGN_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
-                engine.run(Progs::ALIGN_OUTPUTS);
+                //engine.run(Progs::ALIGN_OUTPUTS);
                 engine.run(Progs::STREAM_OUTPUTS);
-                engine.readTensor("Output Stream 0", cpu_output0.data(), cpu_output0.data() + cpu_output0.size());
-                engine.readTensor("Output Stream 1", cpu_output1.data(), cpu_output1.data() + cpu_output1.size());
-            }
-        }
-    }
+            //}
+
+            printMatrix("QMatrix", cpu_output0, cols);
+            printMatrix("RMatrix", cpu_output1, cols);
+        //}
+    //}
+    //}
     return;
 }
