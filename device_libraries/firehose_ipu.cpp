@@ -121,6 +121,7 @@ void tensorDecomp() {
 
     std::cout << "Mapping Tensors..." << std::endl;
     poputil::mapTensorLinearly(graph, input_tensor0);
+    poputil::mapTensorLinearly(graph, input_tensor1);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0);
     poputil::mapTensorLinearly(graph, consumption_tensor_in0_exp);
     poputil::mapTensorLinearly(graph, consumption_tensor_in1);
