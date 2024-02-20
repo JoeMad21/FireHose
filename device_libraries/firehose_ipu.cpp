@@ -302,6 +302,7 @@ void tensorDecomp() {
                         cpu_input0[j+(cols*i)] = distribution(gen);
                     }
                 }
+                printMatrix("GenMatrix", cpu_input1, cols);
                 data_ready_flag = true;
         }
 
