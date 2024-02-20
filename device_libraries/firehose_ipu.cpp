@@ -93,7 +93,7 @@ void tensorDecomp() {
     std::vector<poplar::program::Program> progs(Progs::NUM_PROGRAMS);
 
     // Flags
-    bool flag = false;
+    bool data_ready_flag = false;
 
     // Parameters
     long unsigned int rows = 3;
@@ -278,7 +278,7 @@ void tensorDecomp() {
     {
         #pragma omp section
         {
-
+            while(data_ready_flag) {}
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols; j++) {
                     if (i==j) {
@@ -297,30 +297,23 @@ void tensorDecomp() {
             std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
             /* Loop to create multiple matrices and decompose */
-            while(!flag) {}
-            for (int t = 0; t < exp_size; t++) {
                 for (int i = 0; i < rows; i++) {
                     for (int j = 0; j < cols; j++) {
                         cpu_input0[j+(cols*i)] = distribution(gen);
                     }
                 }
-                flag = true;
-                while(flag) {}
-            }
+                data_ready_flag = true;
         }
 
         #pragma omp section
         {
-            for (int i = 0; i < exp_size; i++) {
-                while(flag) {}
-                flag = false;
-                engine.run(Progs::STREAM_INPUTS);
-                engine.run(Progs::ALIGN_INPUTS);
-                engine.run(Progs::CONSUMPTION_TASK);
-                engine.run(Progs::ALIGN_OUTPUTS);
-                engine.run(Progs::STREAM_OUTPUTS);
-                while (!flag) {}
-            }
+            while(!data_ready_flag) {}
+            data_ready_flag = false;
+            engine.run(Progs::STREAM_INPUTS);
+            engine.run(Progs::ALIGN_INPUTS);
+            engine.run(Progs::CONSUMPTION_TASK);
+            engine.run(Progs::ALIGN_OUTPUTS);
+            engine.run(Progs::STREAM_OUTPUTS);
 
             printMatrix("QMatrix", cpu_output0, cols);
             printMatrix("RMatrix", cpu_output1, cols);
