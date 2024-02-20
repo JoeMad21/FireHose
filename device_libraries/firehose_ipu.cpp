@@ -297,6 +297,7 @@ void tensorDecomp() {
             std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
             /* Loop to create multiple matrices and decompose */
+            while(!flag) {}
             for (int t = 0; t < exp_size; t++) {
                 for (int i = 0; i < rows; i++) {
                     for (int j = 0; j < cols; j++) {
@@ -311,6 +312,7 @@ void tensorDecomp() {
         #pragma omp section
         {
             for (int i = 0; i < exp_size; i++) {
+                while(flag) {}
                 flag = false;
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::ALIGN_INPUTS);
