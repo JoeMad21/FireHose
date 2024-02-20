@@ -266,6 +266,7 @@ void tensorDecomp() {
     /* Connect Streams */
 
     engine.connectStream("Input Stream 0", cpu_input0.data(), cpu_input0.data() + cpu_input0.size());
+    engine.connectStream("Input Stream 1", cpu_input1.data(), cpu_input1.data() + cpu_input1.size());
     engine.connectStream("Output Stream 0", cpu_output0.data(), cpu_output0.data() + cpu_output0.size());
     engine.connectStream("Output Stream 1", cpu_output1.data(), cpu_output1.data() + cpu_output1.size());
 
