@@ -148,10 +148,10 @@ void tensorDecomp() {
     //auto consumption_task_cs = graph.addComputeSet("Consumption Task CS");
     auto io_in = graph.addComputeSet("IO in CS");
     auto io_out = graph.addComputeSet("IO out CS");
-    auto input_io0 = graph.addVertex(io_in, "IOVertex IN0");
-    auto input_io1 = graph.addVertex(io_in, "IOVertex IN1");
-    auto output_io0 = graph.addVertex(io_out, "IOVertex OUT0");
-    auto output_io1 = graph.addVertex(io_out, "IOVertex OUT1");
+    auto input_io0 = graph.addVertex(io_in, "IOVertex");
+    auto input_io1 = graph.addVertex(io_in, "IOVertex");
+    auto output_io0 = graph.addVertex(io_out, "IOVertex");
+    auto output_io1 = graph.addVertex(io_out, "IOVertex");
 
     std::cout << "Added Vertices!" << std::endl;
 
