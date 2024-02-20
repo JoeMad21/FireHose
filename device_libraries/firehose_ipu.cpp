@@ -205,8 +205,8 @@ void tensorDecomp() {
 
     graph.connect(input_io0["strm_in"], input_tensor0);
     graph.connect(input_io0["strm_out"], consumption_tensor_in0);
-    graph.connect(input_io0["strm_in"], input_tensor1);
-    graph.connect(input_io0["strm_out"], consumption_tensor_in1);
+    graph.connect(input_io1["strm_in"], input_tensor1);
+    graph.connect(input_io1["strm_out"], consumption_tensor_in1);
 
     /* Align Consumption Inputs Program */
 
