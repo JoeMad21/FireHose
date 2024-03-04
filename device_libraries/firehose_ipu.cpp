@@ -32,14 +32,8 @@ void writeMatrixToFile(const std::string& matrix_name, std::vector<float>& matri
 
     if (outputFile.is_open()) {
         outputFile << matrix_name << ":\n";
-        // for (const auto& row : resultMatrix) {
         for (int i = 0; i < matrix.size(); i++) {
-
-            // for (int value : row) {
-                // outputFile << value << "\t"; 
             outputFile << matrix[i] << "\t"; 
-            // }
-            outputFile << "\n"; 
         }
 
         outputFile.close(); 
