@@ -26,6 +26,27 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 
 }
 
+// write to file
+void writeMatrixToFile(const std::string& matrix_name, const std::vector<vector<float>>& resultMatrix, const std::string& fileName) {
+    std::ofstream outputFile(fileName); 
+
+    if (outputFile.is_open()) {
+        outputFile << matrix_name << ":\n";
+        for (const auto& row : resultMatrix) {
+            for (int value : row) {
+                outputFile << value << "\t"; 
+            }
+            outputFile << "\n"; 
+        }
+
+        outputFile.close(); 
+        std::cout << "Result matrix has been written to " << fileName << endl;
+    } else {
+        std::cout << "Error: Unable to open the file " << fileName << endl;
+    }
+}
+
+
 // void frontEnd_TensorDecomp(bool& flag, long unsigned int& rows, long unsigned int& cols, long unsigned int& exp_size, std::vector<float>& cpu_input0, std::vector<float>& cpu_output0, std::vector<float>& cpu_output1) {
 //     /* Create data to input into back-end */
 //     std::random_device rd;
@@ -318,6 +339,8 @@ void tensorDecomp() {
 
             printMatrix("QMatrix", cpu_output0, cols);
             printMatrix("RMatrix", cpu_output1, cols);
+            writeMatrixToFile("QMatrix", cpu_output0, "../result.txt");
+            writeMatrixToFile("RMatrix", cpu_output1, "../result.txt");
         }
     }
     }

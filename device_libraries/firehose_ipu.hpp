@@ -6,6 +6,10 @@
 #include <unistd.h>
 #include <omp.h>
 
+// Scoreboard libraries
+#include <iostream>
+#include <fstream>
+
 
 #include <poplar/DeviceManager.hpp>
 #include <poplar/Engine.hpp>
