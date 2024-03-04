@@ -27,7 +27,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 }
 
 // write to file
-void writeMatrixToFile(const std::string& matrix_name, const std::vector<std::vector<float>>& resultMatrix, const std::string& fileName) {
+void writeMatrixToFile(const std::string& matrix_name, std::vector<float>& resultMatrix, const std::string& fileName) {
     std::ofstream outputFile(fileName); 
 
     if (outputFile.is_open()) {
