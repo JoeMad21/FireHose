@@ -40,9 +40,9 @@ void writeMatrixToFile(const std::string& matrix_name, const std::vector<std::ve
         }
 
         outputFile.close(); 
-        std::cout << "Result matrix has been written to " << fileName << endl;
+        std::cout << "Result matrix has been written to " << fileName << std::endl;
     } else {
-        std::cout << "Error: Unable to open the file " << fileName << endl;
+        std::cout << "Error: Unable to open the file " << fileName << std::endl;
     }
 }
 
