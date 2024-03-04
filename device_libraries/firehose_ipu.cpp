@@ -336,8 +336,8 @@ void tensorDecomp() {
 
             printMatrix("QMatrix", cpu_output0, cols);
             printMatrix("RMatrix", cpu_output1, cols);
-            writeMatrixToFile("QMatrix", cpu_output0, "../result.txt");
-            writeMatrixToFile("RMatrix", cpu_output1, "../result.txt");
+            writeMatrixToFile("QMatrix", cpu_output0, "result.txt");
+            writeMatrixToFile("RMatrix", cpu_output1, "result.txt");
         }
     }
     }
