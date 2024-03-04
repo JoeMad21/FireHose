@@ -3,7 +3,7 @@ CC = g++
 all: firehose
 
 firehose: libipu.a
-	$(CC) -fopenmp firehose_main.cpp -L/home/daniyaltahsildar/myFiles/Tensor_Decomp_Scratch/device_libraries -lipu -lpoplar -lpoplin -lpoputil -lpopops -o firehose
+	$(CC) -fopenmp firehose_main.cpp -L/home/daniyaltahsildar/Tensor_Decomp_Scratch/device_libraries -lipu -lpoplar -lpoplin -lpoputil -lpopops -o firehose
 libipu.a: mylib.o
 	ar rcs ./device_libraries/libipu.a ./device_libraries/mylib.o
 mylib.o:
@@ -30,5 +30,5 @@ run:
 super: clean get all run
 
 help:
-	printf "\nrm firehose\nrm ./device_libraries/mylib.o\nrm tensor_decomp_test_*\ngit pull\ng++ -fopenmp firehose_main.cpp -L/home/jomad21/myFiles/Tensor_Decomp_Scratch/device_libraries -lipu -lpoplar -lpoplin -lpoputil -lpopops -o firehose\nar rcs ./device_libraries/libipu.a ./device_libraries/mylib.o\npopc -o ./device_libraries/io_codelet.gp ./device_libraries/io_codelet.cpp'\ng++ -c -fopenmp ./device_libraries/firehose_ipu.cpp -o ./device_libraries/mylib.o\nsbatch demo.batch\n"
+	printf "\nrm firehose\nrm ./device_libraries/mylib.o\nrm tensor_decomp_test_*\ngit pull\ng++ -fopenmp firehose_main.cpp -L/home/daniyaltahsildar/Tensor_Decomp_Scratch/device_libraries -lipu -lpoplar -lpoplin -lpoputil -lpopops -o firehose\nar rcs ./device_libraries/libipu.a ./device_libraries/mylib.o\npopc -o ./device_libraries/io_codelet.gp ./device_libraries/io_codelet.cpp'\ng++ -c -fopenmp ./device_libraries/firehose_ipu.cpp -o ./device_libraries/mylib.o\nsbatch demo.batch\n"
 
