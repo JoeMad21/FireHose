@@ -35,7 +35,7 @@ void writeMatrixToFile(const std::string& matrix_name_1, std::vector<float>& mat
         for (int i = 0; i < matrix_1.size(); i++) {
             outputFile << matrix_1[i] << "\t"; 
         }
-        outputFile << matrix_name_2 << ":\n";
+        outputFile << "\n" << matrix_name_2 << ":\n";
         for (int i = 0; i < matrix_2.size(); i++) {
             outputFile << matrix_2[i] << "\t"; 
         }
@@ -340,7 +340,7 @@ void tensorDecomp() {
 
             printMatrix("QMatrix", cpu_output0, cols);
             printMatrix("RMatrix", cpu_output1, cols);
-            writeMatrixToFile("QMatrix:", cpu_output0, "RMatrix:", cpu_output1, "result.txt");
+            writeMatrixToFile("QMatrix", cpu_output0, "RMatrix", cpu_output1, "result.txt");
         }
     }
     }
