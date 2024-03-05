@@ -52,7 +52,7 @@ void writeMatrixToFile(const std::string& matrix_name, std::vector<float>& matri
     std::ofstream outputFile(fileName, std::ios::app); 
 
     if (outputFile.is_open()) {
-        outputFile << matrix_name << ":\n";
+        outputFile << "\n" << matrix_name << ":\n";
         for (int i = 0; i < matrix.size(); i++) {
             outputFile << matrix[i] << "\t"; 
         }
