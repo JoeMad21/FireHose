@@ -47,7 +47,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 //     }
 // }
 
-
+// write to file
 void writeMatrixToFile(const std::string& matrix_name, std::vector<float>& matrix, const std::string& fileName) {
     std::ofstream outputFile(fileName, std::ios::app); 
 
