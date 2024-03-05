@@ -27,17 +27,34 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 }
 
 // write to file
-void writeMatrixToFile(const std::string& matrix_name_1, std::vector<float>& matrix_1, const std::string& matrix_name_2, std::vector<float>& matrix_2, const std::string& fileName) {
+// void writeMatrixToFile(const std::string& matrix_name_1, std::vector<float>& matrix_1, const std::string& matrix_name_2, std::vector<float>& matrix_2, const std::string& fileName) {
+//     std::ofstream outputFile(fileName, std::ios::app); 
+
+//     if (outputFile.is_open()) {
+//         outputFile << matrix_name_1 << ":\n";
+//         for (int i = 0; i < matrix_1.size(); i++) {
+//             outputFile << matrix_1[i] << "\t"; 
+//         }
+//         outputFile << "\n" << matrix_name_2 << ":\n";
+//         for (int i = 0; i < matrix_2.size(); i++) {
+//             outputFile << matrix_2[i] << "\t"; 
+//         }
+
+//         outputFile.close(); 
+//         std::cout << "Result matrix has been written to " << fileName << std::endl;
+//     } else {
+//         std::cout << "Error: Unable to open the file " << fileName << std::endl;
+//     }
+// }
+
+
+void writeMatrixToFile(const std::string& matrix_name, std::vector<float>& matrix, const std::string& fileName) {
     std::ofstream outputFile(fileName, std::ios::app); 
 
     if (outputFile.is_open()) {
-        outputFile << matrix_name_1 << ":\n";
-        for (int i = 0; i < matrix_1.size(); i++) {
-            outputFile << matrix_1[i] << "\t"; 
-        }
-        outputFile << "\n" << matrix_name_2 << ":\n";
-        for (int i = 0; i < matrix_2.size(); i++) {
-            outputFile << matrix_2[i] << "\t"; 
+        outputFile << matrix_name << ":\n";
+        for (int i = 0; i < matrix.size(); i++) {
+            outputFile << matrix[i] << "\t"; 
         }
 
         outputFile.close(); 
@@ -325,6 +342,7 @@ void tensorDecomp() {
                     }
                 }
                 printMatrix("GenMatrix", cpu_input0, cols);
+                writeMatrixToFile("GenMatrix", cpu_output0, "gen_matrix.txt");
                 data_ready_flag = true;
         }
 
@@ -340,7 +358,11 @@ void tensorDecomp() {
 
             printMatrix("QMatrix", cpu_output0, cols);
             printMatrix("RMatrix", cpu_output1, cols);
-            writeMatrixToFile("QMatrix", cpu_output0, "RMatrix", cpu_output1, "result.txt");
+            // writeMatrixToFile("QMatrix", cpu_output0, "RMatrix", cpu_output1, "result.txt");
+            writeMatrixToFile("QMatrix", cpu_output0, "result.txt");
+            writeMatrixToFile("RMatrix", cpu_output1, "result.txt");
+
+            
         }
     }
     }
