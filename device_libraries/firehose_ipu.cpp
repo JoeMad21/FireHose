@@ -300,9 +300,14 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Connecting Streams..." << std::endl;
 
     for (int i = 0; i < num_streams; i++) {
-        engine.connectStream("Input Stream 0", cpu_in0[i].data(), cpu_in0[i].data() + cpu_in0[i].size());
-        engine.connectStream("Output Stream 0", cpu_out0[i].data(), cpu_out0[i].data() + cpu_out0[i].size());
-        engine.connectStream("Output Stream 1", cpu_out1[i].data(), cpu_out1[i].data() + cpu_out1[i].size());
+        db_name = "Input Stream " + std::to_string(i) + " for input 0";
+        engine.connectStream(db_name, cpu_in0[i].data(), cpu_in0[i].data() + cpu_in0[i].size());
+
+        db_name = "Output Stream " + std::to_string(i) + " for output 0";
+        engine.connectStream(db_name, cpu_out0[i].data(), cpu_out0[i].data() + cpu_out0[i].size());
+
+        db_name = "Output Stream " + std::to_string(i) + " for output 1";
+        engine.connectStream(db_name, cpu_out1[i].data(), cpu_out1[i].data() + cpu_out1[i].size());
     }
 
     std::cout << "Connected Streams!" << std::endl;
