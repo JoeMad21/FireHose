@@ -12,7 +12,7 @@ Output<Vector<float>> strm_out;
     bool compute() {
         for (unsigned i = 0; i < strm_in.size(); i++) {
             for (unsigned j = 0; j < strm_in.size(); j++) {
-                strm_out[j + (i*strm_out.size())] = strm_in[i][j];
+                strm_out[j + (i*strm_in.size())] = strm_in[i][j];
             }
         }
         return true;
