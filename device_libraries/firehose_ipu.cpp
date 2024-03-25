@@ -119,7 +119,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     // Constant Tensors
     std::vector<float> temp_vec_id(col);
-    std::vector<float> vec_id = = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+    std::vector<float> vec_id = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
 
     //for (int i = 0; i < row; i++) {
         //vec_id.push_back(temp_vec_id);
@@ -242,7 +242,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     for(int i = 0; i < num_transfers; i++) {
 
-        seq.add(poplar::program::Copy(c_id, v_con1));
+        seq.add(poplar::program::Copy(c_id, v_con1[i]));
 
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
 
