@@ -301,7 +301,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     {
         #pragma omp section
         {
-            while(data_ready_flag[0]) {}
+            while(data_ready_flags[0]) {}
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
@@ -312,13 +312,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
             }
             printMatrix("GenMatrix", cpu_in0[0], col);
-            data_ready_flag[0] = true;
+            data_ready_flags[0] = true;
         }
 
         #pragma omp section
         {
-            while(!data_ready_flag[0]) {}
-            data_ready_flag[0] = false;
+            while(!data_ready_flags[0]) {}
+            data_ready_flags[0] = false;
             engine.run(Progs::STREAM_INPUTS);
             //engine.run(Progs::ALIGN_INPUTS);
             engine.run(Progs::CONSUMPTION_TASK);
