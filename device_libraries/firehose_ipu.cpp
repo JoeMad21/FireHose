@@ -280,6 +280,17 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Added Programs!" << std::endl;
 
+
+    /* Create and Load Engine */
+
+    std::cout << "Loading Device..." << std::endl;
+
+    auto exe = poplar::compileGraph(graph, progs);
+    poplar::Engine engine(std::move(exe));
+    engine.load(device);
+
+    std::cout << "Loaded Device!" << std::endl;
+
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
@@ -291,16 +302,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     std::cout << "Connected Streams!" << std::endl;
-
-    /* Create and Load Engine */
-
-    std::cout << "Loading Device..." << std::endl;
-
-    auto exe = poplar::compileGraph(graph, progs);
-    poplar::Engine engine(std::move(exe));
-    engine.load(device);
-
-    std::cout << "Loaded Device!" << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
