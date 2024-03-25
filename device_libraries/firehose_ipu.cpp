@@ -224,6 +224,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     seq.add(poplar::program::Execute(cps_io_in));
 
+    seq.add(poplar::program::PrintTensor("v1-debug", v_con0[i]));
+    seq.add(poplar::program::PrintTensor("v2-debug", v_con1[i]));
+
     progs[Progs::STREAM_INPUTS] = seq;
 
     /* Align Consumption Inputs Program */
