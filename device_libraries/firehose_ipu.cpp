@@ -137,7 +137,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         }
     }
 
-    auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id);
+    auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
 
     std::cout << "Added Tensors!" << std::endl;
 
