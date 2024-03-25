@@ -200,10 +200,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<std::size_t> flatShape = {row*col};
 
     // CPU Vectors
-    std::vector<float> cpu_in0(row*col);
-    std::vector<float> cpu_out0(row*col);
-    std::vector<float> cpu_out1(row*col);
-
     std::vector<std::vector<float>> cpu_in0(num_transfers);
     std::vector<std::vector<float>> cpu_out0(num_transfers);
     std::vector<std::vector<float>> cpu_out1(num_transfers);
