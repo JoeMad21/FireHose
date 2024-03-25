@@ -213,6 +213,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         cpu_out1[i] = temp_vec;
     }
 
+    std::cout << "Adding Programs..." << std::endl;
     /* Stream Inputs Program */
 
     auto seq = poplar::program::Sequence();
@@ -265,13 +266,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     progs[Progs::STREAM_OUTPUTS] = seq;
 
-    /* Create and Load Engine */
-
-    auto exe = poplar::compileGraph(graph, progs);
-    poplar::Engine engine(std::move(exe));
-    engine.load(device);
+    std::cout << "Added Programs!" << std::endl;
 
     /* Connect Vertices (Edges)*/
+
+    std::cout << "Connecting Edges..." << std::endl;
 
     for(int i = 0; i < num_transfers; i++) {
         graph.connect(vtx_in0[0]["strm_in"], v_io_in0[0]);
@@ -284,7 +283,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         graph.connect(vtx_out1[0]["strm_out"], v_io_out1[0]);
     }
 
+    std::cout << "Connected Edges!" << std::endl;
+
     /* Connect Streams */
+
+    std::cout << "Connecting Streams..." << std::endl;
 
     for (int i = 0; i < num_streams; i++) {
         engine.connectStream("Input Stream 0", cpu_in0[i].data(), cpu_in0[i].data() + cpu_in0[i].size());
@@ -292,7 +295,17 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         engine.connectStream("Output Stream 1", cpu_out1[i].data(), cpu_out1[i].data() + cpu_out1[i].size());
     }
 
-    std::cout << "Loaded Device" << std::endl;
+    std::cout << "Connected Streams!" << std::endl;
+
+    /* Create and Load Engine */
+
+    std::cout << "Loading Device..." << std::endl;
+
+    auto exe = poplar::compileGraph(graph, progs);
+    poplar::Engine engine(std::move(exe));
+    engine.load(device);
+
+    std::cout << "Loaded Device!" << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
