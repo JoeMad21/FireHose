@@ -7,7 +7,8 @@ firehose: libipu.a
 libipu.a: mylib.o
 	ar rcs ./device_libraries/libipu.a ./device_libraries/mylib.o
 mylib.o:
-	popc -o ./device_libraries/io_codelet.gp ./device_libraries/io_codelet.cpp
+	popc -o ./device_libraries/io_codelet_in.gp ./device_libraries/io_codelet_in.cpp
+	popc -o ./device_libraries/io_codelet_out.gp ./device_libraries/io_codelet_out.cpp
 	$(CC) -c -fopenmp ./device_libraries/firehose_ipu.cpp -o ./device_libraries/mylib.o
 
 clean_app:
