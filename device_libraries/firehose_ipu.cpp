@@ -76,7 +76,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<poplar::Tensor> v_io_out0(num_streams);
 
     std::vector<poplar::Tensor> v_con1(num_streams);
-    std::vector<poplar::Tensor> v_io_out1(num_streams;)
+    std::vector<poplar::Tensor> v_io_out1(num_streams);
 
     std::string db_name;
 
