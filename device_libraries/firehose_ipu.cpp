@@ -201,7 +201,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         db_name = "Output Stream " + std::to_string(i) + " for output 0";
         strm_out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col);
 
-        db_name = "Output Stream " + std::to_string(i) + " in output 1";
+        db_name = "Output Stream " + std::to_string(i) + " for output 1";
         strm_out1[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col);
     }
 
