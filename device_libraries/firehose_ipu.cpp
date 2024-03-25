@@ -308,7 +308,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
             for (int i = 0; i < row; i++) {
                 for (int j = 0; j < col; j++) {
-                    cpu_in0[j+(col*i)] = distribution(gen);
+                    cpu_in0[0][j+(col*i)] = distribution(gen);
                 }
             }
             printMatrix("GenMatrix", cpu_in0[0], col);
