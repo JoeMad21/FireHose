@@ -158,9 +158,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     auto cps_io_in = graph.addComputeSet("IO in CS");
     auto cps_io_out = graph.addComputeSet("IO out CS");
 
-    std::vector<poplar::Vertex> vtx_in0(num_streams);
-    std::vector<poplar::Vertex> vtx_out0(num_streams);
-    std::vector<poplar::Vertex> vtx_out1(num_streams);
+    std::vector<poplar::VertexRef> vtx_in0(num_streams);
+    std::vector<poplar::VertexRef> vtx_out0(num_streams);
+    std::vector<poplar::VertexRef> vtx_out1(num_streams);
 
     for (int i = 0; i < num_streams; i++) {
 
