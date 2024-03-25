@@ -112,7 +112,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         v_con1[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
         poputil::mapTensorLinearly(graph, v_con1[i]);
 
-        db_name = "Output Tensor " + std::to_string(i) " of Set 1";
+        db_name = "Output Tensor " + std::to_string(i) + " of Set 1";
         v_io_out1[i] = graph.addVariable(poplar::FLOAT, {packet_size}, db_name);
         poputil::mapTensorLinearly(graph, v_io_out1[i]);
     }
