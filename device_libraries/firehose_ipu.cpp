@@ -118,7 +118,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     //TO DO: Update this constant to accept other sizes
-    auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}, "Identity Tensor");
+    auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}});
 
     std::cout << "Added Tensors!" << std::endl;
 
