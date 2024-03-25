@@ -244,8 +244,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     for(int i = 0; i < num_transfers; i++) {
 
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
-        seq.add(poplar::program::PrintTensor("v1-debug", v_con0[i]));
-        seq.add(poplar::program::PrintTensor("v2-debug", v_con1[i]));
+        //seq.add(poplar::program::PrintTensor("v1-debug", v_con0[i]));
+        //seq.add(poplar::program::PrintTensor("v2-debug", v_con1[i]));
 
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
 
@@ -299,7 +299,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     {
         #pragma omp section
         {
-            while(data_ready_flags[0]) {}
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
@@ -310,6 +309,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
             }
             printMatrix("GenMatrix", cpu_in0[0], col);
+            while(data_ready_flags[0]) {}
             data_ready_flags[0] = true;
         }
 
