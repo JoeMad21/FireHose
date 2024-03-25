@@ -244,6 +244,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     for(int i = 0; i < num_transfers; i++) {
 
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
+        prog.add(program::PrintTensor("v1-debug", v_con1));
+        prog.add(program::PrintTensor("v2-debug", v_con2));
 
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
 
