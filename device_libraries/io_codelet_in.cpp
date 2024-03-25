@@ -6,7 +6,7 @@ class IOVertexIN : public Vertex {
 public:
 
 Input<Vector<float>> strm_in;
-Output<Vector<Vector<float>>> strm_out;
+Vector<Output<Vector<float>>> strm_out;
 
 // Compute function
     bool compute() {

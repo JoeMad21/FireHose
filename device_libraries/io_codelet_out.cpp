@@ -5,7 +5,7 @@ using namespace poplar;
 class IOVertexOUT : public Vertex {
 public:
 
-Input<Vector<Vector<float>>> strm_in;
+Vector<Input<Vector<float>>> strm_in;
 Output<Vector<float>> strm_out;
 
 // Compute function
