@@ -138,6 +138,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     //}
 
     auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
+    poputil::mapTensorLinearly(graph, c_id);
 
     std::cout << "Added Tensors!" << std::endl;
 
@@ -249,7 +250,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
         //seq.add(poplar::program::PrintTensor("v1-debug", v_con0[i]));
         //seq.add(poplar::program::PrintTensor("v2-debug", v_con1[i]));
-        
+
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
 
         //seq.add(poplar::program::Copy(v_con_in0[i], v_con_out0[i]));
