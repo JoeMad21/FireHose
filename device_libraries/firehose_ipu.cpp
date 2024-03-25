@@ -174,6 +174,17 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         graph.setTileMapping(vtx_out1[i], i+9);
     }
 
+    for(int i = 0; i < num_transfers; i++) {
+        graph.connect(vtx_in0[0]["strm_in"], v_io_in0[0]);
+        graph.connect(vtx_in0[0]["strm_out"], v_con0[0]);
+
+        graph.connect(vtx_out0[0]["strm_in"], v_con0[0]);
+        graph.connect(vtx_out0[0]["strm_out"], v_io_out0[0]);
+
+        graph.connect(vtx_out1[0]["strm_in"], v_con1[0]);
+        graph.connect(vtx_out1[0]["strm_out"], v_io_out1[0]);
+    }
+
     std::cout << "Added Vertices!" << std::endl;
 
     // Streams
