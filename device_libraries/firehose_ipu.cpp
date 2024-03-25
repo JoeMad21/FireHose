@@ -88,7 +88,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         poputil::mapTensorLinearly(graph, v_io_in0[i]);
 
         db_name = "Consumption Tensor " + std::to_string(i) + " of Set 0";
-        v_con0[i] = graph.addVariable(poplar::FLOAT, {packet_size}, db_name);
+        v_con0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
         poputil::mapTensorLinearly(graph, v_con0[i]);
 
         //db_name = "Consumption Task Input " + std::to_string(i);
@@ -224,8 +224,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     seq.add(poplar::program::Execute(cps_io_in));
 
-    seq.add(poplar::program::PrintTensor("v1-debug", v_con0[0]));
-    seq.add(poplar::program::PrintTensor("v2-debug", v_con1[0]));
+    //seq.add(poplar::program::PrintTensor("v1-debug", v_con0[0]));
+    //seq.add(poplar::program::PrintTensor("v2-debug", v_con1[0]));
 
     progs[Progs::STREAM_INPUTS] = seq;
 
@@ -249,7 +249,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
         //seq.add(poplar::program::PrintTensor("v1-debug", v_con0[i]));
         //seq.add(poplar::program::PrintTensor("v2-debug", v_con1[i]));
-
+s
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
 
         //seq.add(poplar::program::Copy(v_con_in0[i], v_con_out0[i]));
