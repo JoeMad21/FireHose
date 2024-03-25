@@ -119,23 +119,23 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     // Constant Tensors
     std::vector<float> temp_vec_id(col);
-    std::vector<std::vector<float>> vec_id;
+    std::vector<float> vec_id = = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
 
-    for (int i = 0; i < row; i++) {
-        vec_id.push_back(temp_vec_id);
-    }
+    //for (int i = 0; i < row; i++) {
+        //vec_id.push_back(temp_vec_id);
+    //}
 
 
-    for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++) {
-            if (i == j) {
-                vec_id[i][j] = 1.0;
-            }
-            else {
-                vec_id[i][j] = 0.0;
-            }
-        }
-    }
+    //for (int i = 0; i < row; i++) {
+        //for (int j = 0; j < col; j++) {
+            //if (i == j) {
+                //vec_id[i][j] = 1.0;
+            //}
+            //else {
+                //vec_id[i][j] = 0.0;
+            //}
+        //}
+    //}
 
     auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
 
