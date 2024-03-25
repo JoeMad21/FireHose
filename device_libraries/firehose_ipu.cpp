@@ -117,8 +117,27 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         poputil::mapTensorLinearly(graph, v_io_out1[i]);
     }
 
-    //TO DO: Update this constant to accept other sizes
-    auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}});
+    // Constant Tensors
+    std::vector<float> temp_vec_id(col);
+    std::vector<std::vector<float>> vec_id;
+
+    for (int i = 0; i < row; i++) {
+        vec_id.push_back(temp_vec_id);
+    }
+
+
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            if (i == j) {
+                vec_id[i][j] = 1.0;
+            }
+            else {
+                vec_id[i][j] = 0.0;
+            }
+        }
+    }
+
+    auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id);
 
     std::cout << "Added Tensors!" << std::endl;
 
