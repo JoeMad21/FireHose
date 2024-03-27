@@ -272,7 +272,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     /* Run Parallel Threads for FireHose */
 
-    for (int i = 0; i < 5; i++) {
     #pragma omp parallel sections
     {
         #pragma omp section
@@ -303,6 +302,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
             printMatrix("RMatrix", cpu_out1[0], col);
         }
     }
-    }
+
     return;
 }
+
+//void placeholder(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
+
+//}
