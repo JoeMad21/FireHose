@@ -58,11 +58,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         data_ready_flags[i] = false;
     }
 
-    // Parameters
-    long unsigned int packet_size = row*col;
-    long unsigned int num_transfers = (row*col) / packet_size;
-    long unsigned int exp_size = 1;
-
     // Variable Tensors
     std::cout << "Adding Tensors..." << std::endl;
 
@@ -151,7 +146,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         graph.setTileMapping(vtx_out1[i], i+9);
     }
 
-    for(int i = 0; i < num_transfers; i++) {
+    for(int i = 0; i < num_streams; i++) {
         graph.connect(vtx_in0[i]["strm_in"], v_io_in0[i]);
         graph.connect(vtx_in0[i]["strm_out"], v_con0[i]);
 
@@ -185,13 +180,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Added Streams!" << std::endl;
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_transfers);
-    std::vector<std::vector<float>> cpu_out0(num_transfers);
-    std::vector<std::vector<float>> cpu_out1(num_transfers);
+    std::vector<std::vector<float>> cpu_in0(num_streams);
+    std::vector<std::vector<float>> cpu_out0(num_streams);
+    std::vector<std::vector<float>> cpu_out1(num_streams);
 
-    std::vector<float> temp_vec(packet_size);
+    std::vector<float> temp_vec(row*col);
 
-    for (int i = 0; i < num_transfers; i++) {
+    for (int i = 0; i < num_streams; i++) {
         cpu_in0[i] = temp_vec;
         
         cpu_out0[i] = temp_vec;
@@ -204,7 +199,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     auto seq = poplar::program::Sequence();
 
-    for(int i = 0; i < num_transfers; i++) {
+    for(int i = 0; i < num_streams; i++) {
         seq.add(poplar::program::Copy(strm_in0[i], v_io_in0[i]));
     }
 
@@ -219,7 +214,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     poplin::addCodelets(graph);
 
-    for(int i = 0; i < num_transfers; i++) {
+    for(int i = 0; i < num_streams; i++) {
 
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
 
@@ -234,7 +229,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     seq.add(poplar::program::Execute(cps_io_out));
 
-    for(int i = 0; i < num_transfers; i++) {
+    for(int i = 0; i < num_streams; i++) {
         seq.add(poplar::program::Copy(v_io_out0[i], strm_out0[i]));
         seq.add(poplar::program::Copy(v_io_out1[i], strm_out1[i]));
     }
@@ -281,7 +276,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
             int thread_id = omp_get_thread_num();
             std::cout << "THREAD # in FRONT " << std::to_string(thread_id) << std::endl;
             for (int a = 0; a < num_packets; a++) {
-                while(data_ready_flags[0]) {}
+                while(data_ready_flags[thread_id]) {}
                 std::random_device rd;
                 std::mt19937 gen(rd());
                 std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
@@ -307,8 +302,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::STREAM_OUTPUTS);
 
-                printMatrix("QMatrix", cpu_out0[0], col);
-                printMatrix("RMatrix", cpu_out1[0], col);
+                printMatrix("QMatrix", cpu_out0[thread_id], col);
+                printMatrix("RMatrix", cpu_out1[thread_id], col);
                 data_ready_flags[thread_id] = false;
             }
         }
