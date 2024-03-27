@@ -286,6 +286,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                         cpu_in0[0][j+(col*i)] = distribution(gen);
                     }
                 }
+                std::cout << "ITERATION " << std::to_string(a) << std::endl;
                 printMatrix("GenMatrix", cpu_in0[0], col);
                 while(data_ready_flags[0]) {}
                 data_ready_flags[0] = true;
@@ -300,6 +301,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::STREAM_OUTPUTS);
 
+                std::cout << "ITERATION " << std::to_string(a) << std::endl;
                 printMatrix("QMatrix", cpu_out0[0], col);
                 printMatrix("RMatrix", cpu_out1[0], col);
                 data_ready_flags[0] = false;
