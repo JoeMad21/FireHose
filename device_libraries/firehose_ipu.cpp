@@ -283,7 +283,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 for (int i = 0; i < row; i++) {
                     for (int j = 0; j < col; j++) {
-                        cpu_in0[0][j+(col*i)] = distribution(gen);
+                        cpu_in0[thread_id][j+(col*i)] = distribution(gen);
                     }
                 }
 
@@ -293,8 +293,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         }
         else {
 
+
             for (int a = 0; a < num_packets; a++) {
-                std::cout << "SEETHIS" << std::to_string(thread_id-num_streams) << std::endl;
                 while(!data_ready_flags[thread_id-num_streams]) {}
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
