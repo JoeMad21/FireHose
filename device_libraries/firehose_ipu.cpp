@@ -296,13 +296,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         {
             for (int a = 0; a < num_packets; a++) {
                 while(!data_ready_flags[0]) {}
-                data_ready_flags[0] = false;
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::STREAM_OUTPUTS);
 
                 printMatrix("QMatrix", cpu_out0[0], col);
                 printMatrix("RMatrix", cpu_out1[0], col);
+                data_ready_flags[0] = false;
             }
         }
     }
