@@ -79,7 +79,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         /* Input to QR Factorization */
         db_name = "Input Tensor " + std::to_string(i) + " of Set 0";
-        v_io_in0[i] = graph.addVariable(poplar::FLOAT, {packet_size}, db_name);
+        v_io_in0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
         poputil::mapTensorLinearly(graph, v_io_in0[i]);
 
         db_name = "Consumption Tensor " + std::to_string(i) + " of Set 0";
@@ -87,7 +87,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         poputil::mapTensorLinearly(graph, v_con0[i]);
 
         db_name = "Output Tensor " + std::to_string(i) + " of Set 0";
-        v_io_out0[i] = graph.addVariable(poplar::FLOAT, {packet_size}, db_name);
+        v_io_out0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
         poputil::mapTensorLinearly(graph, v_io_out0[i]);
 
         /* Necessary Identity to QR Factorization */
@@ -96,7 +96,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         poputil::mapTensorLinearly(graph, v_con1[i]);
 
         db_name = "Output Tensor " + std::to_string(i) + " of Set 1";
-        v_io_out1[i] = graph.addVariable(poplar::FLOAT, {packet_size}, db_name);
+        v_io_out1[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
         poputil::mapTensorLinearly(graph, v_io_out1[i]);
     }
 
@@ -126,8 +126,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     popops::addCodelets(graph);
 
     // Add custom codelets
-    graph.addCodelets("./device_libraries/io_codelet_in.gp");
-    graph.addCodelets("./device_libraries/io_codelet_out.gp");
+    graph.addCodelets("./device_libraries/io_codelet.gp");
 
     std::cout << "Added Codelets!" << std::endl;
 
@@ -143,12 +142,12 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     for (int i = 0; i < num_streams; i++) {
 
-        vtx_in0[i] = graph.addVertex(cps_io_in, "IOVertexIN");
+        vtx_in0[i] = graph.addVertex(cps_io_in, "IOVertex");
         graph.setTileMapping(vtx_in0[i], i+5);
 
-        vtx_out0[i] = graph.addVertex(cps_io_out, "IOVertexOUT");
+        vtx_out0[i] = graph.addVertex(cps_io_out, "IOVertex");
         graph.setTileMapping(vtx_out0[i], i+7);
-        vtx_out1[i] = graph.addVertex(cps_io_out, "IOVertexOUT");
+        vtx_out1[i] = graph.addVertex(cps_io_out, "IOVertex");
         graph.setTileMapping(vtx_out1[i], i+9);
     }
 
