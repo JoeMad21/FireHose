@@ -152,14 +152,14 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     for(int i = 0; i < num_transfers; i++) {
-        graph.connect(vtx_in0[0]["strm_in"], v_io_in0[i]);
-        graph.connect(vtx_in0[0]["strm_out"], v_con0[i]);
+        graph.connect(vtx_in0[i]["strm_in"], v_io_in0[i]);
+        graph.connect(vtx_in0[i]["strm_out"], v_con0[i]);
 
-        graph.connect(vtx_out0[0]["strm_in"], v_con0[i]);
-        graph.connect(vtx_out0[0]["strm_out"], v_io_out0[i]);
+        graph.connect(vtx_out0[i]["strm_in"], v_con0[i]);
+        graph.connect(vtx_out0[i]["strm_out"], v_io_out0[i]);
 
-        graph.connect(vtx_out1[0]["strm_in"], v_con1[i]);
-        graph.connect(vtx_out1[0]["strm_out"], v_io_out1[i]);
+        graph.connect(vtx_out1[i]["strm_in"], v_con1[i]);
+        graph.connect(vtx_out1[i]["strm_out"], v_io_out1[i]);
     }
 
     std::cout << "Added Vertices!" << std::endl;
