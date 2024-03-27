@@ -293,7 +293,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         }
         else {
 
-
             for (int a = 0; a < num_packets; a++) {
                 while(!data_ready_flags[thread_id-num_streams]) {}
                 engine.run(Progs::STREAM_INPUTS);
