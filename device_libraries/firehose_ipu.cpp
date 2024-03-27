@@ -277,6 +277,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         #pragma omp section
         {
             for (int a = 0; a < num_packets; a++) {
+                while(data_ready_flags[0]) {}
                 std::random_device rd;
                 std::mt19937 gen(rd());
                 std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
@@ -288,7 +289,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
                 std::cout << "ITERATION " << std::to_string(a) << std::endl;
                 printMatrix("GenMatrix", cpu_in0[0], col);
-                while(data_ready_flags[0]) {}
                 data_ready_flags[0] = true;
             }
         }
