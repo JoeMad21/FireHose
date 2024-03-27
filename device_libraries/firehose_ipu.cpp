@@ -269,27 +269,29 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     omp_set_num_threads(num_streams);
 
-    #pragma omp parallel sections
+    #pragma omp parallel
     {
-        int thread_id = omp_get_thread_num();
-        //std::cout << "THREAD # in FRONT " << std::to_string(thread_id) << std::endl;
-        for (int a = 0; a < num_packets; a++) {
-            while(data_ready_flags[thread_id]) {}
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-            for (int i = 0; i < row; i++) {
-                for (int j = 0; j < col; j++) {
-                    cpu_in0[0][j+(col*i)] = distribution(gen);
+        {
+            int thread_id = omp_get_thread_num();
+            std::cout << "THREAD # in FRONT " << std::to_string(thread_id) << std::endl;
+            for (int a = 0; a < num_packets; a++) {
+                while(data_ready_flags[thread_id]) {}
+                std::random_device rd;
+                std::mt19937 gen(rd());
+                std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+
+                for (int i = 0; i < row; i++) {
+                    for (int j = 0; j < col; j++) {
+                        cpu_in0[0][j+(col*i)] = distribution(gen);
+                    }
                 }
-            }
 
-            printMatrix("GenMatrix", cpu_in0[thread_id], col);
-            data_ready_flags[thread_id] = true;
+                printMatrix("GenMatrix", cpu_in0[thread_id], col);
+                data_ready_flags[thread_id] = true;
+            }
         }
 
-        #pragma omp section
         {
             int thread_id = omp_get_thread_num();
             for (int a = 0; a < num_packets; a++) {
