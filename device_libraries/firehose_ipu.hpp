@@ -23,6 +23,6 @@
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols);
 
-void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices);
+void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices);
 
 //void placeholder(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices);

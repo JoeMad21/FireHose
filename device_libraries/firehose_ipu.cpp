@@ -24,7 +24,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 
 }
 
-void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
+void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices) {
 
     /* Get an IPU Device */
 
@@ -268,7 +268,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         engine.connectStream(db_name, cpu_out1[i].data(), cpu_out1[i].data() + cpu_out1[i].size());
     }
 
-    std::cout << "Connected Streams!" << std::endl;
+    std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
@@ -276,30 +276,34 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     {
         #pragma omp section
         {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+            for (int a = 0; a < num_packets; a++) {
+                std::random_device rd;
+                std::mt19937 gen(rd());
+                std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-            for (int i = 0; i < row; i++) {
-                for (int j = 0; j < col; j++) {
-                    cpu_in0[0][j+(col*i)] = distribution(gen);
+                for (int i = 0; i < row; i++) {
+                    for (int j = 0; j < col; j++) {
+                        cpu_in0[0][j+(col*i)] = distribution(gen);
+                    }
                 }
+                printMatrix("GenMatrix", cpu_in0[0], col);
+                while(data_ready_flags[0]) {}
+                data_ready_flags[0] = true;
             }
-            printMatrix("GenMatrix", cpu_in0[0], col);
-            while(data_ready_flags[0]) {}
-            data_ready_flags[0] = true;
         }
 
         #pragma omp section
         {
-            while(!data_ready_flags[0]) {}
-            data_ready_flags[0] = false;
-            engine.run(Progs::STREAM_INPUTS);
-            engine.run(Progs::CONSUMPTION_TASK);
-            engine.run(Progs::STREAM_OUTPUTS);
+            for (int a = 0; a < num_packets; a++) {
+                while(!data_ready_flags[0]) {}
+                data_ready_flags[0] = false;
+                engine.run(Progs::STREAM_INPUTS);
+                engine.run(Progs::CONSUMPTION_TASK);
+                engine.run(Progs::STREAM_OUTPUTS);
 
-            printMatrix("QMatrix", cpu_out0[0], col);
-            printMatrix("RMatrix", cpu_out1[0], col);
+                printMatrix("QMatrix", cpu_out0[0], col);
+                printMatrix("RMatrix", cpu_out1[0], col);
+            }
         }
     }
 
