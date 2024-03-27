@@ -272,7 +272,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     #pragma omp parallel
     {
         int thread_id = omp_get_thread_num();
-        std::cout << "THREAD ID " << std::to_string(thread_id) << std::endl;
+        //std::cout << "THREAD ID " << std::to_string(thread_id) << std::endl;
 
         if(thread_id < num_streams) {
             for (int a = 0; a < num_packets; a++) {
@@ -288,11 +288,12 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
 
                 printMatrix("GenMatrix", cpu_in0[thread_id], col);
+                std::cout << "HEREA" << std::endl;
                 data_ready_flags[thread_id] = true;
+                std::cout << "HEREB" << std::endl;
             }
         }
-
-        if(thread_id >= num_streams) {
+        else {
 
             for (int a = 0; a < num_packets; a++) {
                 while(!data_ready_flags[thread_id-num_streams]) {}
