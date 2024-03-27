@@ -2,9 +2,7 @@
 
 enum Progs {
     STREAM_INPUTS,
-    //ALIGN_INPUTS,
     CONSUMPTION_TASK,
-    //ALIGN_OUTPUTS,
     STREAM_OUTPUTS,
     NUM_PROGRAMS
 };
@@ -26,14 +24,14 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
 
 }
 
-void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_streams) {
+void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
 
     /* Get an IPU Device */
 
     std::cout << "Getting Device..." << std::endl;
 
     auto manager = poplar::DeviceManager::createDeviceManager();
-    auto hwDevices = manager.getDevices(poplar::TargetType::IPU, 1);
+    auto hwDevices = manager.getDevices(poplar::TargetType::IPU, num_devices);
     auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
     poplar::Device device;
 
@@ -70,9 +68,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::vector<poplar::Tensor> v_io_in0(num_streams);
     std::vector<poplar::Tensor> v_con0(num_streams);
-    //std::vector<poplar::Tensor> v_con_in0(num_streams);
-    //std::vector<poplar::Tensor> v_con_in_exp0(num_streams);
-    //std::vector<poplar::Tensor> v_con_out0(num_streams);
     std::vector<poplar::Tensor> v_io_out0(num_streams);
 
     std::vector<poplar::Tensor> v_con1(num_streams);
@@ -91,18 +86,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         v_con0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
         poputil::mapTensorLinearly(graph, v_con0[i]);
 
-        //db_name = "Consumption Task Input " + std::to_string(i);
-        //v_con_in0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        //poputil::mapTensorLinearly(graph, v_con_in0[i]);
-
-        //db_name = "Consumption Task Input Expanded " + std::to_string(i);
-        //in_con_exp0[i] = graph.addVariable(poplar::FLOAT, {rows, cols}, db_name);
-        //poputil::mapTensorLinearly(graph, in_con_exp0[i]);
-
-        //db_name = "Consumption Tensor " + std::to_string(i) + " of Set 1";
-        //v_con1[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        //poputil::mapTensorLinearly(graph, v_con1[i]);
-
         db_name = "Output Tensor " + std::to_string(i) + " of Set 0";
         v_io_out0[i] = graph.addVariable(poplar::FLOAT, {packet_size}, db_name);
         poputil::mapTensorLinearly(graph, v_io_out0[i]);
@@ -119,23 +102,18 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     // Constant Tensors
     std::vector<float> temp_vec_id(col);
-    std::vector<float> vec_id = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+    std::vector<float> vec_id;
 
-    //for (int i = 0; i < row; i++) {
-        //vec_id.push_back(temp_vec_id);
-    //}
-
-
-    //for (int i = 0; i < row; i++) {
-        //for (int j = 0; j < col; j++) {
-            //if (i == j) {
-                //vec_id[i][j] = 1.0;
-            //}
-            //else {
-                //vec_id[i][j] = 0.0;
-            //}
-        //}
-    //}
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            if (i == j) {
+                vec_id.push_back(1.0);
+            }
+            else {
+                vec_id.push_back(0.0);
+            }
+        }
+    }
 
     auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
     poputil::mapTensorLinearly(graph, c_id);
@@ -207,10 +185,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Added Streams!" << std::endl;
 
-    // Misc
-    //std::vector<std::size_t> dimShape = {row, col};
-    //std::vector<std::size_t> flatShape = {row*col};
-
     // CPU Vectors
     std::vector<std::vector<float>> cpu_in0(num_transfers);
     std::vector<std::vector<float>> cpu_out0(num_transfers);
@@ -226,6 +200,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     std::cout << "Adding Programs..." << std::endl;
+
     /* Stream Inputs Program */
 
     auto seq = poplar::program::Sequence();
@@ -236,19 +211,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     seq.add(poplar::program::Execute(cps_io_in));
 
-    //seq.add(poplar::program::PrintTensor("v1-debug", v_con0[0]));
-    //seq.add(poplar::program::PrintTensor("v2-debug", v_con1[0]));
-
     progs[Progs::STREAM_INPUTS] = seq;
 
-    /* Align Consumption Inputs Program */
-
-    //seq = poplar::program::Sequence();
-
-    //seq.add(poplar::program::Copy(in_con.reshape(dimShape), in_con_exp0));
-    //seq.add(poplar::program::Copy(in_con.reshape(dimShape), in_con_exp0));
-
-    //progs[Progs::ALIGN_INPUTS] = seq;
 
     /* Consumption Task Program */
 
@@ -259,13 +223,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     for(int i = 0; i < num_transfers; i++) {
 
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
-        //seq.add(poplar::program::PrintTensor("v1-debug", v_con0[i]));
-        //seq.add(poplar::program::PrintTensor("v2-debug", v_con1[i]));
 
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
-
-        //seq.add(poplar::program::Copy(v_con_in0[i], v_con_out0[i]));
-        //seq.add(poplar::program::Copy(v_con_in0[i], v_con_out0[i]));
     }
 
     progs[Progs::CONSUMPTION_TASK] = seq;
@@ -338,9 +297,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
             while(!data_ready_flags[0]) {}
             data_ready_flags[0] = false;
             engine.run(Progs::STREAM_INPUTS);
-            //engine.run(Progs::ALIGN_INPUTS);
             engine.run(Progs::CONSUMPTION_TASK);
-            //engine.run(Progs::ALIGN_OUTPUTS);
             engine.run(Progs::STREAM_OUTPUTS);
 
             printMatrix("QMatrix", cpu_out0[0], col);
