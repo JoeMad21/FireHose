@@ -23,8 +23,4 @@
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols);
 
-//void frontEnd_TensorDecomp(bool& flag, long unsigned int& rows, long unsigned int& cols, long unsigned int& exp_size, std::vector<float>& cpu_input0, std::vector<float>& cpu_output0, std::vector<float>& cpu_output1);
-
-//void backEnd_TensorDecomp(poplar::Engine& engine, bool& flag, long unsigned int& exp_size);
-
-void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_streams);
+void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices);
