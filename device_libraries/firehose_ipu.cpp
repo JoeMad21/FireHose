@@ -279,6 +279,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         #pragma omp section
         {
             int thread_id = omp_get_thread_num();
+            std::cout << "THREAD # in FRONT " << std::to_string(thread_id) << std::endl;
             for (int a = 0; a < num_packets; a++) {
                 while(data_ready_flags[0]) {}
                 std::random_device rd;
@@ -299,6 +300,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         #pragma omp section
         {
             int thread_id = omp_get_thread_num();
+            std::cout << "THREAD # in BACK " << std::to_string(thread_id) << std::endl;
             for (int a = 0; a < num_packets; a++) {
                 while(!data_ready_flags[thread_id]) {}
                 engine.run(Progs::STREAM_INPUTS);
