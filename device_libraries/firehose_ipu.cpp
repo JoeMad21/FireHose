@@ -294,12 +294,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         else {
 
             for (int a = 0; a < num_packets; a++) {
-                std::cout << "HEREA" << std::endl;
+                std::cout << "SEETHIS" << std::to_string(thread_id-num_streams) << std::endl;
                 while(!data_ready_flags[thread_id-num_streams]) {}
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::STREAM_OUTPUTS);
-                std::cout << "HEREB" << std::endl;
 
                 printMatrix("QMatrix", cpu_out0[thread_id-num_streams], col);
                 printMatrix("RMatrix", cpu_out1[thread_id-num_streams], col);
