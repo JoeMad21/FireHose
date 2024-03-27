@@ -272,10 +272,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     /* Run Parallel Threads for FireHose */
 
+    omp_set_num_threads(num_streams);
+
     #pragma omp parallel sections
     {
         #pragma omp section
         {
+            int thread_id = omp_get_thread_num();
             for (int a = 0; a < num_packets; a++) {
                 while(data_ready_flags[0]) {}
                 std::random_device rd;
@@ -287,24 +290,23 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                         cpu_in0[0][j+(col*i)] = distribution(gen);
                     }
                 }
-                std::cout << "ITERATION " << std::to_string(a) << std::endl;
-                printMatrix("GenMatrix", cpu_in0[0], col);
-                data_ready_flags[0] = true;
+
+                printMatrix("GenMatrix", cpu_in0[thread_id], col);
+                data_ready_flags[thread_id] = true;
             }
         }
 
         #pragma omp section
         {
             for (int a = 0; a < num_packets; a++) {
-                while(!data_ready_flags[0]) {}
+                while(!data_ready_flags[thread_id]) {}
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::STREAM_OUTPUTS);
 
-                std::cout << "ITERATION " << std::to_string(a) << std::endl;
                 printMatrix("QMatrix", cpu_out0[0], col);
                 printMatrix("RMatrix", cpu_out1[0], col);
-                data_ready_flags[0] = false;
+                data_ready_flags[thread_id] = false;
             }
         }
     }
