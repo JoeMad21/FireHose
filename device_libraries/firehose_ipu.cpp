@@ -288,18 +288,18 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
 
                 printMatrix("GenMatrix", cpu_in0[thread_id], col);
-                std::cout << "HEREA" << std::endl;
                 data_ready_flags[thread_id] = true;
-                std::cout << "HEREB" << std::endl;
             }
         }
         else {
 
             for (int a = 0; a < num_packets; a++) {
+                std::cout << "HEREA" << std::endl;
                 while(!data_ready_flags[thread_id-num_streams]) {}
                 engine.run(Progs::STREAM_INPUTS);
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::STREAM_OUTPUTS);
+                std::cout << "HEREB" << std::endl;
 
                 printMatrix("QMatrix", cpu_out0[thread_id-num_streams], col);
                 printMatrix("RMatrix", cpu_out1[thread_id-num_streams], col);
