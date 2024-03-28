@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <random>
 #include <unistd.h>
@@ -21,7 +22,7 @@
 #include <poplin/codelets.hpp>
 #include <poplin/experimental/QRFactorization.hpp>
 
-void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols);
+void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id);
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices);
 

@@ -7,8 +7,10 @@ enum Progs {
     NUM_PROGRAMS
 };
 
-void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols) {
-  std::cout << matrix_name << std::endl;
+void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id) {
+  std::string fileName = "results" + std::to_string(id) + ".txt"
+  std::ifstream fileStream = fileName;
+  fileStream << matrix_name << std::endl;
 
   for (int i = 0; i < matrix.size(); i++) {
 
@@ -287,7 +289,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                     }
                 }
 
-                printMatrix("GenMatrix", cpu_in0[thread_id], col);
+                printMatrix("GenMatrix", cpu_in0[thread_id], col, thread_id);
                 data_ready_flags[thread_id] = true;
             }
         }
@@ -299,8 +301,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::STREAM_OUTPUTS);
 
-                printMatrix("QMatrix", cpu_out0[thread_id-num_streams], col);
-                printMatrix("RMatrix", cpu_out1[thread_id-num_streams], col);
+                int id = thread_id-num_streams;
+
+                printMatrix("QMatrix", cpu_out0[thread_id-num_streams], col, id);
+                printMatrix("RMatrix", cpu_out1[thread_id-num_streams], col, id);
                 data_ready_flags[thread_id-num_streams] = false;
             }
         }
