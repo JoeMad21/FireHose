@@ -14,15 +14,15 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 
   for (int i = 0; i < matrix.size(); i++) {
 
-    std::cout << std::fixed << matrix[i] << "\t";
+    fileStream << std::fixed << matrix[i] << "\t";
     
     if ( (i+1)%cols == 0) {
-      std::cout << std::endl;
+      fileStream << std::endl;
     }
 
   }
 
-  std::cout << std::endl;
+  fileStream << std::endl;
 
 }
 
