@@ -8,7 +8,7 @@ enum Progs {
 };
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id) {
-  std::string fileName = "results" + std::to_string(id) + ".txt"
+  std::string fileName = "results" + std::to_string(id) + ".txt";
   std::ifstream fileStream = fileName;
   fileStream << matrix_name << std::endl;
 
