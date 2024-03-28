@@ -9,7 +9,7 @@ enum Progs {
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id) {
   std::string fileName = "results" + std::to_string(id) + ".txt";
-  std::ofstream fileStream = fileName;
+  std::ofstream fileStream(fileName);
   fileStream << matrix_name << std::endl;
 
   for (int i = 0; i < matrix.size(); i++) {
