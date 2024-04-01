@@ -5,7 +5,7 @@
 #SBATCH --partition=p64
 #SBATCH --nodelist=gc-poplar-03
 #SBATCH --ntasks 1
-#SBATCH --time=00:05:00
+#SBATCH --time=00:00:30
 #SBATCH --output=tensor_decomp_test_%j.log
 
 srun ./firehose
