@@ -26,6 +26,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
   }
 
   fileStream << std::endl;
+  fileStream.close();
   std::cout << std::endl;
 
 }
