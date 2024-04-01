@@ -303,9 +303,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
             for (int a = 0; a < num_packets; a++) {
                 while(!data_ready_flags[thread_id-num_streams]) {}
+                std::cout << "HEREA" << std::endl;
                 engine.run(Progs::STREAM_INPUTS);
+                std::cout << "HEREB" << std::endl;
                 engine.run(Progs::CONSUMPTION_TASK);
+                std::cout << "HEREC" << std::endl;
                 engine.run(Progs::STREAM_OUTPUTS);
+                std::cout << "HERED" << std::endl;
 
                 id = thread_id-num_streams;
 
