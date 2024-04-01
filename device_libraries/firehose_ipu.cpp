@@ -309,7 +309,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 engine.run(Progs::CONSUMPTION_TASK);
                 #pragma omp single {
                 engine.run(Progs::STREAM_OUTPUTS);
-                #pragma omp single }
+                }
 
                 id = thread_id-num_streams;
 
