@@ -11,18 +11,22 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
   std::string fileName = "results" + std::to_string(id) + ".txt";
   std::ofstream fileStream(fileName, std::ios::app);
   fileStream << matrix_name << std::endl;
+  std::cout << matrix_name << std::endl;
 
   for (int i = 0; i < matrix.size(); i++) {
 
     fileStream << std::fixed << matrix[i] << "\t";
+    std::cout << std::fixed << matrix[i] << "\t";
     
     if ( (i+1)%cols == 0) {
       fileStream << std::endl;
+      std::cout << std::endl;
     }
 
   }
 
   fileStream << std::endl;
+  std::cout << std::endl;
 
 }
 
@@ -271,6 +275,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     omp_set_num_threads(num_streams*2);
 
+    int id = 0;
+
     #pragma omp parallel
     {
         int thread_id = omp_get_thread_num();
@@ -301,7 +307,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 engine.run(Progs::CONSUMPTION_TASK);
                 engine.run(Progs::STREAM_OUTPUTS);
 
-                int id = thread_id-num_streams;
+                id = thread_id-num_streams;
 
                 printMatrix("QMatrix", cpu_out0[thread_id-num_streams], col, id);
                 printMatrix("RMatrix", cpu_out1[thread_id-num_streams], col, id);
