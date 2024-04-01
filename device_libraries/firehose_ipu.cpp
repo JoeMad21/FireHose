@@ -135,8 +135,16 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     // Vertices
     std::cout << "Adding Vertices..." << std::endl;
 
-    auto cps_io_in = graph.addComputeSet("IO in CS");
-    auto cps_io_out = graph.addComputeSet("IO out CS");
+    std::vector<poplar::ComputeSet> cps_io_in(num_streams);
+    std::vector<poplar::ComputeSet> cps_io_out(num_streams);
+
+    for (int i = 0; i < num_streams; i++) {
+        db_name = "IO in CS " + std::to_string(i);
+        cps_io_in[i] = graph.addComputeSet(db_name);
+
+        db_name = "IO in CS " + std::to_string(i);
+        cps_io_out[i] = graph.addComputeSet(db_name);
+    }
 
     std::vector<poplar::VertexRef> vtx_in0(num_streams);
     std::vector<poplar::VertexRef> vtx_out0(num_streams);
@@ -144,12 +152,12 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     for (int i = 0; i < num_streams; i++) {
 
-        vtx_in0[i] = graph.addVertex(cps_io_in, "IOVertex");
+        vtx_in0[i] = graph.addVertex(cps_io_in[i], "IOVertex");
         graph.setTileMapping(vtx_in0[i], i+5);
 
-        vtx_out0[i] = graph.addVertex(cps_io_out, "IOVertex");
+        vtx_out0[i] = graph.addVertex(cps_io_out[i], "IOVertex");
         graph.setTileMapping(vtx_out0[i], i+7);
-        vtx_out1[i] = graph.addVertex(cps_io_out, "IOVertex");
+        vtx_out1[i] = graph.addVertex(cps_io_out[i], "IOVertex");
         graph.setTileMapping(vtx_out1[i], i+9);
     }
 
@@ -324,7 +332,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 printMatrix("QMatrix", cpu_out0[id], col, id, a);
                 printMatrix("RMatrix", cpu_out1[id], col, id, a);
                 }
-                
+
                 data_ready_flags[id] = false;
             }
         }
