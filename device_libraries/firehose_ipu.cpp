@@ -302,8 +302,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         else {
 
             for (int a = 0; a < num_packets; a++) {
+                std::cout << "ACCESSED BY " << thread_id << std::endl;
                 while(!data_ready_flags[thread_id-num_streams]) {}
-                
+                std::cout << "PASSED BY " << thread_id << std::endl;
+
                 #pragma omp single
                 engine.run(Progs::STREAM_INPUTS);
 
