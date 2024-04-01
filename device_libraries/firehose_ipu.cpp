@@ -303,13 +303,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
             for (int a = 0; a < num_packets; a++) {
                 while(!data_ready_flags[thread_id-num_streams]) {}
-                #pragma omp single {
+                #pragma omp single
                 engine.run(Progs::STREAM_INPUTS);
-                }
+
                 engine.run(Progs::CONSUMPTION_TASK);
-                #pragma omp single {
+                
+                #pragma omp single
                 engine.run(Progs::STREAM_OUTPUTS);
-                }
 
                 id = thread_id-num_streams;
 
