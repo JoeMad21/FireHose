@@ -320,8 +320,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 engine.run((num_streams*2)+id);
                 }
 
-                printMatrix("QMatrix", cpu_out0[id], col, id);
-                printMatrix("RMatrix", cpu_out1[id], col, id);
+                printMatrix("QMatrix", cpu_out0[id], col, id, a);
+                printMatrix("RMatrix", cpu_out1[id], col, id, a);
                 data_ready_flags[id] = false;
             }
         }
