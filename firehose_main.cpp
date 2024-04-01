@@ -3,7 +3,7 @@
 int main() {
 
     long unsigned int row = 3;
-    long unsigned int col = 3;
+    long unsigned int cocl = 3;
     long unsigned int num_packets = 3;
     long unsigned int num_streams = 2;
     long unsigned int num_devices = 1;

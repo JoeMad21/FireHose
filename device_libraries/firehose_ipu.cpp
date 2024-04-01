@@ -7,11 +7,11 @@ enum Progs {
     NUM_PROGRAMS
 };
 
-void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id) {
+void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet) {
   std::string fileName = "results" + std::to_string(id) + ".txt";
   std::ofstream fileStream(fileName, std::ios::app);
-  fileStream << matrix_name << std::endl;
-  std::cout << matrix_name << std::endl;
+  fileStream << matrix_name << " THREAD " << id << " PACKET " << packet << std::endl;
+  std::cout << matrix_name << " THREAD " << id << " PACKET " << packet << std::endl;
 
   for (int i = 0; i < matrix.size(); i++) {
 
@@ -302,7 +302,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                     }
                 }
 
-                printMatrix("GenMatrix", cpu_in0[thread_id], col, thread_id);
+                printMatrix("GenMatrix", cpu_in0[thread_id], col, thread_id, a);
                 data_ready_flags[thread_id] = true;
             }
         }
