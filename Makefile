@@ -3,7 +3,7 @@ CC = g++
 all: firehose
 
 firehose: libipu.a
-	$(CC) -fopenmp firehose_main.cpp -L/home/jomad21/myFiles/Tensor_Decomp_Scratch/device_libraries -lipu -lpoplar -lpoplin -lpoputil -lpopops -o firehose
+	$(CC) -fopenmp firehose_main.cpp -L/home/jomad21/myFiles/FireHose/device_libraries -lipu -lpoplar -lpoplin -lpoputil -lpopops -o firehose
 libipu.a: mylib.o
 	ar rcs ./device_libraries/libipu.a ./device_libraries/mylib.o
 mylib.o:
