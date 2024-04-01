@@ -55,7 +55,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Created Graph!" << std::endl;
 
     // Programs
-    std::vector<poplar::program::Program> progs(3*Progs::NUM_PROGRAMS);
+    std::vector<poplar::program::Program> progs(num_streams*Progs::NUM_PROGRAMS);
 
     // Flags
     bool data_ready_flags[num_streams];
