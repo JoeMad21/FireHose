@@ -55,7 +55,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Created Graph!" << std::endl;
 
     // Programs
-    std::vector<poplar::program::Program> progs(Progs::NUM_PROGRAMS);
+    std::vector<poplar::program::Program> progs(3*Progs::NUM_PROGRAMS);
 
     // Flags
     bool data_ready_flags[num_streams];
@@ -201,46 +201,53 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Adding Programs..." << std::endl;
 
-    /* Stream Inputs Program */
+    /* Stream Inputs Programs */
+
+    int prog_idx = 0;
 
     auto seq = poplar::program::Sequence();
 
     for(int i = 0; i < num_streams; i++) {
+
+        seq = poplar::program::Sequence();
+
         seq.add(poplar::program::Copy(strm_in0[i], v_io_in0[i]));
+
+        seq.add(poplar::program::Execute(cps_io_in));
+
+        progs[prog_idx++] = seq;
     }
 
-    seq.add(poplar::program::Execute(cps_io_in));
-
-    progs[Progs::STREAM_INPUTS] = seq;
-
-
-    /* Consumption Task Program */
-
-    seq = poplar::program::Sequence();
+    /* Consumption Task Programs */
 
     poplin::addCodelets(graph);
 
     for(int i = 0; i < num_streams; i++) {
 
+        seq = poplar::program::Sequence();
+
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
 
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
+
+        progs[prog_idx++] = seq;
     }
 
     progs[Progs::CONSUMPTION_TASK] = seq;
 
-    /* Stream Outputs Program */
-
-    seq = poplar::program::Sequence();
-
-    seq.add(poplar::program::Execute(cps_io_out));
+    /* Stream Outputs Programs */
 
     for(int i = 0; i < num_streams; i++) {
+
+        seq = poplar::program::Sequence();
+
+        seq.add(poplar::program::Execute(cps_io_out));
+
         seq.add(poplar::program::Copy(v_io_out0[i], strm_out0[i]));
         seq.add(poplar::program::Copy(v_io_out1[i], strm_out1[i]));
-    }
 
-    progs[Progs::STREAM_OUTPUTS] = seq;
+        progs[prog_idx++] = seq;
+    }
 
     std::cout << "Added Programs!" << std::endl;
 
@@ -302,28 +309,17 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         else {
 
             for (int a = 0; a < num_packets; a++) {
-                while(!data_ready_flags[thread_id-num_streams]) {}
-
-                #pragma omp single
-                engine.run(Progs::STREAM_INPUTS);
-
-                std::cout << "INPUT BY " << thread_id << std::endl;
-
-                #pragma omp single
-                engine.run(Progs::CONSUMPTION_TASK);
-
-                std::cout << "CON_TASK BY " << thread_id << std::endl;
-
-                #pragma omp single
-                engine.run(Progs::STREAM_OUTPUTS);
-
-                std::cout << "OUTPUT BY " << thread_id << std::endl;
 
                 id = thread_id-num_streams;
+                while(!data_ready_flags[id]) {}
 
-                printMatrix("QMatrix", cpu_out0[thread_id-num_streams], col, id);
-                printMatrix("RMatrix", cpu_out1[thread_id-num_streams], col, id);
-                data_ready_flags[thread_id-num_streams] = false;
+                engine.run(id);
+                engine.run(num_streams+id);
+                engine.run((num_streams*2)+id);
+
+                printMatrix("QMatrix", cpu_out0[id], col, id);
+                printMatrix("RMatrix", cpu_out1[id], col, id);
+                data_ready_flags[id] = false;
             }
         }
     }
