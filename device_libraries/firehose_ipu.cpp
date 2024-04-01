@@ -222,7 +222,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq.add(poplar::program::Copy(strm_in0[i], v_io_in0[i]));
 
-        seq.add(poplar::program::Execute(cps_io_in));
+        seq.add(poplar::program::Execute(cps_io_in[i]));
 
         progs[prog_idx++] = seq;
     }
@@ -250,7 +250,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq = poplar::program::Sequence();
 
-        seq.add(poplar::program::Execute(cps_io_out));
+        seq.add(poplar::program::Execute(cps_io_out[i]));
 
         seq.add(poplar::program::Copy(v_io_out0[i], strm_out0[i]));
         seq.add(poplar::program::Copy(v_io_out1[i], strm_out1[i]));
