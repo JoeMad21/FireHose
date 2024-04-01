@@ -313,9 +313,12 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 id = thread_id-num_streams;
                 while(!data_ready_flags[id]) {}
 
+                #pragma omp critical
+                {
                 engine.run(id);
                 engine.run(num_streams+id);
                 engine.run((num_streams*2)+id);
+                }
 
                 printMatrix("QMatrix", cpu_out0[id], col, id);
                 printMatrix("RMatrix", cpu_out1[id], col, id);
