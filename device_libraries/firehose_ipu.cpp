@@ -320,10 +320,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         }
         else {
 
+            id = thread_id-num_streams;
+
             for (int a = 0; a < num_packets; a++) {
 
-                id = thread_id-num_streams;
-                std::cout << "THIS_THREAD_NUM_IS " << std::to_string(id) << std::endl;
                 while(!data_ready_flags[id]) {}
 
                 #pragma omp critical
