@@ -199,10 +199,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
     std::vector<std::vector<float>> cpu_out1(num_streams, std::vector<float> (row*col, 5.0));
 
-    std::cout << "CPU_IN0_SIZE " << cpu_in0[0].size() << std::endl;
-
-    printMatrix("GenMatrix", cpu_in0[0], col, 0, 0);
-
     std::cout << "Adding Programs..." << std::endl;
 
     /* Stream Inputs Programs */
@@ -308,9 +304,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 /*Problem Area Below*/
                 for (int i = 0; i < row*col; i++) {
-                    std::cout << "THREAD_ID " << std::to_string(snd_id) << std::endl;
-                    std::cout << "VEC_IDX " << std::to_string(i) << std::endl;
-                    std::cout << "VEC_SIZE " << std::to_string(cpu_in0[snd_id].size()) << std::endl << std::endl;
+                    //std::cout << "THREAD_ID " << std::to_string(snd_id) << std::endl;
+                    //std::cout << "VEC_IDX " << std::to_string(i) << std::endl;
+                    //std::cout << "VEC_SIZE " << std::to_string(cpu_in0[snd_id].size()) << std::endl << std::endl;
                     cpu_in0[snd_id][i] = distribution(gen);
                 }
 
