@@ -294,12 +294,12 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     omp_set_num_threads(num_streams*2);
 
     int thread_id = 0;
-    int id = 0;
+    int adj_id = 0;
 
     #pragma omp parallel
     {
         thread_id = omp_get_thread_num();
-        id = thread_id-num_streams;
+        adj_id = thread_id-num_streams;
         //std::cout << "THREAD ID " << std::to_string(thread_id) << std::endl;
 
         if(thread_id < num_streams) {
@@ -324,19 +324,19 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
             for (int a = 0; a < num_packets; a++) {
 
-                while(!data_ready_flags[id]) {}
+                while(!data_ready_flags[adj_id]) {}
 
                 #pragma omp critical
                 {
-                engine.run(id);
-                engine.run(num_streams+id);
-                engine.run((num_streams*2)+id);
+                engine.run(adj_id);
+                engine.run(num_streams+adj_id);
+                engine.run((num_streams*2)+adj_id);
 
-                printMatrix("QMatrix", cpu_out0[id], col, id, a);
-                printMatrix("RMatrix", cpu_out1[id], col, id, a);
+                printMatrix("QMatrix", cpu_out0[adj_id], col, adj_id, a);
+                printMatrix("RMatrix", cpu_out1[adj_id], col, adj_id, a);
                 }
 
-                data_ready_flags[id] = false;
+                data_ready_flags[adj_id] = false;
             }
         }
     }
