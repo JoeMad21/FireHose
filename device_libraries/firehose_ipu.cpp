@@ -311,8 +311,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 /*Problem Area Below*/
                 for (int i = 0; i < row*col; i++) {
                     std::cout << "THREAD_ID " << std::to_string(thread_id) << std::endl;
-                    std::cout << "VEC_IDX" << std::to_string(i) << std::endl;
-                    std::cout << "VEC_SIZE" << std::to_string(cpu_in0[thread_id].size()) << std::endl;
+                    std::cout << "VEC_IDX " << std::to_string(i) << std::endl;
+                    std::cout << "VEC_SIZE " << std::to_string(cpu_in0[thread_id].size()) << std::endl << std::endl;
                     cpu_in0[thread_id][i] = distribution(gen);
                 }
 
