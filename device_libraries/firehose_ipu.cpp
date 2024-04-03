@@ -314,8 +314,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                     }
                 }
 
-                #pragma omp critical
+                #pragma omp critical(print_gen)
                 printMatrix("GenMatrix", cpu_in0[thread_id], col, thread_id, a);
+
                 data_ready_flags[thread_id] = true;
             }
         }
@@ -325,7 +326,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 while(!data_ready_flags[adj_id]) {}
 
-                #pragma omp critical
+                #pragma omp critical(ipu_work)
                 {
                 engine.run(adj_id);
                 engine.run(num_streams+adj_id);
