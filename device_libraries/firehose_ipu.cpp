@@ -295,8 +295,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         //std::cout << "INIT_ID " << std::to_string(thread_id) << std::endl << std::endl;
         int rcv_id = thread_id-num_streams;
 
+        std::vector<float> input(row*col);
+
         if(gbl_id < num_streams) {
-            std::vector<float> input = cpu_in0[snd_id];
+            input = cpu_in0[snd_id];
             for (int a = 0; a < num_packets; a++) {
                 while(data_ready_flags[snd_id]) {}
                 std::random_device rd;
