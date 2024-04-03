@@ -293,11 +293,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     omp_set_num_threads(num_streams*2);
 
+    int thread_id = 0;
     int id = 0;
 
     #pragma omp parallel
     {
-        int thread_id = omp_get_thread_num();
+        thread_id = omp_get_thread_num();
+        id = thread_id-num_streams;
         //std::cout << "THREAD ID " << std::to_string(thread_id) << std::endl;
 
         if(thread_id < num_streams) {
@@ -319,8 +321,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
             }
         }
         else {
-
-            id = thread_id-num_streams;
 
             for (int a = 0; a < num_packets; a++) {
 
