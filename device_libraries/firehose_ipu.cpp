@@ -195,9 +195,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Added Streams!" << std::endl;
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(row, std::vector<float> (col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(row, std::vector<float> (col, 5.0));
-    std::vector<std::vector<float>> cpu_out1(row, std::vector<float> (col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out1(num_streams, std::vector<float> (row*col, 5.0));
 
     std::cout << "Adding Programs..." << std::endl;
 
