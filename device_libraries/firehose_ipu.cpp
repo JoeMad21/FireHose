@@ -199,7 +199,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
     std::vector<std::vector<float>> cpu_out1(num_streams, std::vector<float> (row*col, 5.0));
 
-    std::cout << "SOMETHING IS WRONG HERE" << std::endl;
+    std::cout << "CPU_IN0_SIZE " << cpu_in0[0].size() << std::endl;
 
     printMatrix("GenMatrix", cpu_in0[0], col, 0, 0);
 
