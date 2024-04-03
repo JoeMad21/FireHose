@@ -19,7 +19,10 @@ clean_lib:
 clean_logs:
 	rm tensor_decomp_test_*
 
-clean: clean_app clean_lib clean_logs
+clean_output:
+	./reset.sh
+
+clean: clean_app clean_lib clean_logs clean_output
 
 get:
 	git pull
