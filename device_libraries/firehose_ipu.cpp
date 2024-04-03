@@ -310,7 +310,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 for (int i = 0; i < row*col; i++) {
                     cpu_in0[thread_id][i] = distribution(gen);
-
+                }
 
                 #pragma omp critical(print_gen)
                 printMatrix("GenMatrix", cpu_in0[thread_id], col, thread_id, a);
