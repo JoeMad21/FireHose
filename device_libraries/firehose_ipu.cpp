@@ -300,7 +300,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     {
         thread_id = omp_get_thread_num();
         adj_id = thread_id-num_streams;
-        //std::cout << "THREAD ID " << std::to_string(thread_id) << std::endl;
 
         if(thread_id < num_streams) {
             for (int a = 0; a < num_packets; a++) {
