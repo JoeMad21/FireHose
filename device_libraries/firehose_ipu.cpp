@@ -308,11 +308,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 std::mt19937 gen(rd());
                 std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-                for (int i = 0; i < row; i++) {
-                    for (int j = 0; j < col; j++) {
-                        cpu_in0[thread_id][j+(col*i)] = distribution(gen);
-                    }
-                }
+                for (int i = 0; i < row*col; i++) {
+                    cpu_in0[thread_id][i] = distribution(gen);
+
 
                 #pragma omp critical(print_gen)
                 printMatrix("GenMatrix", cpu_in0[thread_id], col, thread_id, a);
