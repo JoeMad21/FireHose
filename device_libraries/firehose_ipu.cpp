@@ -336,6 +336,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
 
                 #pragma omp critical(print)
+                {
                 printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a);
                 printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a);
                 }
