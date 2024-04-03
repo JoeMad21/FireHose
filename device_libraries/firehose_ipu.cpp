@@ -303,37 +303,32 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         if(thread_id < num_streams) {
             for (int a = 0; a < num_packets; a++) {
-                std::cout << "AAA" << std::endl;
                 while(data_ready_flags[thread_id]) {}
                 std::random_device rd;
                 std::mt19937 gen(rd());
                 std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-                std::cout << "BBB" << std::endl;
-
+                /*Problem Area Below*/
+                std::cout << "CCC" << std::endl;
                 for (int i = 0; i < row*col; i++) {
                     cpu_in0[thread_id][i] = distribution(gen);
                 }
 
+                std::cout << "DDD" << std::endl;
+
                 #pragma omp critical(print_gen)
                 printMatrix("GenMatrix", cpu_in0[thread_id], col, thread_id, a);
 
-                std::cout << "CCC" << std::endl;
 
                 data_ready_flags[thread_id] = true;
 
-                std::cout << "DDD" << std::endl;
             }
         }
         else {
 
             for (int a = 0; a < num_packets; a++) {
 
-                std::cout << "EEE" << std::endl;
-
                 while(!data_ready_flags[adj_id]) {}
-
-                std::cout << "FFF" << std::endl;
 
                 #pragma omp critical(ipu_work)
                 {
@@ -345,11 +340,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 printMatrix("RMatrix", cpu_out1[adj_id], col, adj_id, a);
                 }
 
-                std::cout << "GGG" << std::endl;
-
                 data_ready_flags[adj_id] = false;
-
-                std::cout << "HHH" << std::endl;
             }
         }
     }
