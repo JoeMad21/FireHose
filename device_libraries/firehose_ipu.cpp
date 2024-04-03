@@ -200,6 +200,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<std::vector<float>> cpu_out1(num_streams);
 
     std::vector<float> temp_vec(row*col);
+    int value = 5; 
+    fill(temp_vec.begin(), temp_vec.end(), value);
 
     for (int i = 0; i < num_streams; i++) {
         cpu_in0[i] = temp_vec;
