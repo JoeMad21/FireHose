@@ -1,5 +1,7 @@
 #include "firehose_ipu.hpp"
 
+#define num_programs 3  
+
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet) {
   std::string fileName = "results" + std::to_string(id) + ".txt";
   std::ofstream fileStream(fileName, std::ios::app);
@@ -49,7 +51,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Created Graph!" << std::endl;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams*Progs::NUM_PROGRAMS);
+    std::vector<poplar::program::Program> progs(num_streams*num_programs);
 
     // Flags
     bool data_ready_flags[num_streams];
