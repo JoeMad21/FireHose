@@ -328,7 +328,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
 
                 #pragma omp critical(print)
-                //printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a);
+                printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a);
 
 
                 data_ready_flags[snd_id] = true;
