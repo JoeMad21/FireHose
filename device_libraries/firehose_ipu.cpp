@@ -247,7 +247,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         progs[prog_idx++] = seq;
     }
 
-    progs[Progs::CONSUMPTION_TASK] = seq;
+    //progs[Progs::CONSUMPTION_TASK] = seq;
 
     /* Stream Outputs Programs */
 
@@ -343,7 +343,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 #pragma omp critical(ipu_work)
                 {
-                std::cout << rcv_id << std::endl;
                 engine.run(rcv_id);
                 engine.run(num_streams+rcv_id);
                 engine.run((num_streams*2)+rcv_id);
@@ -351,8 +350,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 #pragma omp critical(print)
                 {
-                //printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a);
-                //printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a);
+                printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a);
+                printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a);
                 }
 
                 data_ready_flags[rcv_id] = false;
