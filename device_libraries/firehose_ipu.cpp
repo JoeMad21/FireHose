@@ -103,7 +103,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     // Constant Tensors
-    std::vector<float> temp_vec_id(col);
     std::vector<float> vec_id;
 
     for (int i = 0; i < row; i++) {
@@ -295,10 +294,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         //std::cout << "INIT_ID " << std::to_string(thread_id) << std::endl << std::endl;
         int rcv_id = thread_id-num_streams;
 
-        std::vector<float> input(row*col);
-
         if(gbl_id < num_streams) {
-            input = cpu_in0[snd_id];
             for (int a = 0; a < num_packets; a++) {
                 while(data_ready_flags[snd_id]) {}
                 std::random_device rd;
@@ -307,14 +303,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 /*Problem Area Below*/
                 for (int i = 0; i < row*col; i++) {
-                    //std::cout << "THREAD_ID " << std::to_string(snd_id) << std::endl;
-                    //std::cout << "VEC_IDX " << std::to_string(i) << std::endl;
-                    //std::cout << "VEC_SIZE " << std::to_string(cpu_in0[snd_id].size()) << std::endl << std::endl;
-                    input[i] = distribution(gen);
+                    cpu_in0[snd_id][i] = distribution(gen);
                 }
 
                 #pragma omp critical(print)
-                printMatrix("GenMatrix", input, col, snd_id, a);
+                printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a);
 
 
                 data_ready_flags[snd_id] = true;
