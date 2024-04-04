@@ -338,10 +338,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                     while (iss >> value) {
                         cpu_in0[snd_id][i++] = value;
                     }
-
-    }
-
-    file.close();
                 }
 
                 #pragma omp critical(print)
@@ -371,6 +367,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
             }
         }
     }
+
+    file.close();
 
     return;
 }
