@@ -26,7 +26,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 
 }
 
-void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices) {
+void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, bool get_from_file) {
 
     /* Get an IPU Device */
 
@@ -297,22 +297,32 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     omp_set_num_threads(num_streams*2);
 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+
+
+    //if(get_from_file) {
+        //auto source = distribution;
+    //}
+
+
+    //}
+
     #pragma omp parallel
     {
         int thread_id = omp_get_thread_num();
         int gbl_id = (int) thread_id;
         int snd_id = (int) thread_id;
         int rcv_id = thread_id-num_streams;
+        auto source = distribution;
 
         if(gbl_id < num_streams) {
             for (int a = 0; a < num_packets; a++) {
                 while(data_ready_flags[snd_id]) {}
-                std::random_device rd;
-                std::mt19937 gen(rd());
-                std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
                 for (int i = 0; i < row*col; i++) {
-                    cpu_in0[snd_id][i] = distribution(gen);
+                    cpu_in0[snd_id][i] = source;
                 }
 
                 #pragma omp critical(print)
