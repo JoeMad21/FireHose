@@ -315,7 +315,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-        std::ifstream file("inputs.mtx");
+        std::ifstream file("/home/jomad21/myFiles/FireHose/inputs.mtx");
         std::string line;
 
 
