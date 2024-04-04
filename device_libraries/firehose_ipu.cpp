@@ -215,10 +215,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         seq.add(poplar::program::Execute(cps_io_in[i]));
 
         db_name = "v_io_in[" + std::to_string(i) + "]";
-        seq.add(poplar::program::PrintTensor(db_name, v_io_in0[i]));
+        //seq.add(poplar::program::PrintTensor(db_name, v_io_in0[i]));
 
         db_name = "v_con0[" + std::to_string(i) + "]";
-        seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
+        //seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
 
         progs[prog_idx++] = seq;
     }
@@ -234,15 +234,15 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
 
         db_name = "v_con1[" + std::to_string(i) + "]";
-        seq.add(poplar::program::PrintTensor(db_name, v_con1[i]));
+        //seq.add(poplar::program::PrintTensor(db_name, v_con1[i]));
 
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
 
         db_name = "v_con0[" + std::to_string(i) + "] (After)";
-        seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
+        //seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
 
         db_name = "v_con1[" + std::to_string(i) + "] (After)";
-        seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
+        //seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
 
         progs[prog_idx++] = seq;
     }
@@ -258,10 +258,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         seq.add(poplar::program::Execute(cps_io_out[i]));
 
         db_name = "v_io_out0[" + std::to_string(i) + "]";
-        seq.add(poplar::program::PrintTensor(db_name, v_io_out0[i]));
+        //seq.add(poplar::program::PrintTensor(db_name, v_io_out0[i]));
 
         db_name = "v_io_out1[" + std::to_string(i) + "]";
-        seq.add(poplar::program::PrintTensor(db_name, v_io_out1[i]));
+        //seq.add(poplar::program::PrintTensor(db_name, v_io_out1[i]));
 
         seq.add(poplar::program::Copy(v_io_out0[i], strm_out0[i]));
         seq.add(poplar::program::Copy(v_io_out1[i], strm_out1[i]));
@@ -328,7 +328,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
 
                 #pragma omp critical(print)
-                printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a);
+                //printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a);
 
 
                 data_ready_flags[snd_id] = true;
@@ -343,6 +343,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 #pragma omp critical(ipu_work)
                 {
+                std::cout << rcv_id << std::endl;
                 engine.run(rcv_id);
                 engine.run(num_streams+rcv_id);
                 engine.run((num_streams*2)+rcv_id);
@@ -350,8 +351,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 #pragma omp critical(print)
                 {
-                printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a);
-                printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a);
+                //printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a);
+                //printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a);
                 }
 
                 data_ready_flags[rcv_id] = false;
