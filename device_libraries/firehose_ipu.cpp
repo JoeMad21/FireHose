@@ -334,8 +334,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                     float value;
         
                     // Split the line into floats
+                    int i = 0;
                     while (iss >> value) {
-                        cpu_in0[snd_id][i] = value;
+                        cpu_in0[snd_id][i++] = value;
                     }
 
     }
