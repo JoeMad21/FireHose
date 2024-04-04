@@ -1,12 +1,5 @@
 #include "firehose_ipu.hpp"
 
-enum Progs {
-    STREAM_INPUTS,
-    CONSUMPTION_TASK,
-    STREAM_OUTPUTS,
-    NUM_PROGRAMS
-};
-
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet) {
   std::string fileName = "results" + std::to_string(id) + ".txt";
   std::ofstream fileStream(fileName, std::ios::app);
@@ -302,17 +295,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     omp_set_num_threads(num_streams*2);
 
-    //int thread_id = 0;
-    //int gbl_id = 0;
-    //int snd_id = 0;
-    //int rcv_id = 0;
-
     #pragma omp parallel
     {
         int thread_id = omp_get_thread_num();
         int gbl_id = (int) thread_id;
         int snd_id = (int) thread_id;
-        //std::cout << "INIT_ID " << std::to_string(thread_id) << std::endl << std::endl;
         int rcv_id = thread_id-num_streams;
 
         if(gbl_id < num_streams) {
@@ -322,7 +309,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 std::mt19937 gen(rd());
                 std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-                /*Problem Area Below*/
                 for (int i = 0; i < row*col; i++) {
                     cpu_in0[snd_id][i] = distribution(gen);
                 }
@@ -341,12 +327,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 while(!data_ready_flags[rcv_id]) {}
 
-                #pragma omp critical(ipu_work)
-                {
                 engine.run(rcv_id);
                 engine.run(num_streams+rcv_id);
                 engine.run((num_streams*2)+rcv_id);
-                }
 
                 #pragma omp critical(print)
                 {
