@@ -1,4 +1,5 @@
 CC = g++
+//whatever//
 
 all: firehose
 
