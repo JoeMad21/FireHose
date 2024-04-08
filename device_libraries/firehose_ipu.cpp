@@ -7,10 +7,10 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
     std::string fileName;
   switch(io) {
     case 0:
-        std::string fileName = "input" + std::to_string(id) + ".txt";
+        fileName = "input" + std::to_string(id) + ".txt";
         break;
     default:
-        std::string fileName = "results" + std::to_string(id) + ".txt";
+        fileName = "results" + std::to_string(id) + ".txt";
         break;
   }
   std::ofstream fileStream(fileName, std::ios::app);
