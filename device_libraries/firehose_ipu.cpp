@@ -349,6 +349,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                     }
                 }
 
+                #pragma omp critical(print)
                 printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a, 0);
 
                 data_ready_flags[snd_id] = true;
@@ -365,8 +366,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 engine.run(num_streams+rcv_id);
                 engine.run((num_streams*2)+rcv_id);
 
-                printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a, 1);
-                printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a, 1);
+                #pragma omp critical(print)
+                {
+                    printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a, 1);
+                    printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a, 1);
+                }
 
                 data_ready_flags[rcv_id] = false;
             }
