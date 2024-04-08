@@ -8,10 +8,10 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
   switch(io) {
     case 0:
         std::string fileName = "input" + std::to_string(id) + ".txt";
-        break:
+        break;
     default:
         std::string fileName = "results" + std::to_string(id) + ".txt";
-        break:
+        break;
   }
   std::ofstream fileStream(fileName, std::ios::app);
   fileStream << matrix_name << " THREAD " << id << " PACKET " << packet << std::endl;
