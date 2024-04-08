@@ -1,9 +1,9 @@
 #!/bin/bash
 
-for file in ./results*.txt; do
+for file in ./IPU_INPUTS*.out; do
   : > "$file"
 done
 
-for file in ./input*.txt; do
+for file in ./IPU_OUTPUTS*.out; do
   : > "$file"
 done
