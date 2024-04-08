@@ -366,9 +366,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 data_ready_flags[rcv_id] = false;
             }
         }
-    }
 
-    file.close();
+        file.close();
+    }
 
     return;
 }
