@@ -7,10 +7,10 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
     std::string fileName;
   switch(io) {
     case 0:
-        fileName = "input" + std::to_string(id) + ".txt";
+        fileName = "IPU_INPUTS" + std::to_string(id) + ".out";
         break;
     default:
-        fileName = "results" + std::to_string(id) + ".txt";
+        fileName = "IPU_OUTPUTS" + std::to_string(id) + ".out";
         break;
   }
   std::ofstream fileStream(fileName, std::ios::app);
@@ -324,7 +324,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-        std::ifstream file("/home/jomad21/myFiles/FireHose/inputs.mtx");
+        std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(snd_id) + ".mtx";
+
+        std::ifstream file(fileName);
         std::string line;
 
 
