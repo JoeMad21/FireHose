@@ -324,10 +324,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-        std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(snd_id) + ".mtx";
+        //std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(snd_id) + ".mtx";
 
-        std::ifstream file(fileName);
-        std::string line;
+        //std::ifstream file(fileName);
+        //std::string line;
 
 
         if(gbl_id < num_streams) {
