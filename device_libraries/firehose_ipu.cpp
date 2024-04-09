@@ -339,17 +339,17 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                         cpu_in0[snd_id][i] = distribution(gen);
                     }
                 }
-                else {
-                    std::getline(file, line);
-                    std::istringstream iss(line);
-                    float value;
+                //else {
+                    //std::getline(file, line);
+                    //std::istringstream iss(line);
+                    //float value;
         
                     // Split the line into floats
-                    int i = 0;
-                    while (iss >> value) {
-                        cpu_in0[snd_id][i++] = value;
-                    }
-                }
+                    //int i = 0;
+                    //while (iss >> value) {
+                        //cpu_in0[snd_id][i++] = value;
+                    //}
+                //}
 
                 #pragma omp critical(print)
                 printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a, 0);
