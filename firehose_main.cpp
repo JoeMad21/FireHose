@@ -7,7 +7,7 @@ int main() {
     long unsigned int num_packets = 3;
     long unsigned int num_streams = 2;
     long unsigned int num_devices = 1;
-    bool get_from_file = true;
+    bool get_from_file = false;
 
 
     tensorDecomp(row, col, num_packets, num_streams, num_devices, get_from_file);
