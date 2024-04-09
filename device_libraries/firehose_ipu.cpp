@@ -324,39 +324,37 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-        //std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(snd_id) + ".mtx";
+        std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(snd_id) + ".mtx";
 
-        //std::ifstream file(fileName);
-        //std::string line;
+        std::ifstream file(fileName);
+        std::string line;
 
 
         if(gbl_id < num_streams) {
             for (int a = 0; a < num_packets; a++) {
                 while(data_ready_flags[snd_id]) {}
 
-                //if (!get_from_file) {
+                if (!get_from_file) {
                     std::cout << "AAA" << std::endl;
                     for (int i = 0; i < row*col; i++) {
                         cpu_in0[snd_id][i] = distribution(gen);
                     }
                     std::cout << "BBB" << std::endl;
-                //}
-                //else {
-                    //std::getline(file, line);
-                    //std::istringstream iss(line);
-                    //float value;
+                }
+                else {
+                    std::getline(file, line);
+                    std::istringstream iss(line);
+                    float value;
         
                     // Split the line into floats
-                    //int i = 0;
-                    //while (iss >> value) {
-                        //cpu_in0[snd_id][i++] = value;
-                    //}
-                //}
+                    int i = 0;
+                    while (iss >> value) {
+                        cpu_in0[snd_id][i++] = value;
+                    }
+                }
 
                 #pragma omp critical(print)
                 printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a, 0);
-
-                std::cout << "CCC" << std::endl;
 
                 data_ready_flags[snd_id] = true;
 
@@ -366,11 +364,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
             for (int a = 0; a < num_packets; a++) {
 
-                std::cout << "DDD" << std::endl;
-
                 while(!data_ready_flags[rcv_id]) {}
-
-                std::cout << "EEE" << std::endl;
 
                 #pragma omp critical(ipu_work)
                 {
@@ -379,21 +373,17 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                     engine.run((num_streams*2)+rcv_id);
                 }
 
-                std::cout << "FFF" << std::endl;
-
                 #pragma omp critical(print)
                 {
                     printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a, 1);
                     printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a, 1);
                 }
 
-                std::cout << "GGG" << std::endl;
-
                 data_ready_flags[rcv_id] = false;
             }
         }
 
-        //file.close();
+        file.close();
     }
 
     return;
