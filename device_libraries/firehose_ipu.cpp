@@ -372,9 +372,12 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                 std::cout << "EEE" << std::endl;
 
-                engine.run(rcv_id);
-                engine.run(num_streams+rcv_id);
-                engine.run((num_streams*2)+rcv_id);
+                #pragma omp critical(ipu_work)
+                {
+                    engine.run(rcv_id);
+                    engine.run(num_streams+rcv_id);
+                    engine.run((num_streams*2)+rcv_id);
+                }
 
                 std::cout << "FFF" << std::endl;
 
