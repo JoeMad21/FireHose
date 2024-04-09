@@ -334,11 +334,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
             for (int a = 0; a < num_packets; a++) {
                 while(data_ready_flags[snd_id]) {}
 
-                if (!get_from_file) {
+                //if (!get_from_file) {
                     for (int i = 0; i < row*col; i++) {
                         cpu_in0[snd_id][i] = distribution(gen);
                     }
-                }
+                //}
                 //else {
                     //std::getline(file, line);
                     //std::istringstream iss(line);
