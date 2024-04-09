@@ -378,7 +378,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
             }
         }
 
-        file.close();
+        //file.close();
     }
 
     return;
