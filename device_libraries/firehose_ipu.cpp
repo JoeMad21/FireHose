@@ -335,11 +335,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 while(data_ready_flags[snd_id]) {}
 
                 if (!get_from_file) {
-                    std::cout << "AAA" << std::endl;
                     for (int i = 0; i < row*col; i++) {
                         cpu_in0[snd_id][i] = distribution(gen);
                     }
-                    std::cout << "BBB" << std::endl;
                 }
                 else {
                     std::getline(file, line);
