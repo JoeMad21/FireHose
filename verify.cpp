@@ -17,7 +17,7 @@ int main() {
         // Check if the line starts with "GenMatrix"
 
         if (line.find("GenMatrix") != std::string::npos) {
-            std::cout << "Generated Input" << std::to_string(input_count++) std::endl;
+            std::cout << "Generated Input" << std::to_string(input_count++) << std::endl;
             std::cout << line << std::endl;
             continue;
         }
