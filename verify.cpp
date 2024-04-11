@@ -45,7 +45,7 @@ int main() {
                     correct_line = correct_line + line1 + "\n";
                 }
                 std::cout << std::endl;
-                correct_line = correct_line "\n";
+                correct_line = correct_line + "\n";
                 std::getline(file1, line1);
                 std::getline(file1, line1);
                 std::cout << "RMatrix" << std::endl;
