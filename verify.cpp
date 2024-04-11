@@ -3,10 +3,9 @@
 #include <string>
 
 int main() {
-    std::ifstream file("./IPU_INPUTS0.out");
+    std::ifstream file0("./IPU_INPUTS0.out");
+    std::ifstream file1("./IPU_OUTPUTS0.out");
     std::string line;
-    bool printSection = false;
-    int sectionCount = 0;
 
     if (!file.is_open()) {
         std::cerr << "Error opening file" << std::endl;
@@ -16,17 +15,9 @@ int main() {
     while (std::getline(file, line)) {
         // Check if the line starts with "GenMatrix"
         if (line.find("GenMatrix") != std::string::npos) {
-            sectionCount++;
             // Start printing if this is the second section
-            printSection = true;
+             std::cout << line << std::endl;
             continue; // Skip the header line
-        }
-        
-        // If in the second section, print the line
-        if (printSection) {
-            std::cout << line << std::endl;
-            // Optional: Stop printing after the second section
-            // if(line == "") printSection = false; // Assuming sections are separated by blank lines
         }
     }
 
