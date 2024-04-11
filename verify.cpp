@@ -8,24 +8,29 @@ int main() {
     std::string line0;
     std::string line1;
     int input_count = 0;
+    int adj_count = 0;
 
-    if (!file0.is_open()) {
-        std::cerr << "Error opening file" << std::endl;
-        return 1;
-    }
+    while(std::getline(file0, line0)) {
+        adj_count = input_count % 5;
 
-    while (std::getline(file0, line0)) {
-        // Check if the line starts with "GenMatrix"
+        switch(adj_count) {
+            case 1:
+                std::cout << line0 << std::endl;
+                break;
 
-        //std::cout << "Generated Input " << std::to_string(input_count++) << std::endl;
-        if (line0.find("GenMatrix") != std::string::npos) {
-            std::cout << line0 << std::endl;
-            continue;
+            case 2:
+                std::cout << line0 << std::endl;
+                break;
+
+            case 3:
+                std::cout << line0 << std::endl;
+                break;
+            
+            default:
+                break;
         }
-    }
 
-    file0.close();
-    return 0;
+    }
 }
 
 /*
