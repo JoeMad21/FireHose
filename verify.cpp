@@ -3,7 +3,7 @@
 #include <string>
 
 int main() {
-    std::ifstream file("your_file_path.txt");
+    std::ifstream file("./IPU_INPUTS0.out");
     std::string line;
     bool printSection = false;
     int sectionCount = 0;
