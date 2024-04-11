@@ -25,12 +25,14 @@ int main() {
             case 3:
                 std::cout << line0 << std::endl;
                 break;
+
+            case 4:
+                std::cout << std::endl;
+                break;
             
             default:
                 break;
         }
-
-        std::cout << std::endl;
 
     }
 
