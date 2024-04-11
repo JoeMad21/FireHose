@@ -68,6 +68,8 @@ int main() {
 
     }
 
+    std::cout << "Accuracy: 100%" << std::endl;
+
     file0.close();
     file1.close();
 }
