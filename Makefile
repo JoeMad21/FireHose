@@ -10,6 +10,9 @@ mylib.o:
 	popc -o ./device_libraries/io_codelet.gp ./device_libraries/io_codelet.cpp
 	$(CC) -c -fopenmp ./device_libraries/firehose_ipu.cpp -o ./device_libraries/mylib.o
 
+verify:
+	$(CC) verify.cpp -o verify
+
 clean_app:
 	rm firehose
 
