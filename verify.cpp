@@ -23,7 +23,7 @@ int main() {
         }
     }
 
-    file.close();
+    file0.close();
     return 0;
 }
 
