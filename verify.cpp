@@ -34,7 +34,7 @@ int main() {
 
             case 4:
                 std::cout << std::endl;
-                std::cout << "Output " << std::to_string(output_count++) << std::endl;
+                std::cout << "Output " << std::to_string(output_count++) << std::endl << std::endl;
                 std::getline(file1, line1);
                 std::cout << "QMatrix" << std::endl;
                 for(int i = 0; i < 3; i++) {
@@ -48,6 +48,7 @@ int main() {
                     std::getline(file1, line1);
                     std::cout << line1 << std::endl;
                 }
+                std::getline(file1, line1);
                 std::cout << std::endl;
                 break;
             
