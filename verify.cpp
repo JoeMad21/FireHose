@@ -10,6 +10,7 @@ int main() {
     int line_count = 0;
     int adj_count = 0;
     int input_count = 0;
+    int output_count = 0;
 
     while(std::getline(file0, line0)) {
         adj_count = line_count++ % 5;
@@ -33,6 +34,20 @@ int main() {
 
             case 4:
                 std::cout << std::endl;
+                std::cout << "Output " << std::to_string(output_count++) << std::endl;
+                std::getline(file1, line1);
+                std::cout << "QMatrix" << std::endl;
+                for(int i = 0; i < 3; i++) {
+                    std::getline(file1, line1);
+                    std::cout << line1 << std::endl;
+                }
+                std::getline(file1, line1);
+                std::getline(file1, line1);
+                std::cout << "RMatrix" << std::endl;
+                for(int i = 0; i < 3; i++) {
+                    std::getline(file1, line1);
+                    std::cout << line1 << std::endl;
+                }
                 break;
             
             default:
