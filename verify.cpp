@@ -7,13 +7,18 @@ int main() {
     std::ifstream file1("./IPU_OUTPUTS0.out");
     std::string line0;
     std::string line1;
-    int input_count = 0;
+    int line_count = 0;
     int adj_count = 0;
+    int input_count = 0;
 
     while(std::getline(file0, line0)) {
-        adj_count = input_count++ % 5;
+        adj_count = line_count++ % 5;
 
         switch(adj_count) {
+            case 0:
+                std::cout << "Input " << std::to_string(input_count++) << std::endl;
+                break;
+
             case 1:
                 std::cout << line0 << std::endl;
                 break;
