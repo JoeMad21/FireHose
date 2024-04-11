@@ -11,7 +11,7 @@ int main() {
     int adj_count = 0;
 
     while(std::getline(file0, line0)) {
-        adj_count = input_count % 5;
+        adj_count = input_count++ % 5;
 
         switch(adj_count) {
             case 1:
@@ -31,6 +31,8 @@ int main() {
         }
 
     }
+
+    file0.close();
 }
 
 /*
