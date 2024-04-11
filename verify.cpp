@@ -18,7 +18,7 @@ int main() {
         if (line.find("GenMatrix") != std::string::npos) {
             sectionCount++;
             // Start printing if this is the second section
-            printSection = (sectionCount == 2);
+            printSection = true;
             continue; // Skip the header line
         }
         
