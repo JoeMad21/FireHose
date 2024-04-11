@@ -35,7 +35,7 @@ int main() {
 
             case 4:
                 std::cout << std::endl;
-                std::cout << "IPU Output " << std::to_string(output_count++) << std::endl << std::endl;
+                std::cout << "IPU Output " << std::to_string(output_count) << std::endl << std::endl;
                 std::getline(file1, line1);
                 std::cout << "QMatrix" << std::endl;
                 correct_line = "QMatrix\n";
