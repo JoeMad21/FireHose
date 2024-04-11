@@ -2,9 +2,9 @@
 
 int main() {
 
-    long unsigned int row = 256;
-    long unsigned int col = 256;
-    long unsigned int num_packets = 10;
+    long unsigned int row = 3;
+    long unsigned int col = 3;
+    long unsigned int num_packets = 3;
     long unsigned int num_streams = 2;
     long unsigned int num_devices = 1;
     bool get_from_file = false;
