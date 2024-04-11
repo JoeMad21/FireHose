@@ -17,7 +17,7 @@ int main() {
     while (std::getline(file0, line0)) {
         // Check if the line starts with "GenMatrix"
 
-        std::cout << "Generated Input " << std::to_string(input_count++) << std::endl;
+        //std::cout << "Generated Input " << std::to_string(input_count++) << std::endl;
         if (line0.find("GenMatrix") != std::string::npos) {
             std::cout << line0 << std::endl;
             continue;
