@@ -8,17 +8,17 @@ int main() {
     std::string line;
     int input_count = 0;
 
-    if (!file.is_open()) {
+    if (!file0.is_open()) {
         std::cerr << "Error opening file" << std::endl;
         return 1;
     }
 
-    while (std::getline(file, line)) {
+    while (std::getline(file0, line)) {
         // Check if the line starts with "GenMatrix"
 
         if (line.find("GenMatrix") != std::string::npos) {
-            //std::cout << "Generated Input" << std::to_string(input_count++) std::endl;
-            //std::cout << line << std::endl;
+            std::cout << "Generated Input" << std::to_string(input_count++) std::endl;
+            std::cout << line << std::endl;
             continue;
         }
     }
