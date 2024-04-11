@@ -5,7 +5,8 @@
 int main() {
     std::ifstream file0("./IPU_INPUTS0.out");
     std::ifstream file1("./IPU_OUTPUTS0.out");
-    std::string line;
+    std::string line0;
+    std::string line1;
     int input_count = 0;
 
     if (!file0.is_open()) {
@@ -13,12 +14,12 @@ int main() {
         return 1;
     }
 
-    while (std::getline(file0, line)) {
+    while (std::getline(file0, line0)) {
         // Check if the line starts with "GenMatrix"
 
+        std::cout << "Generated Input " << std::to_string(input_count++) << std::endl;
         if (line.find("GenMatrix") != std::string::npos) {
-            std::cout << "Generated Input" << std::to_string(input_count++) << std::endl;
-            std::cout << line << std::endl;
+            std::cout << line0 << std::endl;
             continue;
         }
     }
