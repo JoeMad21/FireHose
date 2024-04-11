@@ -30,6 +30,8 @@ int main() {
                 break;
         }
 
+        std::cout << std::endl;
+
     }
 
     file0.close();
