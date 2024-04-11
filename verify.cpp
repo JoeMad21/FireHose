@@ -48,6 +48,7 @@ int main() {
                     std::getline(file1, line1);
                     std::cout << line1 << std::endl;
                 }
+                std::cout << std::endl;
                 break;
             
             default:
