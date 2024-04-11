@@ -57,6 +57,7 @@ int main() {
     }
 
     file0.close();
+    file1.close();
 }
 
 /*
