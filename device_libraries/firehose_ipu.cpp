@@ -15,23 +15,19 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
   }
   std::ofstream fileStream(fileName, std::ios::app);
   fileStream << matrix_name << " THREAD " << id << " PACKET " << packet << std::endl;
-  //std::cout << matrix_name << " THREAD " << id << " PACKET " << packet << std::endl;
 
   for (int i = 0; i < matrix.size(); i++) {
 
     fileStream << std::fixed << matrix[i] << "\t";
-    //std::cout << std::fixed << matrix[i] << "\t";
     
     if ( (i+1)%cols == 0) {
       fileStream << std::endl;
-      //std::cout << std::endl;
     }
 
   }
 
   fileStream << std::endl;
   fileStream.close();
-  //std::cout << std::endl;
 
 }
 
@@ -218,12 +214,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq.add(poplar::program::Execute(cps_io_in[i]));
 
-        db_name = "v_io_in[" + std::to_string(i) + "]";
-        //seq.add(poplar::program::PrintTensor(db_name, v_io_in0[i]));
-
-        db_name = "v_con0[" + std::to_string(i) + "]";
-        //seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
-
         progs[prog_idx++] = seq;
     }
 
@@ -237,21 +227,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq.add(poplar::program::Copy(c_id, v_con1[i]));
 
-        db_name = "v_con1[" + std::to_string(i) + "]";
-        //seq.add(poplar::program::PrintTensor(db_name, v_con1[i]));
-
         poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
-
-        db_name = "v_con0[" + std::to_string(i) + "] (After)";
-        //seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
-
-        db_name = "v_con1[" + std::to_string(i) + "] (After)";
-        //seq.add(poplar::program::PrintTensor(db_name, v_con0[i]));
 
         progs[prog_idx++] = seq;
     }
-
-    //progs[Progs::CONSUMPTION_TASK] = seq;
 
     /* Stream Outputs Programs */
 
@@ -260,12 +239,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         seq = poplar::program::Sequence();
 
         seq.add(poplar::program::Execute(cps_io_out[i]));
-
-        db_name = "v_io_out0[" + std::to_string(i) + "]";
-        //seq.add(poplar::program::PrintTensor(db_name, v_io_out0[i]));
-
-        db_name = "v_io_out1[" + std::to_string(i) + "]";
-        //seq.add(poplar::program::PrintTensor(db_name, v_io_out1[i]));
 
         seq.add(poplar::program::Copy(v_io_out0[i], strm_out0[i]));
         seq.add(poplar::program::Copy(v_io_out1[i], strm_out1[i]));
@@ -305,13 +278,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     /* Run Parallel Threads for FireHose */
 
     omp_set_num_threads(num_streams*2);
-
-    //if(get_from_file) {
-        //auto source = distribution;
-    //}
-
-
-    //}
 
     #pragma omp parallel
     {
