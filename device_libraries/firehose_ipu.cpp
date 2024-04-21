@@ -33,7 +33,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 
 }
 
-void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, bool get_from_file) {
+void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
     /* Get an IPU Device */
 
@@ -288,8 +288,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         int rel_id = thread_id / 2;
         int packet = 0;
         
-        std::random_device rd;
-        std::mt19937 gen(rd());
+        std::mt19937 gen(seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(rel_id) + ".mtx";
@@ -299,7 +298,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         switch(pc_id) {
             case PRODUCER:
-                while(data_ready_flags[rel_id]);
 
                 for (int i = 0; i < row*col; i++) {
                     cpu_in0[rel_id][i] = distribution(gen);
@@ -329,6 +327,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
 
                 data_ready_flags[rel_id] = false;
+                break;
         }
 
         /*
