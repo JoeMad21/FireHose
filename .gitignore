@@ -1,2 +1,3 @@
 ./device_libraries/io_codelet_in.cpp
 ./device_libraries/io_codelet_out.cpp
+.vscode/settings.json

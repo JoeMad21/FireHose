@@ -1,6 +1,8 @@
 #include "firehose_ipu.hpp"
 
-#define num_programs 3  
+#define NUM_PROGRAMS 3
+#define PRODUCER 0
+#define CONSUMER 1
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io) {
 
@@ -56,7 +58,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Created Graph!" << std::endl;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams*num_programs);
+    std::vector<poplar::program::Program> progs(num_streams*NUM_PROGRAMS);
 
     // Flags
     bool data_ready_flags[num_streams];
@@ -282,20 +284,54 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     #pragma omp parallel
     {
         int thread_id = omp_get_thread_num();
-        int gbl_id = (int) thread_id;
-        int snd_id = (int) thread_id;
-        int rcv_id = thread_id-num_streams;
+        int pc_id = thread_id % 2;
+        int rel_id = thread_id % num_streams;
+        int packet = 0;
         
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-        std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(snd_id) + ".mtx";
+        std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(rel_id) + ".mtx";
 
         std::ifstream file(fileName);
         std::string line;
 
+        switch(pc_id) {
+            case PRODUCER:
+                while(data_ready_flags[snd_id]);
 
+                for (int i = 0; i < row*col; i++) {
+                    cpu_in0[rel_id][i] = distribution(gen);
+                }
+
+                #pragma omp critical(print)
+                printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet++, 0);
+
+                data_ready_flags[rel_id] = true;
+                break;
+            
+            case CONSUMER:
+
+                while(!data_ready_flags[rel_id]);
+
+                #pragma omp critical(ipu_work)
+                {
+                    engine.run(rel_id);
+                    engine.run(num_streams+rel_id);
+                    engine.run((num_streams*2)+rel_id);
+                }
+
+                #pragma omp critical(print)
+                {
+                    printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                    printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet++, 1);
+                }
+
+                data_ready_flags[rel_id] = false;
+        }
+
+        /*
         if(gbl_id < num_streams) {
             for (int a = 0; a < num_packets; a++) {
                 while(data_ready_flags[snd_id]) {}
@@ -346,6 +382,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 data_ready_flags[rcv_id] = false;
             }
         }
+        */
 
         file.close();
     }
