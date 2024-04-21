@@ -299,7 +299,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         switch(pc_id) {
             case PRODUCER:
-                while(data_ready_flags[snd_id]);
+                while(data_ready_flags[rel_id]);
 
                 for (int i = 0; i < row*col; i++) {
                     cpu_in0[rel_id][i] = distribution(gen);
