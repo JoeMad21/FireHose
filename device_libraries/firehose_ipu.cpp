@@ -299,7 +299,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         switch(pc_id) {
             case PRODUCER:
                 for(int packet = 0; packet < num_packets; packet++) {
-                while(!data_ready_flags[rel_id]);
+                while(data_ready_flags[rel_id]);
 
 
                 for (int i = 0; i < row*col; i++) {
