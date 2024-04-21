@@ -307,7 +307,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 }
 
                 #pragma omp critical(print)
-                printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet++, 0);
+                printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet, 0);
 
                 data_ready_flags[rel_id] = true;
                 }
@@ -327,7 +327,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                 #pragma omp critical(print)
                 {
                     printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
-                    printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet++, 1);
+                    printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet, 1);
                 }
 
                 data_ready_flags[rel_id] = false;
