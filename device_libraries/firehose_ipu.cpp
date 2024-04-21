@@ -285,7 +285,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     {
         int thread_id = omp_get_thread_num();
         int pc_id = thread_id % 2;
-        int rel_id = thread_id % num_streams;
+        int rel_id = thread_id / 2;
         int packet = 0;
         
         std::random_device rd;
