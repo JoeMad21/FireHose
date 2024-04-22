@@ -188,13 +188,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        strm_in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
+        strm_in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, ReplicatedStreamMode::REPLICATE, streamOpts);
 
         db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        strm_out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
+        strm_out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, ReplicatedStreamMode::REPLICATE, streamOpts);
 
         db_name = "Output Stream " + std::to_string(i) + " for output 1";
-        strm_out1[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
+        strm_out1[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, ReplicatedStreamMode::REPLICATE, streamOpts);
     }
 
     std::cout << "Added Streams!" << std::endl;
