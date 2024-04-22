@@ -182,7 +182,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<poplar::DataStream> strm_out0(num_streams);
     std::vector<poplar::DataStream> strm_out1(num_streams);
 
-    OptionFlags streamOpts {
+    poplar::OptionFlags streamOpts {
       {"bufferingDepth", "2"},
     };
 
