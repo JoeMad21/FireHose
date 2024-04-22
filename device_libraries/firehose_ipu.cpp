@@ -186,17 +186,17 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
       {"bufferingDepth", "2"},
     };
 
-    poplar::ReplicatedStreamMode strmMode = poplar::ReplicatedStreamMode::REPLICATE;
+    poplar::ReplicatedStreamMode replicatedMode = poplar::ReplicatedStreamMode::REPLICATE
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        strm_in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, strmMode, streamOpts);
+        strm_in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, replicatedMode, streamOpts);
 
         db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        strm_out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, strmMode, streamOpts);
+        strm_out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, replicatedMode, streamOpts);
 
         db_name = "Output Stream " + std::to_string(i) + " for output 1";
-        strm_out1[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, strmMode, streamOpts);
+        strm_out1[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, replicatedMode, streamOpts);
     }
 
     std::cout << "Added Streams!" << std::endl;
