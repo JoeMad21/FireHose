@@ -264,15 +264,19 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Connecting Streams..." << std::endl;
 
+    OptionFlags streamOpts {
+      {"bufferingDepth", "2"},
+    };
+
     for (int i = 0; i < num_streams; i++) {
         db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        engine.connectStream(db_name, cpu_in0[i].data(), cpu_in0[i].data() + cpu_in0[i].size());
+        engine.connectStream(db_name, cpu_in0[i].data(), cpu_in0[i].data() + cpu_in0[i].size(), streamOpts);
 
         db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        engine.connectStream(db_name, cpu_out0[i].data(), cpu_out0[i].data() + cpu_out0[i].size());
+        engine.connectStream(db_name, cpu_out0[i].data(), cpu_out0[i].data() + cpu_out0[i].size(), streamOpts);
 
         db_name = "Output Stream " + std::to_string(i) + " for output 1";
-        engine.connectStream(db_name, cpu_out1[i].data(), cpu_out1[i].data() + cpu_out1[i].size());
+        engine.connectStream(db_name, cpu_out1[i].data(), cpu_out1[i].data() + cpu_out1[i].size(), streamOpts);
     }
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
@@ -291,104 +295,44 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         std::mt19937 gen(seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-        std::string fileName = "/home/jomad21/myFiles/FireHose/input" + std::to_string(rel_id) + ".mtx";
-
-        std::ifstream file(fileName);
-        std::string line;
-
         switch(pc_id) {
             case PRODUCER:
                 for(int packet = 0; packet < num_packets; packet++) {
-                while(data_ready_flags[rel_id]);
+                    while(data_ready_flags[rel_id]);
 
 
-                for (int i = 0; i < row*col; i++) {
-                    cpu_in0[rel_id][i] = distribution(gen);
-                }
+                    for (int i = 0; i < row*col; i++) {
+                        cpu_in0[rel_id][i] = distribution(gen);
+                    }
 
-                #pragma omp critical(print)
-                printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet, 0);
+                    #pragma omp critical(print)
+                    printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet, 0);
 
-                data_ready_flags[rel_id] = true;
+                    data_ready_flags[rel_id] = true;
                 }
                 break;
             
             case CONSUMER:
                 for(int packet = 0; packet < num_packets; packet++) {
-                while(!data_ready_flags[rel_id]);
+                    while(!data_ready_flags[rel_id]);
 
-                #pragma omp critical(ipu_work)
-                {
-                    engine.run(rel_id);
-                    engine.run(num_streams+rel_id);
-                    engine.run((num_streams*2)+rel_id);
-                }
+                    #pragma omp critical(ipu_work)
+                    {
+                        engine.run(rel_id);
+                        engine.run(num_streams+rel_id);
+                        engine.run((num_streams*2)+rel_id);
+                    }
 
-                #pragma omp critical(print)
-                {
-                    printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
-                    printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet, 1);
-                }
+                    #pragma omp critical(print)
+                    {
+                        printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet, 1);
+                    }
 
-                data_ready_flags[rel_id] = false;
+                    data_ready_flags[rel_id] = false;
                 }
                 break;
         }
-
-        /*
-        if(gbl_id < num_streams) {
-            for (int a = 0; a < num_packets; a++) {
-                while(data_ready_flags[snd_id]) {}
-
-                if (!get_from_file) {
-                    for (int i = 0; i < row*col; i++) {
-                        cpu_in0[snd_id][i] = distribution(gen);
-                    }
-                }
-                else {
-                    std::getline(file, line);
-                    std::istringstream iss(line);
-                    float value;
-        
-                    // Split the line into floats
-                    int i = 0;
-                    while (iss >> value) {
-                        cpu_in0[snd_id][i++] = value;
-                    }
-                }
-
-                #pragma omp critical(print)
-                printMatrix("GenMatrix", cpu_in0[snd_id], col, snd_id, a, 0);
-
-                data_ready_flags[snd_id] = true;
-
-            }
-        }
-        else {
-
-            for (int a = 0; a < num_packets; a++) {
-
-                while(!data_ready_flags[rcv_id]) {}
-
-                #pragma omp critical(ipu_work)
-                {
-                    engine.run(rcv_id);
-                    engine.run(num_streams+rcv_id);
-                    engine.run((num_streams*2)+rcv_id);
-                }
-
-                #pragma omp critical(print)
-                {
-                    printMatrix("QMatrix", cpu_out0[rcv_id], col, rcv_id, a, 1);
-                    printMatrix("RMatrix", cpu_out1[rcv_id], col, rcv_id, a, 1);
-                }
-
-                data_ready_flags[rcv_id] = false;
-            }
-        }
-        */
-
-        file.close();
     }
 
     return;
