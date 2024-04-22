@@ -264,7 +264,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    OptionFlags streamOpts {
+    poplar::OptionFlags streamOpts {
       {"bufferingDepth", "2"},
     };
 
