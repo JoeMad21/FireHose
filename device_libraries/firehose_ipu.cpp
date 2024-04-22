@@ -186,7 +186,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
       {"bufferingDepth", "2"},
     };
 
-    poplar::ReplicatedStreamMode replicatedMode = poplar::ReplicatedStreamMode::REPLICATE
+    poplar::ReplicatedStreamMode replicatedMode = poplar::ReplicatedStreamMode::REPLICATE;
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "Input Stream " + std::to_string(i) + " for input 0";
