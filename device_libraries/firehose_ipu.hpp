@@ -19,6 +19,7 @@
 
 #include <poputil/TileMapping.hpp>
 #include <poplar/Engine.hpp>
+#include <poplar/ReplicatedStreamMode.hpp>
 
 #include <poplin/codelets.hpp>
 #include <poplin/experimental/QRFactorization.hpp>
