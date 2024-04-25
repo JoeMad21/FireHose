@@ -338,7 +338,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     return;
 }
 
-void matMul(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+void matMult(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
     /* Get an IPU Device */
 
@@ -528,7 +528,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
         //poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
 
-        poplar::Tensor matmul_out = matMul(graph, v_con0[i], v_con1[i], seq, "MatMul");
+        poplar::Tensor matmul_out = poplin::matMul(graph, v_con0[i], v_con1[i], seq, "MatMul");
 
         seq.add(poplar::program::Copy(matmul_out, v_con0[i]));
 
