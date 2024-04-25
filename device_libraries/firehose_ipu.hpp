@@ -23,6 +23,7 @@
 
 #include <poplin/codelets.hpp>
 #include <poplin/experimental/QRFactorization.hpp>
+#include <poplin/MatMul.hpp>
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io);
 
