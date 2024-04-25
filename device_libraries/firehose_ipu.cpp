@@ -942,7 +942,6 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
     return;
 }
 
-
 //void placeholder(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
 
 //}
