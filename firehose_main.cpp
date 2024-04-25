@@ -2,6 +2,7 @@
 
 #define TENSOR_DECOMP 0
 #define MAT_MUL 1
+#define MAT_ADD 2
 
 int main() {
 
@@ -12,7 +13,7 @@ int main() {
     long unsigned int num_devices = 1;
     long unsigned int seed = 42;
     bool get_from_file = false;
-    int con_task = MAT_MUL;
+    int con_task = MAT_ADD;
 
     switch(con_task) {
         case TENSOR_DECOMP:
@@ -21,6 +22,10 @@ int main() {
 
         case MAT_MUL:
             matMul(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            break;
+
+        case MAT_ADD:
+            matAdd(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
     }
 

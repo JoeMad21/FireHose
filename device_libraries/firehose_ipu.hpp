@@ -15,6 +15,7 @@
 #include <poplar/IPUModel.hpp>
 #include <poplar/Tensor.hpp>
 
+#include <popops/ElementWise.hpp>
 #include <popops/codelets.hpp>
 
 #include <poputil/TileMapping.hpp>
@@ -30,5 +31,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file);
 
 void matMul(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file);
+
+void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file);
 
 //void placeholder(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices);
