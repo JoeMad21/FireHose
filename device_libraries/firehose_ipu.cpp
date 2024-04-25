@@ -338,7 +338,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     return;
 }
 
-void matMult(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+void matMul(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
     /* Get an IPU Device */
 

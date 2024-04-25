@@ -20,7 +20,7 @@ int main() {
             break;
 
         case MAT_MUL:
-            matMult(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            matMul(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
     }
 
