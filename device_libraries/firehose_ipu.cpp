@@ -528,7 +528,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
         //poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
 
-        poplar::Tensor matmul_out = poplin::matMul(graph, v_con0[i], v_con1[i], seq, "MatMul");
+        poplar::Tensor matmul_out = matMul(graph, v_con0[i], v_con1[i], seq, "MatMul");
 
         seq.add(poplar::program::Copy(matmul_out, v_con0[i]));
 
