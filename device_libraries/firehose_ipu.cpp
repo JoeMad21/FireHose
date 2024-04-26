@@ -38,13 +38,13 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 }
 
 
-poplar::Device getDevice(int device, int num_devices) {
+poplar::Device getDevice(int hw_mode, int num_devices) {
     std::cout << "Getting Device..." << std::endl;
 
     auto manager = poplar::DeviceManager::createDeviceManager();
     std::vector<poplar::Device> hwDevices;
 
-    switch(device) {
+    switch(hw_mode) {
         case IPU_HW:
             hwDevices = manager.getDevices(poplar::TargetType::IPU, num_devices);
             break;
