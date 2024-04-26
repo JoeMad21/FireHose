@@ -4,6 +4,10 @@
 #define PRODUCER 0
 #define CONSUMER 1
 
+#define IPU_HW 0
+#define IPU_MDL 1
+#define CPU_HW 2
+
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io) {
 
     std::string fileName;
@@ -33,14 +37,27 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 
 }
 
-void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
-    /* Get an IPU Device */
-
+poplar::Device getDevice(int device, int num_devices) {
     std::cout << "Getting Device..." << std::endl;
 
     auto manager = poplar::DeviceManager::createDeviceManager();
-    auto hwDevices = manager.getDevices(poplar::TargetType::IPU, num_devices);
+    std::vector<poplar::Device> hwDevices;
+
+    switch(device) {
+        case IPU_HW:
+            hwDevices = manager.getDevices(poplar::TargetType::IPU, num_devices);
+            break;
+
+        case IPU_MDL:
+            hwDevices = manager.getDevices(poplar::TargetType::IPU_MODEL, num_devices);
+            break;
+
+        case IPU_HW:
+            hwDevices = manager.getDevices(poplar::TargetType::CPU, num_devices);
+            break;
+    }
+
     auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
     poplar::Device device;
 
@@ -49,6 +66,26 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     std::cout << "Got Device!" << std::endl;
+
+    return device;
+}
+
+void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+
+    /* Get an IPU Device */
+
+    //std::cout << "Getting Device..." << std::endl;
+
+    //auto manager = poplar::DeviceManager::createDeviceManager();
+    //auto hwDevices = manager.getDevices(poplar::TargetType::IPU, num_devices);
+    //auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
+    //poplar::Device device;
+
+    //if (it != hwDevices.end()) {
+        //device = std::move(*it);
+    //}
+
+    poplar::Device device = getDevice(0, num_devices);
 
     /* Expose Shared Memory */
 
