@@ -53,7 +53,7 @@ poplar::Device getDevice(int device, int num_devices) {
             hwDevices = manager.getDevices(poplar::TargetType::IPU_MODEL, num_devices);
             break;
 
-        case IPU_HW:
+        case CPU_HW:
             hwDevices = manager.getDevices(poplar::TargetType::CPU, num_devices);
             break;
     }
