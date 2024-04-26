@@ -70,20 +70,11 @@ poplar::Device getDevice(int hw_mode, int num_devices) {
     return device;
 }
 
+//void createVariableTensors() {
+
+//}
+
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
-
-    /* Get an IPU Device */
-
-    //std::cout << "Getting Device..." << std::endl;
-
-    //auto manager = poplar::DeviceManager::createDeviceManager();
-    //auto hwDevices = manager.getDevices(poplar::TargetType::IPU, num_devices);
-    //auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
-    //poplar::Device device;
-
-    //if (it != hwDevices.end()) {
-        //device = std::move(*it);
-    //}
 
     poplar::Device device = getDevice(0, num_devices);
 
