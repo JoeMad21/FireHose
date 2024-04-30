@@ -296,7 +296,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     int prog_idx = 0;
 
-    poplar::program seq;
+    poplar::program::Sequence seq;
 
     for(int i = 0; i < num_streams; i++) {
 
