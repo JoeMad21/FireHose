@@ -74,11 +74,11 @@ poplar::Device getDevice(int hw_mode, int num_devices) {
 void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int num_tensors) {
 
     std::string db_name;
-    layer myLayer(num_tensors);
+    layer myLayer;
 
     for(int i = 0; i < num_tensors; i++) {
         db_name = "Layer " + std::to_string(layer_id) + " Tensor " + std::to_string(i);
-        myLayer.tensors[i] = graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name);
+        myLayer.tensors.push_back(graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name));
 
         switch(map) {
         case MAPPING::LINEAR:

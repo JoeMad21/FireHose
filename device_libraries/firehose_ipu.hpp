@@ -28,26 +28,10 @@
 
 struct layer {
     std::vector<poplar::Tensor> tensors;
-
-    layer() {
-        tensors = std::vector<poplar::Tensor> tensors;
-    }
-
-    layer(int num_tensors) {
-        tensors = std::vector<poplar::Tensor> temp(num_tensors);
-    }
 };
 
 struct model {
     std::vector<layer> layers;
-
-    model() {
-        layers = std::vector<layer> temp;
-    }
-
-    model(int num_layers) {
-        layers = std::vector<layer> temp(num_layers);
-    }
 };
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io);
