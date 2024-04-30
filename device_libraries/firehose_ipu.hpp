@@ -36,6 +36,8 @@ struct model {
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io);
 
+void createIdentityMatrix(std::vector<float>& vec_id);
+
 poplar::Device getDevice(int hw_mode, int num_devices);
 
 void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int num_tensors);

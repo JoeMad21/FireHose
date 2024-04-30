@@ -38,6 +38,19 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 
 }
 
+void createIdentityMatrix(std::vector<float>& vec_id) {
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            if (i == j) {
+                vec_id.push_back(1.0);
+            }
+            else {
+                vec_id.push_back(0.0);
+            }
+        }
+    }
+}
+
 
 poplar::Device getDevice(int hw_mode, int num_devices) {
     std::cout << "Getting Device..." << std::endl;
@@ -94,21 +107,50 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
         }
     }
 
-    // POSSIBLE ISSUE HERE
+    // TO DO: Overload assignment operator
     myModel.layers.push_back(myLayer);
+
+    return;
 }
+
+// void AddConstantTensor(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int c_id) {
+
+//     std::string db_name;
+//     layer myLayer;
+
+//     db_name = "Constant Tensor " + std::to_string(i);
+//     myLayer.tensors.push_back(graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name));
+
+//     switch(map) {
+//     case MAPPING::LINEAR:
+//         poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
+//         break;
+//     case MAPPING::SET:
+//         graph.setTileMapping(myLayer.tensors[i], i);
+//         break;
+//     default:
+//         poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
+//         std::cout << "WARNING: DEFAULTED" << std::endl;
+//         break;
+//     }
+
+//     if (myModel.layers.size() == layer_id) {
+//         // TO DO: Overload assignment operator
+//         myModel.layers.push_back(myLayer);
+//     }
+//     else {
+//         myModel.layers[layer_id].tensors.push_back(myLayer.tensors[0])
+//     }
+
+//     return;
+// }
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
+    /* Create Shared Memory */
+
+    // Strings
     std::string db_name;
-    poplar::Device device = getDevice(0, num_devices);
-
-    /* Expose Shared Memory */
-
-    // Graph
-    std::cout << "Creating Graph..." << std::endl;
-    poplar::Graph graph(device.getTarget());
-    std::cout << "Created Graph!" << std::endl;
 
     // Programs
     std::vector<poplar::program::Program> progs(num_streams*NUM_PROGRAMS);
@@ -120,10 +162,24 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         data_ready_flags[i] = false;
     }
 
-    // Build Graph
-    std::cout << "Adding Tensors..." << std::endl;
+    /* Get Program Context */
+    
+    // Get Device
+    std::cout << "Getting Device..." << std::endl;
+    poplar::Device device = getDevice(0, num_devices);
+    std::cout << "Got Device!" << std::endl;
 
-    model myModel; //USE VARIABLE
+    // Graph
+    std::cout << "Creating Graph..." << std::endl;
+    poplar::Graph graph(device.getTarget());
+    std::cout << "Created Graph!" << std::endl;
+
+    /* Build Graph */
+
+    // Build Model
+
+    std::cout << "Building Model..." << std::endl;
+    model myModel; // TO DO: Use Variable
     std::pair<int,int> myParams = std::make_pair(row, col);
     int num_layer = 0;
 
@@ -131,31 +187,24 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
     buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
 
-    //POSSIBLE ISSUE HERE
+    // TO DO: Overload assignment operator
     std::vector<model> myModels(num_streams);
     for(int i = 0; i < num_streams; i++) {
         myModels[i] = myModel;
     }
+    std::cout << "Built Model!" << std::endl;
 
 
     // Constant Tensors
-    std::vector<float> vec_id;
+    std::cout << "Adding Constant Tensors..." << std::endl;
 
-    for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++) {
-            if (i == j) {
-                vec_id.push_back(1.0);
-            }
-            else {
-                vec_id.push_back(0.0);
-            }
-        }
-    }
+    std::vector<float> vec_id;
+    createIdentityMatrix(vec_id);
 
     poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
     poputil::mapTensorLinearly(graph, c_id);
 
-    std::cout << "Added Tensors!" << std::endl;
+    std::cout << "Added Constant Tensors!" << std::endl;
 
     // Add standard codelets
     std::cout << "Adding Codelets..." << std::endl;
@@ -167,6 +216,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Added Codelets!" << std::endl;
 
+    /* TO BE REWRITTEN START */
     // Vertices
     std::cout << "Adding Vertices..." << std::endl;
 
@@ -232,6 +282,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     std::cout << "Added Streams!" << std::endl;
+
+    /* TO BE REWRITTEN END */
 
     // CPU Vectors
     std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
