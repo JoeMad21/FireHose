@@ -122,7 +122,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Adding Tensors..." << std::endl;
 
     model myModel(3); //USE VARIABLE
-    myParams = std::make_pair(row, col);
+    std::pair<int,int> myParams = std::make_pair(row, col);
     int num_layer = 0;
 
     buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 1);
