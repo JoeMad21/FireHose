@@ -196,14 +196,14 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     for(int i = 0; i < num_streams; i++) {
-        graph.connect(vtx_in0[i]["strm_in"], myModel[i].layers[LAYERS::INPUT].tensors[0]);
-        graph.connect(vtx_in0[i]["strm_out"], myModel[i].layers[LAYERS::CONSUMPTION].tensors[0]);
+        graph.connect(vtx_in0[i]["strm_in"], myModels[i].layers[LAYERS::INPUT].tensors[0]);
+        graph.connect(vtx_in0[i]["strm_out"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
 
-        graph.connect(vtx_out0[i]["strm_in"], myModel[i].layers[LAYERS::CONSUMPTION].tensors[0]);
-        graph.connect(vtx_out0[i]["strm_out"], myModel[i].layers[LAYERS::OUTPUT].tensors[0]);
+        graph.connect(vtx_out0[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
+        graph.connect(vtx_out0[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
 
-        graph.connect(vtx_out1[i]["strm_in"], myModel[i].layers[LAYERS::CONSUMPTION].tensors[1]);
-        graph.connect(vtx_out1[i]["strm_out"], myModel[i].layers[LAYERS::OUTPUT].tensors[1]);
+        graph.connect(vtx_out1[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]);
+        graph.connect(vtx_out1[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[1]);
     }
 
     std::cout << "Added Vertices!" << std::endl;
