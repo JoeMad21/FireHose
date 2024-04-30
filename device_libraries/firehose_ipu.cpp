@@ -95,7 +95,7 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
     }
 
     // POSSIBLE ISSUE HERE
-    myModel.layers[layer_id] = myLayer;
+    myModel.layers.push_back(myLayer);
 }
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
@@ -123,7 +123,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     // Build Graph
     std::cout << "Adding Tensors..." << std::endl;
 
-    model myModel(3); //USE VARIABLE
+    model myModel; //USE VARIABLE
     std::pair<int,int> myParams = std::make_pair(row, col);
     int num_layer = 0;
 
