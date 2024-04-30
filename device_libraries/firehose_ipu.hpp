@@ -30,11 +30,11 @@ struct layer {
     std::vector<poplar::Tensor> tensors;
 
     layer() {
-        std::vector<poplar::Tensor> tensors;
+        tensors = std::vector<poplar::Tensor> tensors;
     }
 
     layer(int num_tensors) {
-        std::vector<poplar::Tensor> tensors(num_tensors);
+        tensors = std::vector<poplar::Tensor> temp(num_tensors);
     }
 };
 
@@ -42,11 +42,11 @@ struct model {
     std::vector<layer> layers;
 
     model() {
-        std::vector<layer> layers;
+        layers = std::vector<layer> temp;
     }
 
     model(int num_layers) {
-        std::vector<layer> layers(num_layers);
+        layers = std::vector<layer> temp(num_layers);
     }
 };
 

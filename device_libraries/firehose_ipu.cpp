@@ -78,21 +78,20 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
 
     for(int i = 0; i < num_tensors; i++) {
         db_name = "Layer " + std::to_string(layer_id) + " Tensor " + std::to_string(i);
-        myLayer[i] = graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name);
+        myLayer.tensors[i] = graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name);
 
         switch(map) {
         case MAPPING::LINEAR:
-            poputil::mapTensorLinearly(graph, myLayer[i]);
+            poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
             break;
         case MAPPING::SET:
-            graph.setTileMapping(myLayer[i], i);
+            graph.setTileMapping(myLayer.tensors[i], i);
             break;
         default:
-            poputil::mapTensorLinearly(graph, myLayer[i]);
+            poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
             std::cout << "WARNING: DEFAULTED" << std::endl;
             break;
         }
-        std::cout << "HERED" << std::endl;
     }
 
     // POSSIBLE ISSUE HERE
