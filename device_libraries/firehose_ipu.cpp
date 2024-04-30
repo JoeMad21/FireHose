@@ -222,41 +222,45 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     // Vertices
     std::cout << "Adding Vertices..." << std::endl;
 
-    std::vector<poplar::ComputeSet> cps_io_in(num_streams);
-    std::vector<poplar::ComputeSet> cps_io_out(num_streams);
+    struct {
+        std::vector<poplar::ComputeSet> in(num_streams);
+        std::vector<poplar::ComputeSet> out(num_streams);
+    } cps;
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "IO in CS " + std::to_string(i);
-        cps_io_in[i] = graph.addComputeSet(db_name);
+        cps.in[i] = graph.addComputeSet(db_name);
 
         db_name = "IO in CS " + std::to_string(i);
-        cps_io_out[i] = graph.addComputeSet(db_name);
+        cps.out[i] = graph.addComputeSet(db_name);
     }
 
-    std::vector<poplar::VertexRef> vtx_in0(num_streams);
-    std::vector<poplar::VertexRef> vtx_out0(num_streams);
-    std::vector<poplar::VertexRef> vtx_out1(num_streams);
+    struct {
+        std::vector<poplar::VertexRef> in0(num_streams);
+        std::vector<poplar::VertexRef> out0(num_streams);
+        std::vector<poplar::VertexRef> out1(num_streams);
+    } vtx;
 
     for (int i = 0; i < num_streams; i++) {
 
-        vtx_in0[i] = graph.addVertex(cps_io_in[i], "IOVertex");
-        graph.setTileMapping(vtx_in0[i], i+5);
+        vtx.in0[i] = graph.addVertex(cps.in[i], "IOVertex");
+        graph.setTileMapping(vtx.in0[i], i+5);
 
-        vtx_out0[i] = graph.addVertex(cps_io_out[i], "IOVertex");
-        graph.setTileMapping(vtx_out0[i], i+7);
-        vtx_out1[i] = graph.addVertex(cps_io_out[i], "IOVertex");
-        graph.setTileMapping(vtx_out1[i], i+9);
+        vtx.out0[i] = graph.addVertex(cps.out[i], "IOVertex");
+        graph.setTileMapping(vtx.out0[i], i+7);
+        vtx.out1[i] = graph.addVertex(cps.out[i], "IOVertex");
+        graph.setTileMapping(vtx.out1[i], i+9);
     }
 
     for(int i = 0; i < num_streams; i++) {
-        graph.connect(vtx_in0[i]["strm_in"], myModels[i].layers[LAYERS::INPUT].tensors[0]);
-        graph.connect(vtx_in0[i]["strm_out"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
+        graph.connect(vtx.in0[i]["strm_in"], myModels[i].layers[LAYERS::INPUT].tensors[0]);
+        graph.connect(vtx.in0[i]["strm_out"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
 
-        graph.connect(vtx_out0[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
-        graph.connect(vtx_out0[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
+        graph.connect(vtx.out0[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
+        graph.connect(vtx.out0[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
 
-        graph.connect(vtx_out1[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]);
-        graph.connect(vtx_out1[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[1]);
+        graph.connect(vtx.out1[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]);
+        graph.connect(vtx.out1[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[1]);
     }
 
     std::cout << "Added Vertices!" << std::endl;
@@ -264,9 +268,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     // Streams
     std::cout << "Adding Streams..." << std::endl;
 
-    std::vector<poplar::DataStream> strm_in0(num_streams);
-    std::vector<poplar::DataStream> strm_out0(num_streams);
-    std::vector<poplar::DataStream> strm_out1(num_streams);
+    struct {
+        std::vector<poplar::DataStream> in0(num_streams);
+        std::vector<poplar::DataStream> out0(num_streams);
+        std::vector<poplar::DataStream> out1(num_streams);
+    } strm;
 
     poplar::OptionFlags streamOpts {
       {"bufferingDepth", "2"},
@@ -274,23 +280,30 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        strm_in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
+        strm.in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
 
         db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        strm_out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
+        strm.out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
 
         db_name = "Output Stream " + std::to_string(i) + " for output 1";
-        strm_out1[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
+        strm.out1[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
     }
 
     std::cout << "Added Streams!" << std::endl;
 
     /* TO BE REWRITTEN END */
 
+    /* CPU Memory */
+
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out1(num_streams, std::vector<float> (row*col, 5.0));
+    struct {
+        std::vector<std::vector<float>> in0(num_streams, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> out0(num_streams, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> out1(num_streams, std::vector<float> (row*col, 5.0));
+    } cpu;
+
+
+    /* Programs */
 
     std::cout << "Adding Programs..." << std::endl;
 
@@ -303,26 +316,26 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         // Begin Sequence 
         seq = poplar::program::Sequence();
 
-        /* Stream Inputs Programs */
+        // Stream Inputs Programs
 
         seq = poplar::program::Sequence();
 
-        seq.add(poplar::program::Copy(strm_in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
+        seq.add(poplar::program::Copy(strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
 
-        seq.add(poplar::program::Execute(cps_io_in[i]));
+        seq.add(poplar::program::Execute(cps.in[i]));
 
-        /* Consumption Task Programs */
+        // Consumption Task Programs
 
         seq.add(poplar::program::Copy(c_id, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]));
 
         poplin::experimental::QRFactorization(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq);
 
-        /* Stream Outputs Programs */
+        // Stream Outputs Programs
 
-        seq.add(poplar::program::Execute(cps_io_out[i]));
+        seq.add(poplar::program::Execute(cps.io.out[i]));
 
-        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], strm_out0[i]));
-        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[1], strm_out1[i]));
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], strm.out0[i]));
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[1], strm.out1[i]));
 
         // End Sequence
         progs[prog_idx++] = seq;
@@ -346,13 +359,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        engine.connectStream(db_name, cpu_in0[i].data(), cpu_in0[i].data() + cpu_in0[i].size());
+        engine.connectStream(db_name, cpu.in0[i].data(), cpu.in0[i].data() + cpu.in0[i].size());
 
         db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        engine.connectStream(db_name, cpu_out0[i].data(), cpu_out0[i].data() + cpu_out0[i].size());
+        engine.connectStream(db_name, cpu.out0[i].data(), cpu.out0[i].data() + cpu.out0[i].size());
 
         db_name = "Output Stream " + std::to_string(i) + " for output 1";
-        engine.connectStream(db_name, cpu_out1[i].data(), cpu_out1[i].data() + cpu_out1[i].size());
+        engine.connectStream(db_name, cpu.out1[i].data(), cpu.out1[i].data() + cpu.out1[i].size());
     }
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
@@ -377,11 +390,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
 
                     for (int i = 0; i < row*col; i++) {
-                        cpu_in0[rel_id][i] = distribution(gen);
+                        cpu.in0[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
-                    printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet, 0);
+                    printMatrix("GenMatrix", cpu.in0[rel_id], col, rel_id, packet, 0);
 
                     data_ready_flags[rel_id] = true;
                 }
@@ -398,8 +411,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
-                        printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet, 1);
+                        printMatrix("QMatrix", cpu.out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("RMatrix", cpu.out1[rel_id], col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
