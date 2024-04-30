@@ -85,7 +85,7 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair params, int laye
         case MAPPING::LINEAR:
             poputil::mapTensorLinearly(graph, myLayer[i]);
             break;
-        case MAPPING::SET
+        case MAPPING::SET:
             graph.setTileMapping(myLayer[i], i);
             break;
         default:
@@ -95,7 +95,7 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair params, int laye
     }
 
     // POSSIBLE ISSUE HERE
-    model.layers[layer_id] = myLayer;
+    myModel.layers[layer_id] = myLayer;
 }
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
