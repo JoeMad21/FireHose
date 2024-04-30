@@ -44,7 +44,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 
 poplar::Device getDevice(int hw_mode, int num_devices);
 
-void buildGraph(poplar::Graph& graph, int num_inputs, int num_outputs, int num_streams, int row, int col);
+void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int num_tensors);
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file);
 

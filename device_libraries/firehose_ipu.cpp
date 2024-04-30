@@ -71,7 +71,7 @@ poplar::Device getDevice(int hw_mode, int num_devices) {
     return device;
 }
 
-void buildLayer(poplar::Graph& graph, model& myModel, std::pair params, int layer_id, int map, int num_tensors) {
+void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int num_tensors) {
 
     std::string db_name;
     layer myLayer(num_tensors);
