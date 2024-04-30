@@ -130,7 +130,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
 
     //POSSIBLE ISSUE HERE
-    model myModels[num_streams];
+    model myModels(3)[num_streams];
     for(int i = 0; i < num_streams; i++) {
         myModels = myModel;
     }
