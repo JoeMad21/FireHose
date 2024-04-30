@@ -28,7 +28,7 @@
 
 struct layer {
     std::vector<poplar::Tensor> tensors;
-    layers(int num_tensors) {
+    layer(int num_tensors) {
         std::vector<layer> tensors(num_tensors);
     }
 };
