@@ -38,7 +38,7 @@ void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, i
 
 }
 
-void createIdentityMatrix(std::vector<float>& vec_id) {
+void createIdentityMatrix(std::vector<float>& vec_id, int row, int col) {
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
             if (i == j) {
@@ -198,7 +198,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::cout << "Adding Constant Tensors..." << std::endl;
 
     std::vector<float> vec_id;
-    createIdentityMatrix(vec_id);
+    createIdentityMatrix(vec_id, row, col);
 
     poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
     poputil::mapTensorLinearly(graph, c_id);
@@ -366,7 +366,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         int thread_id = omp_get_thread_num();
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
-        //int packet = 0;
         
         std::mt19937 gen(seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
