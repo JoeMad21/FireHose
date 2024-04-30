@@ -77,8 +77,11 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
     layer myLayer(num_tensors);
 
     for(int i = 0; i < num_tensors; i++) {
+        std::cout << "HEREA" << std::endl;
         db_name = "Layer " + std::to_string(layer_id) + " Tensor " + std::to_string(i);
+        std::cout << "HEREB" << std::endl;
         myLayer.tensors[i] = graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name);
+        std::cout << "HEREC" << std::endl;
 
         switch(map) {
         case MAPPING::LINEAR:
@@ -92,6 +95,7 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
             std::cout << "WARNING: DEFAULTED" << std::endl;
             break;
         }
+        std::cout << "HERED" << std::endl;
     }
 
     // POSSIBLE ISSUE HERE
@@ -123,25 +127,19 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     // Build Graph
     std::cout << "Adding Tensors..." << std::endl;
 
-    std::cout << "HEREA" << std::endl;
     model myModel(3); //USE VARIABLE
-    std::cout << "HEREB" << std::endl;
     std::pair<int,int> myParams = std::make_pair(row, col);
-    std::cout << "HEREC" << std::endl;
     int num_layer = 0;
-    std::cout << "HERED" << std::endl;
 
     buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 1);
     buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
     buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
 
-    std::cout << "HEREE" << std::endl;
     //POSSIBLE ISSUE HERE
     std::vector<model> myModels(num_streams);
     for(int i = 0; i < num_streams; i++) {
         myModels[i] = myModel;
     }
-    std::cout << "HEREF" << std::endl;
 
 
     // Constant Tensors
