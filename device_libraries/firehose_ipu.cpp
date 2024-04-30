@@ -99,6 +99,7 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
+    std::string db_name;
     poplar::Device device = getDevice(0, num_devices);
 
     /* Expose Shared Memory */
