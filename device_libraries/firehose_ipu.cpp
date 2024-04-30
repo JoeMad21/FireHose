@@ -76,9 +76,8 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
     std::string db_name;
     layer myLayer(num_tensors);
 
-    db_name = "Layer " + std::to_string(layer_id) + " Tensor " + std::to_string(i);
-
     for(int i = 0; i < num_tensors; i++) {
+        db_name = "Layer " + std::to_string(layer_id) + " Tensor " + std::to_string(i);
         myLayer[i] = graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name);
 
         switch(map) {
