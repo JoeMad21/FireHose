@@ -153,7 +153,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams*NUM_PROGRAMS);
+    std::vector<poplar::program::Program> progs(num_streams);
 
     // Flags
     bool data_ready_flags[num_streams];
@@ -194,7 +194,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
     std::cout << "Built Model!" << std::endl;
 
-
     // Constant Tensors
     std::cout << "Adding Constant Tensors..." << std::endl;
 
@@ -206,10 +205,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Added Constant Tensors!" << std::endl;
 
+    /* Add Codelets */
+
     // Add standard codelets
     std::cout << "Adding Codelets..." << std::endl;
 
     popops::addCodelets(graph);
+    poplin::addCodelets(graph);
 
     // Add custom codelets
     graph.addCodelets("./device_libraries/io_codelet.gp");
@@ -292,13 +294,16 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Adding Programs..." << std::endl;
 
-    /* Stream Inputs Programs */
-
     int prog_idx = 0;
 
-    auto seq = poplar::program::Sequence();
+    poplar::program seq;
 
     for(int i = 0; i < num_streams; i++) {
+
+        // Begin Sequence 
+        seq = poplar::program::Sequence();
+
+        /* Stream Inputs Programs */
 
         seq = poplar::program::Sequence();
 
@@ -306,35 +311,20 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq.add(poplar::program::Execute(cps_io_in[i]));
 
-        progs[prog_idx++] = seq;
-    }
-
-    /* Consumption Task Programs */
-
-    poplin::addCodelets(graph);
-
-    for(int i = 0; i < num_streams; i++) {
-
-        seq = poplar::program::Sequence();
+        /* Consumption Task Programs */
 
         seq.add(poplar::program::Copy(c_id, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]));
 
         poplin::experimental::QRFactorization(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq);
 
-        progs[prog_idx++] = seq;
-    }
-
-    /* Stream Outputs Programs */
-
-    for(int i = 0; i < num_streams; i++) {
-
-        seq = poplar::program::Sequence();
+        /* Stream Outputs Programs */
 
         seq.add(poplar::program::Execute(cps_io_out[i]));
 
         seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], strm_out0[i]));
         seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[1], strm_out1[i]));
 
+        // End Sequence
         progs[prog_idx++] = seq;
     }
 
@@ -405,8 +395,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
                     #pragma omp critical(ipu_work)
                     {
                         engine.run(rel_id);
-                        engine.run(num_streams+rel_id);
-                        engine.run((num_streams*2)+rel_id);
                     }
 
                     #pragma omp critical(print)
@@ -449,7 +437,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     std::cout << "Created Graph!" << std::endl;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams*NUM_PROGRAMS);
+    std::vector<poplar::program::Program> progs(num_streams);
 
     // Flags
     bool data_ready_flags[num_streams];
