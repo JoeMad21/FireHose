@@ -4,36 +4,37 @@
 #define PRODUCER 0
 #define CONSUMER 1
 
-#define IPU_HW 0
-#define IPU_MDL 1
-#define CPU_HW 2
+enum HARDWARE {IPU, MODEL, CPU};
+enum MAPPING {LINEAR, SET};
+enum LAYERS {INPUT, CONSUMPTION, OUTPUT}
+
+
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io) {
-
-    std::string fileName;
-  switch(io) {
-    case 0:
-        fileName = "IPU_INPUTS" + std::to_string(id) + ".out";
-        break;
-    default:
-        fileName = "IPU_OUTPUTS" + std::to_string(id) + ".out";
-        break;
-  }
-  std::ofstream fileStream(fileName, std::ios::app);
-  fileStream << matrix_name << " THREAD " << id << " PACKET " << packet << std::endl;
-
-  for (int i = 0; i < matrix.size(); i++) {
-
-    fileStream << std::fixed << matrix[i] << "\t";
     
-    if ( (i+1)%cols == 0) {
-      fileStream << std::endl;
+    std::string fileName;
+    switch(io) {
+        case 0:
+            fileName = "IPU_INPUTS" + std::to_string(id) + ".out";
+            break;
+        default:
+            fileName = "IPU_OUTPUTS" + std::to_string(id) + ".out";
+            break;
     }
-
-  }
-
-  fileStream << std::endl;
-  fileStream.close();
+    std::ofstream fileStream(fileName, std::ios::app);
+    fileStream << matrix_name << " THREAD " << id << " PACKET " << packet << std::endl;
+    
+    for (int i = 0; i < matrix.size(); i++) {
+        
+        fileStream << std::fixed << matrix[i] << "\t";
+        
+        if ( (i+1)%cols == 0) {
+            fileStream << std::endl;
+        }
+    }
+    
+    fileStream << std::endl;
+    fileStream.close();
 
 }
 
@@ -45,15 +46,15 @@ poplar::Device getDevice(int hw_mode, int num_devices) {
     std::vector<poplar::Device> hwDevices;
 
     switch(hw_mode) {
-        case IPU_HW:
+        case HARDWARE::IPU:
             hwDevices = manager.getDevices(poplar::TargetType::IPU, num_devices);
             break;
 
-        case IPU_MDL:
+        case HARDWARE::MODEL:
             hwDevices = manager.getDevices(poplar::TargetType::IPU_MODEL, num_devices);
             break;
 
-        case CPU_HW:
+        case HARDWARE::CPU:
             hwDevices = manager.getDevices(poplar::TargetType::CPU, num_devices);
             break;
     }
@@ -70,9 +71,32 @@ poplar::Device getDevice(int hw_mode, int num_devices) {
     return device;
 }
 
-//void createVariableTensors() {
+void buildLayer(poplar::Graph& graph, model& myModel, std::pair params, int layer_id, int map, int num_tensors) {
 
-//}
+    std::string db_name;
+    layer myLayer(num_tensors);
+
+    db_name = "Layer " + std::to_string(layer_id) + " Tensor " + std::to_string(i);
+
+    for(int i = 0; i < num_tensors; i++) {
+        myLayer[i] = graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name);
+
+        switch(map) {
+        case MAPPING::LINEAR:
+            poputil::mapTensorLinearly(graph, myLayer[i]);
+            break;
+        case MAPPING::SET
+            graph.setTileMapping(myLayer[i], i);
+            break;
+        default:
+            poputil::mapTensorLinearly(graph, myLayer[i]);
+            break;
+        }
+    }
+
+    // POSSIBLE ISSUE HERE
+    model.layers[layer_id] = myLayer;
+}
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
@@ -95,42 +119,23 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         data_ready_flags[i] = false;
     }
 
-    // Variable Tensors
+    // Build Graph
     std::cout << "Adding Tensors..." << std::endl;
 
-    std::vector<poplar::Tensor> v_io_in0(num_streams);
-    std::vector<poplar::Tensor> v_con0(num_streams);
-    std::vector<poplar::Tensor> v_io_out0(num_streams);
+    model myModel(3); //USE VARIABLE
+    myParams = std::make_pair(row, col);
+    int num_layer = 0;
 
-    std::vector<poplar::Tensor> v_con1(num_streams);
-    std::vector<poplar::Tensor> v_io_out1(num_streams);
+    buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 1);
+    buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
+    buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
 
-    std::string db_name;
-
-    for (int i = 0; i < num_streams; i++) {
-
-        /* Input to QR Factorization */
-        db_name = "Input Tensor " + std::to_string(i) + " of Set 0";
-        v_io_in0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_io_in0[i]);
-
-        db_name = "Consumption Tensor " + std::to_string(i) + " of Set 0";
-        v_con0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_con0[i]);
-
-        db_name = "Output Tensor " + std::to_string(i) + " of Set 0";
-        v_io_out0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_io_out0[i]);
-
-        /* Necessary Identity to QR Factorization */
-        db_name = "Consumption Tensor" + std::to_string(i) + " of Set 1";
-        v_con1[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_con1[i]);
-
-        db_name = "Output Tensor " + std::to_string(i) + " of Set 1";
-        v_io_out1[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_io_out1[i]);
+    //POSSIBLE ISSUE HERE
+    model myModels[num_streams];
+    for(int i = 0; i < num_streams; i++) {
+        myModels = myModel;
     }
+
 
     // Constant Tensors
     std::vector<float> vec_id;
@@ -146,7 +151,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
         }
     }
 
-    auto c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
+    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
     poputil::mapTensorLinearly(graph, c_id);
 
     std::cout << "Added Tensors!" << std::endl;
@@ -191,14 +196,14 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     }
 
     for(int i = 0; i < num_streams; i++) {
-        graph.connect(vtx_in0[i]["strm_in"], v_io_in0[i]);
-        graph.connect(vtx_in0[i]["strm_out"], v_con0[i]);
+        graph.connect(vtx_in0[i]["strm_in"], myModel[i].layers[LAYERS::INPUT].tensors[0]);
+        graph.connect(vtx_in0[i]["strm_out"], myModel[i].layers[LAYERS::CONSUMPTION].tensors[0]);
 
-        graph.connect(vtx_out0[i]["strm_in"], v_con0[i]);
-        graph.connect(vtx_out0[i]["strm_out"], v_io_out0[i]);
+        graph.connect(vtx_out0[i]["strm_in"], myModel[i].layers[LAYERS::CONSUMPTION].tensors[0]);
+        graph.connect(vtx_out0[i]["strm_out"], myModel[i].layers[LAYERS::OUTPUT].tensors[0]);
 
-        graph.connect(vtx_out1[i]["strm_in"], v_con1[i]);
-        graph.connect(vtx_out1[i]["strm_out"], v_io_out1[i]);
+        graph.connect(vtx_out1[i]["strm_in"], myModel[i].layers[LAYERS::CONSUMPTION].tensors[1]);
+        graph.connect(vtx_out1[i]["strm_out"], myModel[i].layers[LAYERS::OUTPUT].tensors[1]);
     }
 
     std::cout << "Added Vertices!" << std::endl;
@@ -244,7 +249,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq = poplar::program::Sequence();
 
-        seq.add(poplar::program::Copy(strm_in0[i], v_io_in0[i]));
+        seq.add(poplar::program::Copy(strm_in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
 
         seq.add(poplar::program::Execute(cps_io_in[i]));
 
@@ -259,9 +264,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq = poplar::program::Sequence();
 
-        seq.add(poplar::program::Copy(c_id, v_con1[i]));
+        seq.add(poplar::program::Copy(c_id, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]));
 
-        poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
+        poplin::experimental::QRFactorization(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq);
 
         progs[prog_idx++] = seq;
     }
@@ -274,8 +279,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq.add(poplar::program::Execute(cps_io_out[i]));
 
-        seq.add(poplar::program::Copy(v_io_out0[i], strm_out0[i]));
-        seq.add(poplar::program::Copy(v_io_out1[i], strm_out1[i]));
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], strm_out0[i]));
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[1], strm_out1[i]));
 
         progs[prog_idx++] = seq;
     }

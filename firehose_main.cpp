@@ -1,8 +1,6 @@
 #include "device_libraries/firehose_ipu.hpp"
 
-#define TENSOR_DECOMP 0
-#define MAT_MUL 1
-#define MAT_ADD 2
+enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD}
 
 int main() {
 
@@ -13,18 +11,18 @@ int main() {
     long unsigned int num_devices = 1;
     long unsigned int seed = 42;
     bool get_from_file = false;
-    int con_task = TENSOR_DECOMP;
+    int con_task = TASK::TENSOR_DECOMP;
 
     switch(con_task) {
-        case TENSOR_DECOMP:
+        case TASK::TENSOR_DECOMP:
             tensorDecomp(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
 
-        case MAT_MUL:
+        case TASK::MAT_MUL:
             matMul(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
 
-        case MAT_ADD:
+        case TASK::MAT_ADD:
             matAdd(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
     }

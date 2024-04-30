@@ -26,9 +26,19 @@
 #include <poplin/experimental/QRFactorization.hpp>
 #include <poplin/MatMul.hpp>
 
+struct model(int num_layers) {
+    std::vector<layer> layers(num_layers);
+};
+
+struct layer(int num_tensors) {
+    std::vector<poplar::Tensor> tensors(num_tensors);
+};
+
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io);
 
 poplar::Device getDevice(int hw_mode, int num_devices);
+
+void buildGraph(poplar::Graph& graph, int num_inputs, int num_outputs, int num_streams, int row, int col);
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file);
 
