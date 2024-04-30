@@ -1,6 +1,6 @@
 #include "device_libraries/firehose_ipu.hpp"
 
-enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD}
+enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD};
 
 int main() {
 
