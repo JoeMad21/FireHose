@@ -26,12 +26,18 @@
 #include <poplin/experimental/QRFactorization.hpp>
 #include <poplin/MatMul.hpp>
 
-struct model(int num_layers) {
-    std::vector<layer> layers(num_layers);
+struct model {
+    std::vector<layer> layers;
+    model(int num_layers) {
+        std::vector<layer> layers(num_layers);
+    }
 };
 
-struct layer(int num_tensors) {
-    std::vector<poplar::Tensor> tensors(num_tensors);
+struct layer {
+    std::vector<poplar::Tensor> tensors;
+    layers(int num_tensors) {
+        std::vector<layer> tensors(num_tensors);
+    }
 };
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io);
