@@ -89,12 +89,15 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
             break;
         default:
             poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
+            std::cout << "WARNING: DEFAULTED" << std::endl;
             break;
         }
     }
 
     // POSSIBLE ISSUE HERE
+    std::cout << "HEREA" << std::endl;
     myModel.layers[layer_id] = myLayer;
+    std::cout << "HEREB" << std::endl;
 }
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
