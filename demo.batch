@@ -3,7 +3,7 @@
 #SBATCH --job-name Tensor_Decomp
 #SBATCH --ipus=1
 #SBATCH --partition=p64
-#SBATCH --nodelist=gc-poplar-03
+#SBATCH --nodelist=gc-poplar-04
 #SBATCH --ntasks 1
 #SBATCH --time=00:05:00
 #SBATCH --output=tensor_decomp_test_%j.log
