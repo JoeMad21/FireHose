@@ -11,7 +11,7 @@ int main() {
     long unsigned int num_devices = 1;
     long unsigned int seed = 42;
     bool get_from_file = false;
-    int con_task = TASK::TENSOR_DECOMP;
+    int con_task = TASK::MAT_MUL;
 
     switch(con_task) {
         case TASK::TENSOR_DECOMP:
