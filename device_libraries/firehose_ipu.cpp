@@ -1316,7 +1316,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     // CPU Vectors
     std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (2*2, 5.0));
 
     /* Connect Streams */
 
