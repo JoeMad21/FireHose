@@ -662,7 +662,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     poplin::addCodelets(graph);
 
     // Add custom codelets
-    // Not necessary
+    graph.addCodelets("./device_libraries/io_codelet.gp");
 
     std::cout << "Added Codelets!" << std::endl;
 
@@ -847,7 +847,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
     poplin::addCodelets(graph);
 
     // Add custom codelets
-    // Not necessary
+    graph.addCodelets("./device_libraries/io_codelet.gp");
 
     std::cout << "Added Codelets!" << std::endl;
 
