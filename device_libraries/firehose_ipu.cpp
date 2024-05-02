@@ -266,7 +266,7 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
 
     std::vector<poplar::ComputeSet> tempCS(num_streams);
     std::vector<poplar::VertexRef> tempVTX(num_streams);
-    std::vector<poplar::DataStream> tempDS(num_streams)
+    std::vector<poplar::DataStream> tempDS(num_streams);
     
     comPat.cps.in = tempCS;
     comPat.cps.out = tempCS;
@@ -285,7 +285,7 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
 
     addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
     addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
-    addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9)
+    addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9);
 
     std::string in = "strm_in";
     std::string out = "strm_out";
@@ -344,7 +344,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(row, col);
 
-    std::vector<model> myModels = buildTensorTemplateTRIANGLEUP(graph, myModels, myParams, num_streams);
+    buildTensorTemplateTRIANGLEUP(graph, myModels, myParams, num_streams);
 
     // Add Variable Tensors
     // Not necessary
