@@ -1263,8 +1263,9 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     auto convp = poplin::ConvParams(poplar::FLOAT, 1, {3,3}, {2,2}, 1, 1, 1);
 
     for(int i = 0; i < num_streams; i++) {
-
-        myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {2,2}, "placeholder convolution tensor");
+        
+        myModels[i].layers[LAYERS::CONSUMPTION].tensors[0] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder convolution tensor");
+        myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder convolution tensor");
 
     }
 
