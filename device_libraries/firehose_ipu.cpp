@@ -1274,6 +1274,8 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     auto convp = poplin::ConvParams(poplar::FLOAT, row*col, inputFieldShape, inputFieldShape, 1, 1, 1);
 
+    myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {2,2}, "placeholder convolution tensor")
+
     for(int i = 0; i < num_streams; i++) {
 
         // Begin Sequence 
