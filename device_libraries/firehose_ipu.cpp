@@ -763,7 +763,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
         printMatrix("Matrix A", cpu_in0[0], col, 0, packet, 0);
         printMatrix("Matrix B", cpu_in1[0], col, 0, packet, 0);
 
-        engine.run(rel_id);
+        engine.run(0);
 
         printMatrix("Result Matrix", cpu_out0[0], col, 0, packet, 1);
     }
