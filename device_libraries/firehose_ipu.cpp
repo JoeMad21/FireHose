@@ -880,7 +880,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
 
         // Consumption Task Programs
 
-        poplar::Tensor matadd_out = popops::add(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq, "MatMul");
+        poplar::Tensor matadd_out = popops::add(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq, "MatAdd");
 
         seq.add(poplar::program::Copy(matadd_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
 
@@ -1065,7 +1065,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
         // Consumption Task Programs
 
-        poplar::Tensor transpose_out = popops::add(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq, "MatMul");
+        poplar::Tensor transpose_out = popops::partialTranspose(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], seq, "Tranpose");
 
         seq.add(poplar::program::Copy(transpose_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
 
@@ -1095,7 +1095,6 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
     // CPU Vectors
     std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (row*col, 5.0));
     std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
 
     /* Connect Streams */
@@ -1103,7 +1102,6 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
     std::cout << "Connecting Streams..." << std::endl;
 
     connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, num_streams, 0, IO::IN);
     connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
@@ -1129,13 +1127,11 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
                     for (int i = 0; i < row*col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
-                        cpu_in1[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
-                        printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
+                        printMatrix("INPUT A", cpu_in0[rel_id], col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
@@ -1153,7 +1149,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Result Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("Transposed Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
