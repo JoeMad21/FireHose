@@ -184,7 +184,9 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
             }
             break;
 
-    
+        default:
+            std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
+            break;
     }
 
     return;
@@ -277,6 +279,10 @@ void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std
             buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
             buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1);
             break;
+
+        default:
+            std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
+            break;
     }
 
     // Duplicate Model (Still copied to vector even if there is no copy)
@@ -340,6 +346,10 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
             addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
             addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
             break;
+
+        default:
+            std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
+            break;
     }
 
     std::string in = "strm_in";
@@ -375,6 +385,10 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
             connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
             connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
             break;
+
+        default:
+            std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
+            break;
     }
 
     std::cout << "Added Vertices!" << std::endl;
@@ -399,7 +413,6 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
             addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
             addStream(graph, comPat.strm.in1, params, 2, 1, num_streams, IO::IN);
             addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
-            
             break;
 
         case COMPATSHAPE::SQUARE:
@@ -412,6 +425,10 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
         case COMPATSHAPE::LINE:
             addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
             addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+            break;
+
+        default:
+            std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
             break;
     }
 
@@ -1131,7 +1148,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("INPUT A", cpu_in0[rel_id], col, rel_id, packet, 0);
+                        printMatrix("Input Matrix", cpu_in0[rel_id], col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
