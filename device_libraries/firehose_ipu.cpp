@@ -750,6 +750,9 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     /* Run Parallel Threads for FireHose */
 
+    std::mt19937 gen(seed+rel_id);
+    std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+
     for (int packet = 0; packet < num_packets; packet++) {
 
         for (int i = 0; i < row*col; i++) {
