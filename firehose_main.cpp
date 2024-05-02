@@ -1,6 +1,6 @@
 #include "device_libraries/firehose_ipu.hpp"
 
-enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE};
+enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
 
 int main() {
 
@@ -11,7 +11,7 @@ int main() {
     long unsigned int num_devices = 1;
     long unsigned int seed = 42;
     bool get_from_file = false;
-    int con_task = TASK::TRANSPOSE;
+    int con_task = TASK::CONVOLUTION;
 
     switch(con_task) {
         case TASK::TENSOR_DECOMP:
@@ -28,6 +28,10 @@ int main() {
 
         case TASK::TRANSPOSE:
             transpose(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            break;
+
+        case TASK::CONVOLUTION:
+            convolution(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
     }
 
