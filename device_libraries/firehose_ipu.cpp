@@ -1272,7 +1272,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     inputFieldShape.push_back(row);
     inputFieldShape.push_back(col);
 
-    ConvParams(poplar::FLOAT, row*col, inputFieldShape, inputFieldShape, 1, 1, 1);
+    poplin::ConvParams(poplar::FLOAT, row*col, inputFieldShape, inputFieldShape, 1, 1, 1);
 
     for(int i = 0; i < num_streams; i++) {
 
