@@ -750,57 +750,72 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(num_streams*2);
+    for (int packet = 0; packet < num_packets; packet++) {
 
-    #pragma omp parallel
-    {
-        int thread_id = omp_get_thread_num();
-        int pc_id = thread_id % 2;
-        int rel_id = thread_id / 2;
-        
-        std::mt19937 gen(seed+rel_id);
-        std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
-
-        switch(pc_id) {
-            case PRODUCER:
-                for(int packet = 0; packet < num_packets; packet++) {
-                    while(data_ready_flags[rel_id]);
-
-
-                    for (int i = 0; i < row*col; i++) {
-                        cpu_in0[rel_id][i] = distribution(gen);
-                        cpu_in1[rel_id][i] = distribution(gen);
-                    }
-
-                    #pragma omp critical(print)
-                    {
-                        printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
-                        printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
-                    }
-
-                    data_ready_flags[rel_id] = true;
-                }
-                break;
-            
-            case CONSUMER:
-                for(int packet = 0; packet < num_packets; packet++) {
-                    while(!data_ready_flags[rel_id]);
-
-                    #pragma omp critical(ipu_work)
-                    {
-                        engine.run(rel_id);
-                    }
-
-                    #pragma omp critical(print)
-                    {
-                        printMatrix("Result Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
-                    }
-
-                    data_ready_flags[rel_id] = false;
-                }
-                break;
+        for (int i = 0; i < row*col; i++) {
+            cpu_in0[rel_id][i] = distribution(gen);
+            cpu_in1[rel_id][i] = distribution(gen);
         }
+
+        printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
+        printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
+
+        engine.run(rel_id);
+
+        printMatrix("Result Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
     }
+
+    //omp_set_num_threads(num_streams*2);
+
+    // #pragma omp parallel
+    // {
+    //     int thread_id = omp_get_thread_num();
+    //     int pc_id = thread_id % 2;
+    //     int rel_id = thread_id / 2;
+        
+    //     std::mt19937 gen(seed+rel_id);
+    //     std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+
+    //     switch(pc_id) {
+    //         case PRODUCER:
+    //             for(int packet = 0; packet < num_packets; packet++) {
+    //                 while(data_ready_flags[rel_id]);
+
+
+    //                 for (int i = 0; i < row*col; i++) {
+    //                     cpu_in0[rel_id][i] = distribution(gen);
+    //                     cpu_in1[rel_id][i] = distribution(gen);
+    //                 }
+
+    //                 #pragma omp critical(print)
+    //                 {
+    //                     printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
+    //                     printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
+    //                 }
+
+    //                 data_ready_flags[rel_id] = true;
+    //             }
+    //             break;
+            
+    //         case CONSUMER:
+    //             for(int packet = 0; packet < num_packets; packet++) {
+    //                 while(!data_ready_flags[rel_id]);
+
+    //                 #pragma omp critical(ipu_work)
+    //                 {
+    //                     engine.run(rel_id);
+    //                 }
+
+    //                 #pragma omp critical(print)
+    //                 {
+    //                     printMatrix("Result Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+    //                 }
+
+    //                 data_ready_flags[rel_id] = false;
+    //             }
+    //             break;
+    //     }
+    // }
 
     return;
 }
