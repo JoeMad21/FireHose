@@ -430,19 +430,19 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     /* CPU Memory */
 
     // CPU Vectors
-    struct {
-        std::vector<std::vector<float>> in0(3, std::vector<float> (row*col, 5.0));
-        std::vector<std::vector<float>> out0(3, std::vector<float> (row*col, 5.0));
-        std::vector<std::vector<float>> out1(3, std::vector<float> (row*col, 5.0));
-    } cpu;
+    //struct {
+        std::vector<std::vector<float>> in0(num_streams, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> out0(num_streams, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> out1(num_streams, std::vector<float> (row*col, 5.0));
+    //} cpu;
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu.in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu.out0, num_streams, 0, IO::OUT);
-    connectEngineStream(graph, engine, cpu.out1, num_streams, 1, IO::OUT);
+    connectEngineStream(graph, engine, in0, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, out1, num_streams, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
