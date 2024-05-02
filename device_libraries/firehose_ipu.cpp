@@ -765,6 +765,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
                     for (int i = 0; i < row*col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
+                        cpu_in1[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
