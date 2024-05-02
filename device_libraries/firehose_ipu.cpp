@@ -430,19 +430,17 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     /* CPU Memory */
 
     // CPU Vectors
-    struct {
-        std::vector<std::vector<float>> in0(num_streams, std::vector<float> (row*col, 5.0));
-        std::vector<std::vector<float>> out0(num_streams, std::vector<float> (row*col, 5.0));
-        std::vector<std::vector<float>> out1(num_streams, std::vector<float> (row*col, 5.0));
-    } cpu;
+    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out1(num_streams, std::vector<float> (row*col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu.in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu.out0, num_streams, 0, IO::OUT);
-    connectEngineStream(graph, engine, cpu.out1, num_streams, 1, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_out1, num_streams, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
@@ -466,11 +464,11 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
 
                     for (int i = 0; i < row*col; i++) {
-                        cpu.in0[rel_id][i] = distribution(gen);
+                        cpu_in0[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
-                    printMatrix("GenMatrix", cpu.in0[rel_id], col, rel_id, packet, 0);
+                    printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet, 0);
 
                     data_ready_flags[rel_id] = true;
                 }
@@ -487,8 +485,8 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("QMatrix", cpu.out0[rel_id], col, rel_id, packet, 1);
-                        printMatrix("RMatrix", cpu.out1[rel_id], col, rel_id, packet, 1);
+                        printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
