@@ -1071,7 +1071,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "Compute Set for Pipeline " + std::to_string(i);
-        cps[i] = graph.addComputeSet(db_name);
+        cps.push_back(graph.addComputeSet(db_name));
     }
 
     for(int i = 0; i < num_streams; i++) {
