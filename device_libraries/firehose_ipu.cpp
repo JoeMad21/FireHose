@@ -1067,6 +1067,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
     poplar::program::Sequence seq;
 
     std::vector<poplar::ComputeSet> cps(num_streams);
+    std::vector<poplar::VertexRef> vtx(num_streams);
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "Compute Set for Pipeline " + std::to_string(i);
