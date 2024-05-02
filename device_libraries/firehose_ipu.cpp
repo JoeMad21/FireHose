@@ -183,11 +183,6 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
 
     
     }
-
-    for (int i = 0; i < num_streams; i++) {
-        db_name = title + std::to_string(i) + port + std::to_string(num_port);
-        strm[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
-    }
 }
 
 void addVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset) {
@@ -209,10 +204,11 @@ void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, st
     }
 }
 
-void connectEngineStream(poplar::Graph& graph, std::vector<float>& cpu, int num_streams, int num_port, int IO) {
+void connectEngineStream(poplar::Graph& graph, poplar::Engine& engine, std::vector<float>& cpu, int num_streams, int num_port, int IO) {
 
     std::string db_name;
     std::string title;
+    std::string port;
     
     switch(IO) {
         case IO::IN:
@@ -428,9 +424,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, cpu.in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, cpu.out0, num_streams, 0, IO::OUT);
-    connectEngineStream(graph, cpu.out1, num_streams, 1, IO::OUT);
+    connectEngineStream(graph, engine, cpu.in0, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu.out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu.out1, num_streams, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
