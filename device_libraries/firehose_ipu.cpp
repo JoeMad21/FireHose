@@ -1081,8 +1081,8 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
     }
 
     for(int i = 0; i < num_streams; i++) {
-        graph.connect(vtx[i]["strm_in"], myModels[i].layers[LAYER::CONSUMPTION].tensors[0]);
-        graph.connect(vtx[i]["strm_out"], myModels[i].layers[LAYER::OUTPUT].tensors[0]);
+        graph.connect(vtx[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
+        graph.connect(vtx[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
     }
 
     for(int i = 0; i < num_streams; i++) {
