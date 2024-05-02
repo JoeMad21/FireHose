@@ -185,13 +185,13 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
     }
 }
 
-void addVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset) {
+void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset) {
 
     std::string vtx_name = "IOVertex";
 
     for (int i = 0; i < num_streams; i++) {
 
-        vtx[i] = graph.addVertex(vtx[i], "IOVertex");
+        vtx[i] = graph.addVertex(cps[i], "IOVertex");
         graph.setTileMapping(vtx[i], i+offset);
     }
 
@@ -269,9 +269,9 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
     addComputeSet(graph, comPat.cps.in, num_streams, IO::IN);
     addComputeSet(graph, comPat.cps.out, num_streams, IO::OUT);
 
-    addVertex(graph, comPat.vtx.in0, num_streams, 5);
-    addVertex(graph, comPat.vtx.out0, num_streams, 7);
-    addVertex(graph, comPat.vtx.out1, num_streams, 9)
+    addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
+    addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
+    addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9)
 
     std::string in = "strm_in";
     std::string out = "strm_out";
