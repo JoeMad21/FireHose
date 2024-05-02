@@ -1301,7 +1301,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
         poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], convp, true, seq, "Tranpose");
 
-        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
+        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]));
 
         // Stream Outputs Programs
 
