@@ -431,9 +431,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     // CPU Vectors
     struct {
-        std::vector<std::vector<float>> in0(num_streams, std::vector<float> (row*col, 5.0));
-        std::vector<std::vector<float>> out0(num_streams, std::vector<float> (row*col, 5.0));
-        std::vector<std::vector<float>> out1(num_streams, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> in0(3, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> out0(3, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> out1(3, std::vector<float> (row*col, 5.0));
     } cpu;
 
     /* Connect Streams */
