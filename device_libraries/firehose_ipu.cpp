@@ -519,8 +519,6 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         // Stream Inputs Programs
 
-        seq = poplar::program::Sequence();
-
         seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
 
         seq.add(poplar::program::Execute(comPat.cps.in[i]));
@@ -699,8 +697,6 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
         seq = poplar::program::Sequence();
 
         // Stream Inputs Programs
-
-        seq = poplar::program::Sequence();
 
         seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
         seq.add(poplar::program::Copy(comPat.strm.in1[i], myModels[i].layers[LAYERS::INPUT].tensors[1]));
@@ -885,8 +881,6 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
         seq = poplar::program::Sequence();
 
         // Stream Inputs Programs
-
-        seq = poplar::program::Sequence();
 
         seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
         seq.add(poplar::program::Copy(comPat.strm.in1[i], myModels[i].layers[LAYERS::INPUT].tensors[1]));
@@ -1092,8 +1086,6 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
         // Stream Inputs Programs
 
-        seq = poplar::program::Sequence();
-
         seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
 
         seq.add(poplar::program::Execute(comPat.cps.in[i]));
@@ -1286,28 +1278,38 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     for(int i = 0; i < num_streams; i++) {
 
+        std::cout << "HEREA" << std::endl;
+
         // Begin Sequence 
         seq = poplar::program::Sequence();
 
-        // Stream Inputs Programs
+        std::cout << "HEREB" << std::endl;
 
-        seq = poplar::program::Sequence();
+        // Stream Inputs Programs
 
         seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
 
+        std::cout << "HEREC" << std::endl;
+
         seq.add(poplar::program::Execute(comPat.cps.in[i]));
+
+        std::cout << "HERED" << std::endl;
 
         // Consumption Task Programs
 
         poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], convp, true, seq, "Tranpose");
 
-        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]));
+        std::cout << "HEREE" << std::endl;
+
+        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::OUTPUT].tensors[0]));
+
+        std::cout << "HEREF" << std::endl;
 
         // Stream Outputs Programs
 
         //seq.add(poplar::program::Execute(comPat.cps.out[i]));
 
-        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], comPat.strm.out0[i]));
+        //seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], comPat.strm.out0[i]));
 
         // End Sequence
         progs[prog_idx++] = seq;
