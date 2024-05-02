@@ -248,31 +248,31 @@ void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std
     model myModel;
 
     switch(mode) {
-        case COMPAT::TRIANGLEUP:
+        case COMPATSHAPE::TRIANGLEUP:
             buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
             buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
             buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
             break;
 
-        case COMPAT::TRIANGLEQR:
+        case COMPATSHAPE::TRIANGLEQR:
             buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
             buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
             buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
             break;
 
-        case COMPAT::TRIANGLEDOWN:
+        case COMPATSHAPE::TRIANGLEDOWN:
             buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2);
             buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
             buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1);
             break;
 
-        case COMPAT::SQUARE:
+        case COMPATSHAPE::SQUARE:
             buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2);
             buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
             buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
             break;
 
-        case COMPAT::LINE:
+        case COMPATSHAPE::LINE:
             buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
             buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
             buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1);
@@ -673,7 +673,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     std::cout << "Added Codelets!" << std::endl;
 
-    comPatterncomPat;
+    comPattern comPat;
 
     buildIOTemplateTRIANGLEDOWN(graph, myModels, comPat, myParams, num_streams);
 
