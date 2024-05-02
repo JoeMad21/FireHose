@@ -750,22 +750,22 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     /* Run Parallel Threads for FireHose */
 
-    std::mt19937 gen(seed+rel_id);
+    std::mt19937 gen(seed+0);
     std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
     for (int packet = 0; packet < num_packets; packet++) {
 
         for (int i = 0; i < row*col; i++) {
-            cpu_in0[rel_id][i] = distribution(gen);
-            cpu_in1[rel_id][i] = distribution(gen);
+            cpu_in0[0][i] = distribution(gen);
+            cpu_in1[0][i] = distribution(gen);
         }
 
-        printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
-        printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
+        printMatrix("Matrix A", cpu_in0[0], col, rel_id, packet, 0);
+        printMatrix("Matrix B", cpu_in1[0], col, rel_id, packet, 0);
 
         engine.run(rel_id);
 
-        printMatrix("Result Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+        printMatrix("Result Matrix", cpu_out0[0], col, rel_id, packet, 1);
     }
 
     //omp_set_num_threads(num_streams*2);
