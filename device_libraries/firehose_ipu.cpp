@@ -1280,6 +1280,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
         // Stream Inputs Programs
 
         seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
+        seq.add(poplar::program::Copy(comPat.strm.in1[i], myModels[i].layers[LAYERS::INPUT].tensors[1]));
 
         seq.add(poplar::program::Execute(comPat.cps.in[i]));
 
@@ -1316,6 +1317,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     // CPU Vectors
     std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (2*2, 5.0));
     std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (2*2, 5.0));
 
     /* Connect Streams */
@@ -1323,6 +1325,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     std::cout << "Connecting Streams..." << std::endl;
 
     connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, num_streams, 0, IO::IN);
     connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
