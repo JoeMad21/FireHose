@@ -1264,10 +1264,12 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     for(int i = 0; i < num_streams; i++) {
         
-        myModels[i].layers[LAYERS::CONSUMPTION].tensors[0] = graph.addVariable(poplar::FLOAT, {1, 1, 3, 3}, "placeholder convolution tensor");
-        myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder convolution tensor");
+        myModels[i].layers[LAYERS::CONSUMPTION].tensors[0] = graph.addVariable(poplar::FLOAT, {1, 1, 3, 3}, "placeholder input tensor");
+        myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder weight tensor");
+        myModels[i].layers[LAYERS::OUTPUT].tensors[0] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder output tensor");
         poputil::mapTensorLinearly(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
         poputil::mapTensorLinearly(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]);
+        poputil::mapTensorLinearly(graph, myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
     }
 
     for(int i = 0; i < num_streams; i++) {
@@ -1286,7 +1288,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
         poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], convp, false, seq, "Convolution"); // PROBLEM LINE
         poputil::mapTensorLinearly(graph, conv_out);
 
-        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::OUTPUT].tensors[0].reshape({3,3})));
+        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::OUTPUT].tensors[0]));
 
         // Stream Outputs Programs
 
