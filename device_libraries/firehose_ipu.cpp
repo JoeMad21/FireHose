@@ -1065,7 +1065,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
         // Consumption Task Programs
 
-        poplar::Tensor transpose_out = popops::partialTranspose(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], seq, "Tranpose");
+        poplar::Tensor transpose_out = popops::rearrange::partialTranspose(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], seq, "Tranpose");
 
         seq.add(poplar::program::Copy(transpose_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
 
