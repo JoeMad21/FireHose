@@ -186,11 +186,11 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
 
     for (int i = 0; i < num_streams; i++) {
         db_name = title + std::to_string(i) + port + std::to_string(num_port);
-        strm.in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
+        strm[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
     }
 }
 
-void addVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, int offset) {
+void addVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset) {
 
     std::string vtx_name = "IOVertex";
 
