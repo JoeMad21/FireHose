@@ -89,4 +89,6 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
 
 void transpose(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file);
 
+convolution(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file);
+
 //void placeholder(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices);
