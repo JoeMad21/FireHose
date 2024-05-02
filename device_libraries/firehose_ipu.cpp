@@ -262,13 +262,13 @@ void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std
 
         case COMPATSHAPE::TRIANGLEDOWN:
             buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2);
-            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
             buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1);
             break;
 
         case COMPATSHAPE::SQUARE:
             buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2);
-            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
             buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
             break;
 
@@ -360,15 +360,15 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
 
         case COMPATSHAPE::TRIANGLEDOWN:
             connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
-            connectVertex(graph, comPat.vtx.in1, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 1, 0, in, out);
+            connectVertex(graph, comPat.vtx.in1, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 1, 1, in, out);
             connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
             break;
 
         case COMPATSHAPE::SQUARE:
             connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
-            connectVertex(graph, comPat.vtx.in1, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 1, 0, in, out);
+            connectVertex(graph, comPat.vtx.in1, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 1, 1, in, out);
             connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
-            connectVertex(graph, comPat.vtx.out1, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 1, in, out);
+            connectVertex(graph, comPat.vtx.out1, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 1, 1, in, out);
             break;
 
         case COMPATSHAPE::LINE:
@@ -701,9 +701,9 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
         // Consumption Task Programs
 
-        seq.add(poplar::program::Copy(c_id, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]));
+        poplar::Tensor matmul_out = poplin::matMul(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq, "MatMul");
 
-        poplin::experimental::QRFactorization(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq);
+        seq.add(poplar::program::Copy(matmul_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
 
         // Stream Outputs Programs
 
@@ -731,16 +731,16 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     // CPU Vectors
     std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (row*col, 5.0));
     std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out1(num_streams, std::vector<float> (row*col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
     connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, num_streams, 0, IO::IN);
     connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
-    connectEngineStream(graph, engine, cpu_out1, num_streams, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
@@ -768,7 +768,10 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
                     }
 
                     #pragma omp critical(print)
-                    printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet, 0);
+                    {
+                        printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
+                        printMatrix("Matrix B", cpu_in0[rel_id], col, rel_id, packet, 0);
+                    }
 
                     data_ready_flags[rel_id] = true;
                 }
@@ -785,8 +788,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
-                        printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet, 1);
+                        printMatrix("Result Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
