@@ -197,7 +197,7 @@ void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::
 
 }
 
-void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, std::vector<model>& myModels, int top_layer, int bottom_layer, int top_tensor, int bottom_tensor, std::string in, std::string out) {
+void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, std::vector<model>& myModels, int num_streams, int top_layer, int bottom_layer, int top_tensor, int bottom_tensor, std::string in, std::string out) {
     for(int i = 0; i < num_streams; i++) {
         graph.connect(vtx[i][in], myModels[i].layers[top_layer].tensors[top_tensor]);
         graph.connect(vtx[i][out], myModels[i].layers[bottom_layer].tensors[bottom_tensor]);
@@ -276,9 +276,9 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
     std::string in = "strm_in";
     std::string out = "strm_out";
 
-    connectVertex(graph, comPat.vtx.in0, myModels, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
-    connectVertex(graph, comPat.vtx.out0, myModels, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
-    connectVertex(graph, comPat.vtx.out1, myModels, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 1, 1, in, out);
+    connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
+    connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
+    connectVertex(graph, comPat.vtx.out1, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 1, 1, in, out);
 
     std::cout << "Added Vertices!" << std::endl;
 

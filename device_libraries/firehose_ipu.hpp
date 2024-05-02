@@ -69,7 +69,7 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
 
 void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset);
 
-void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, std::vector<model>& myModels, int top_layer, int bottom_layer, int top_tensor, int bottom_tensor, std::string in, std::string out);
+void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, std::vector<model>& myModels, int num_streams, int top_layer, int bottom_layer, int top_tensor, int bottom_tensor, std::string in, std::string out);
 
 void connectEngineStream(poplar::Graph& graph, std::vector<float>& cpu, int num_streams, int num_port, int IO);
 
