@@ -1266,7 +1266,8 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
         
         myModels[i].layers[LAYERS::CONSUMPTION].tensors[0] = graph.addVariable(poplar::FLOAT, {1, 1, 3, 3}, "placeholder convolution tensor");
         myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder convolution tensor");
-
+        poputil::mapTensorLinearly(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
+        poputil::mapTensorLinearly(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]);
     }
 
     for(int i = 0; i < num_streams; i++) {
@@ -1283,6 +1284,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
         // Consumption Task Programs
 
         poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], convp, false, seq, "Convolution"); // PROBLEM LINE
+        poputil::mapTensorLinearly(graph, conv_out);
 
         seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::OUTPUT].tensors[0]));
 
