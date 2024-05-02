@@ -194,8 +194,6 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
 
 void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset) {
 
-    std::string vtx_name = "IOVertex";
-
     for (int i = 0; i < num_streams; i++) {
 
         vtx[i] = graph.addVertex(cps[i], "IOVertex");
@@ -1052,6 +1050,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
     // Add custom codelets
     graph.addCodelets("./device_libraries/io_codelet.gp");
+    graph.addCodelets("./device_libraries/transpose.gp");
 
     std::cout << "Added Codelets!" << std::endl;
 
@@ -1074,6 +1073,17 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
         cps[i] = graph.addComputeSet(db_name);
     }
 
+    for (int i = 0; i < num_streams; i++) {
+
+        vtx[i] = graph.addVertex(cps[i], "IOVertex");
+        graph.setTileMapping(vtx[i], i+15);
+    }
+
+    for(int i = 0; i < num_streams; i++) {
+        graph.connect(vtx[i]["strm_in"], myModels[i].layers[LAYER::CONSUMPTION].tensors[0]);
+        graph.connect(vtx[i]["strm_out"], myModels[i].layers[LAYER::OUTPUT].tensors[0]);
+    }
+
     for(int i = 0; i < num_streams; i++) {
 
         // Begin Sequence 
@@ -1089,9 +1099,11 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
         // Consumption Task Programs
 
-        poplar::Tensor transpose_out = popops::rearrange::partialTranspose(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], cps[i], "Tranpose");
+        //poplar::Tensor transpose_out = popops::rearrange::partialTranspose(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], cps[i], "Tranpose");
 
-        seq.add(poplar::program::Copy(transpose_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
+        //seq.add(poplar::program::Copy(transpose_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
+
+        seq.add(poplar::program::Execute(comPat.cps.out[i]));
 
         // Stream Outputs Programs
 
