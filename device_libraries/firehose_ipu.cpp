@@ -651,15 +651,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     // Not necessary
 
     // Constant Tensors
-    std::cout << "Adding Constant Tensors..." << std::endl;
-
-    std::vector<float> vec_id;
-    createIdentityMatrix(vec_id, row, col);
-
-    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
-    poputil::mapTensorLinearly(graph, c_id);
-
-    std::cout << "Added Constant Tensors!" << std::endl;
+    // Not necessary
 
     /* Add Codelets */
 
@@ -842,13 +834,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
     // Not necessary
 
     // Constant Tensors
-    std::cout << "Adding Constant Tensors..." << std::endl;
-
-    std::vector<float> vec_id;
-    createIdentityMatrix(vec_id, row, col);
-
-    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
-    poputil::mapTensorLinearly(graph, c_id);
+    // Not necessary
 
     std::cout << "Added Constant Tensors!" << std::endl;
 
