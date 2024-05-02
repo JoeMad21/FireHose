@@ -1263,7 +1263,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     auto convp = poplin::ConvParams(poplar::FLOAT, 1, {3,3}, {2,2}, 1, 1, 1);
 
     poplar::OptionFlags streamOpts {
-      {"bufferingDepth", std::to_string(buf_depth)},
+      {"bufferingDepth", "2"},
     };
 
     for(int i = 0; i < num_streams; i++) {
