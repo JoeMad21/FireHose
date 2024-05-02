@@ -1272,7 +1272,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     inputFieldShape.push_back(row);
     inputFieldShape.push_back(col);
 
-    poplin::ConvParams(poplar::FLOAT, row*col, inputFieldShape, inputFieldShape, 1, 1, 1);
+    auto convp = poplin::ConvParams(poplar::FLOAT, row*col, inputFieldShape, inputFieldShape, 1, 1, 1);
 
     for(int i = 0; i < num_streams; i++) {
 
@@ -1289,7 +1289,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
         // Consumption Task Programs
 
-        poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], "Tranpose");
+        poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], convp, true, seq, "Tranpose");
 
         seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
 
