@@ -1104,7 +1104,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
         //seq.add(poplar::program::Copy(transpose_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
 
-        seq.add(poplar::program::Execute(comPat.cps.out[i]));
+        seq.add(poplar::program::Execute(cps[i]));
 
         // Stream Outputs Programs
 
