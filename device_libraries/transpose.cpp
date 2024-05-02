@@ -2,7 +2,7 @@
 
 using namespace poplar;
 
-class IOVertex : public Vertex {
+class transposeVertex : public Vertex {
 public:
 
 Vector<Input<Vector<float>>> strm_in;

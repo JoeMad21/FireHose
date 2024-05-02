@@ -1076,7 +1076,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
     for (int i = 0; i < num_streams; i++) {
 
-        vtx[i] = graph.addVertex(cps[i], "IOVertex");
+        vtx[i] = graph.addVertex(cps[i], "transposeVertex");
         graph.setTileMapping(vtx[i], i+15);
     }
 
