@@ -1294,7 +1294,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
         //seq.add(poplar::program::Execute(comPat.cps.out[i]));
 
-        //seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], comPat.strm.out0[i]));
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], comPat.strm.out0[i]));
 
         // End Sequence
         progs[prog_idx++] = seq;
@@ -1316,7 +1316,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     // CPU Vectors
     std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (2*2, 5.0));
 
     /* Connect Streams */
 
