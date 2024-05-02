@@ -455,7 +455,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(row, col);
 
-    buildTensorTemplate(graph, myModels, myParams, num_streams);
+    buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEQR);
 
     // Add Variable Tensors
     // Not necessary
@@ -486,7 +486,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, num_streams);
+    buildIOTemplate(graph, myModels, comPat, myParams, num_streams, COMPATSHAPE::TRIANGLEQR);
 
     /* Programs */
 
@@ -644,7 +644,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(row, col);
 
-    buildTensorTemplateTRIANGLEDOWN(graph, myModels, myParams, num_streams);
+    buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     // Add Variable Tensors
     // Not necessary
@@ -675,7 +675,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     comPattern comPat;
 
-    buildIOTemplateTRIANGLEDOWN(graph, myModels, comPat, myParams, num_streams);
+    buildIOTemplate(graph, myModels, comPat, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     /* Programs */
 
