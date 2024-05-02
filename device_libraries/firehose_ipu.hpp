@@ -34,6 +34,27 @@ struct model {
     std::vector<layer> layers;
 };
 
+struct comPatternTriangleUP {
+
+    struct {
+        std::vector<poplar::ComputeSet> in;
+        std::vector<poplar::ComputeSet> out;
+    } cps;
+
+    struct {
+        std::vector<poplar::VertexRef> in0(num_streams);
+        std::vector<poplar::VertexRef> out0(num_streams);
+        std::vector<poplar::VertexRef> out1(num_streams);
+    } vtx;
+
+    struct {
+        std::vector<poplar::DataStream> in0(num_streams);
+        std::vector<poplar::DataStream> out0(num_streams);
+        std::vector<poplar::DataStream> out1(num_streams);
+    } strm;
+}
+
+
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io);
 
 void createIdentityMatrix(std::vector<float>& vec_id, int row, int col);

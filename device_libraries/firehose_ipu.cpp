@@ -7,6 +7,7 @@
 enum HARDWARE {IPU, MODEL, CPU};
 enum MAPPING {LINEAR, SET};
 enum LAYERS {INPUT, CONSUMPTION, OUTPUT};
+enum IO {INPUT, OUTPUT}
 
 
 
@@ -102,7 +103,7 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
             break;
         default:
             poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
-            std::cout << "WARNING: DEFAULTED" << std::endl;
+            std::cout << "WARNING: DEFAULTED IN buildLayer()" << std::endl;
             break;
         }
     }
@@ -113,37 +114,189 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
     return;
 }
 
-// void AddConstantTensor(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int c_id) {
+void addComputeSet(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, int num_streams, int IO) {
 
-//     std::string db_name;
-//     layer myLayer;
+    std::string db_name;
+    std::string title;
+    
+    switch(IO) {
+        case 0:
+            title = "Input Compute Set for Pipeline ";
+            break;
+        case 1:
+            title = "Output Compute Set for Pipeline ";
+            break;
+        default:
+            title = "Input Compute Set for Pipeline ";
+            std::cout << "WARNING: DEFAULTED IN addComputeSet()" << std::endl;
+            break;
+    }
 
-//     db_name = "Constant Tensor " + std::to_string(i);
-//     myLayer.tensors.push_back(graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name));
+    for (int i = 0; i < num_streams; i++) {
+        db_name = title + std::to_string(i);
+        cps[i] = graph.addComputeSet(db_name);
+    }
+}
 
-//     switch(map) {
-//     case MAPPING::LINEAR:
-//         poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
-//         break;
-//     case MAPPING::SET:
-//         graph.setTileMapping(myLayer.tensors[i], i);
-//         break;
-//     default:
-//         poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
-//         std::cout << "WARNING: DEFAULTED" << std::endl;
-//         break;
-//     }
+void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std::pair<int,int> params, int buf_depth, int num_port, int num_streams, int IO) {
 
-//     if (myModel.layers.size() == layer_id) {
-//         // TO DO: Overload assignment operator
-//         myModel.layers.push_back(myLayer);
-//     }
-//     else {
-//         myModel.layers[layer_id].tensors.push_back(myLayer.tensors[0])
-//     }
+    std::string db_name;
+    std::string title;
+    std::string port;
+    std::string buf_depth = std::to_string(buf_depth);
 
-//     return;
-// }
+    poplar::OptionFlags streamOpts {
+      {"bufferingDepth", buf_depth},
+    };
+    
+    switch(IO) {
+        case IO::INPUT:
+            title = "Input Stream ";
+            port = "for input ";
+            break;
+        case IO::OUTPUT:
+            title = "Output Stream ";
+            port = "for output  ";
+            break;
+        default:
+            title = "Input Stream ";
+            port = "for input ";
+            std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
+            break;
+    }
+
+    switch(IO) {
+        case IO::INPUT:
+            
+            for (int i = 0; i < num_streams; i++) {
+                db_name = title + std::to_string(i) + port + std::to_string(num_port);
+                strm[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, params.first*params.second, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
+            }
+            break;
+
+        case IO::OUTPUT:
+
+            for (int i = 0; i < num_streams; i++) {
+                db_name = title + std::to_string(i) + port + std::to_string(num_port);
+                strm[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, params.first*params.second, streamOpts);
+            }
+            break;
+
+    
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        db_name = title + std::to_string(i) + port + std::to_string(num_port);
+        strm.in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
+    }
+}
+
+void addVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, int offset) {
+
+    std::string vtx_name = "IOVertex";
+
+    for (int i = 0; i < num_streams; i++) {
+
+        vtx[i] = graph.addVertex(vtx[i], "IOVertex");
+        graph.setTileMapping(vtx[i], i+offset);
+    }
+
+}
+
+void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, std::vector<model>& myModels, int top_layer, int bottom_layer, int top_tensor, int bottom_tensor, std::string in, std::string out) {
+    for(int i = 0; i < num_streams; i++) {
+        graph.connect(vtx[i][in], myModels[i].layers[top_layer].tensors[top_tensor]);
+        graph.connect(vtx[i][out], myModels[i].layers[bottom_layer].tensors[bottom_tensor]);
+    }
+}
+
+void connectEngineStream(poplar::Graph& graph, std::vector<float>& cpu, int num_streams, int num_port, int IO) {
+
+    std::string db_name;
+    std::string title;
+    
+    switch(IO) {
+        case IO::INPUT:
+            title = "Input Stream ";
+            port = "for input ";
+            break;
+        case IO::OUTPUT:
+            title = "Output Stream ";
+            port = "for output  ";
+            break;
+        default:
+            title = "Input Stream ";
+            port = "for input ";
+            std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
+            break;
+    }
+
+    for (int i = 0; i < num_streams; i++) {
+        db_name = title + std::to_string(i) + port + std::to_string(num_port);
+        engine.connectStream(db_name, cpu[i].data(), cpu[i].data() + cpu[i].size());
+    }
+}
+
+void buildTensorTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams) {
+    std::cout << "Building Model..." << std::endl;
+    model myModel;
+
+    buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
+    buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
+    buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
+
+    // Duplicate Model (Still copied to vector even if there is no copy)
+    // TO DO: Overload assignment operator
+    for(int i = 0; i < num_streams; i++) {
+        myModels[i] = myModel;
+    }
+    std::cout << "Built Model!" << std::endl;
+
+    return myModels;
+}
+
+void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, comPatternTriangleUP& comPat, std::pair<int,int> params, int num_streams) {
+
+    std::cout << "Adding Vertices..." << std::endl;
+    
+    comPat.cps.in = std::vector<poplar::ComputeSet> tempCS(num_streams);
+    comPat.cps.out = std::vector<poplar::ComputeSet> tempCS(num_streams);
+
+    comPat.vtx.in0 = std::vector<poplar::VertexRef> tempVTX(num_streams);
+    comPat.vtx.out0 = std::vector<poplar::VertexRef> tempVTX(num_streams);
+    comPat.vtx.out1 = std::vector<poplar::VertexRef> tempVTX(num_streams);
+
+    comPat.strm.in0 = std::vector<poplar::DataStream> tempDS(num_streams);
+    comPat.strm.out0 = std::vector<poplar::DataStream> tempDS(num_streams);
+    comPat.strm.out1 = std::vector<poplar::DataStream> tempDS(num_streams);
+
+
+    addComputeSet(graph, comPat.cps.in, num_streams, IO::INPUT);
+    addComputeSet(graph, comPat.cps.out, num_streams, IO::OUTPUT);
+
+    addVertex(graph, comPat.vtx.in0, num_streams, 5);
+    addVertex(graph, comPat.vtx.out0, num_streams, 7);
+    addVertex(graph, comPat.vtx.out1, num_streams, 9)
+
+    std::string in = "strm_in";
+    std::string out = "strm_out";
+
+    connectVertex(graph, comPat.vtx.in0, myModels, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
+    connectVertex(graph, comPat.vtx.out0, myModels, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
+    connectVertex(graph, comPat.vtx.out1, myModels, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 1, 1, in, out);
+
+    std::cout << "Added Vertices!" << std::endl;
+
+    // Streams
+    std::cout << "Adding Streams..." << std::endl;
+
+    addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::INPUT);
+    addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUTPUT);
+    addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUTPUT);
+
+    std::cout << "Added Streams!" << std::endl;
+
+}
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
@@ -177,22 +330,13 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     /* Build Graph */
 
     // Build Model
-
-    std::cout << "Building Model..." << std::endl;
-    model myModel; // TO DO: Use Variable
+    std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(row, col);
-    int num_layer = 0;
 
-    buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 1);
-    buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
-    buildLayer(graph, myModel, myParams, num_layer++, MAPPING::LINEAR, 2);
+    std::vector<model> myModels = buildTensorTemplateTRIANGLEUP(graph, myModels, myParams, num_streams);
 
-    // TO DO: Overload assignment operator
-    std::vector<model> myModels(num_streams);
-    for(int i = 0; i < num_streams; i++) {
-        myModels[i] = myModel;
-    }
-    std::cout << "Built Model!" << std::endl;
+    // Add Variable Tensors
+    // Not necessary
 
     // Constant Tensors
     std::cout << "Adding Constant Tensors..." << std::endl;
@@ -218,90 +362,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Added Codelets!" << std::endl;
 
-    /* TO BE REWRITTEN START */
-    // Vertices
-    std::cout << "Adding Vertices..." << std::endl;
+    comPatternTriangleUP comPat;
 
-    struct {
-        std::vector<poplar::ComputeSet> in(num_streams);
-        std::vector<poplar::ComputeSet> out(num_streams);
-    } cps;
-
-    for (int i = 0; i < num_streams; i++) {
-        db_name = "IO in CS " + std::to_string(i);
-        cps.in[i] = graph.addComputeSet(db_name);
-
-        db_name = "IO in CS " + std::to_string(i);
-        cps.out[i] = graph.addComputeSet(db_name);
-    }
-
-    struct {
-        std::vector<poplar::VertexRef> in0(num_streams);
-        std::vector<poplar::VertexRef> out0(num_streams);
-        std::vector<poplar::VertexRef> out1(num_streams);
-    } vtx;
-
-    for (int i = 0; i < num_streams; i++) {
-
-        vtx.in0[i] = graph.addVertex(cps.in[i], "IOVertex");
-        graph.setTileMapping(vtx.in0[i], i+5);
-
-        vtx.out0[i] = graph.addVertex(cps.out[i], "IOVertex");
-        graph.setTileMapping(vtx.out0[i], i+7);
-        vtx.out1[i] = graph.addVertex(cps.out[i], "IOVertex");
-        graph.setTileMapping(vtx.out1[i], i+9);
-    }
-
-    for(int i = 0; i < num_streams; i++) {
-        graph.connect(vtx.in0[i]["strm_in"], myModels[i].layers[LAYERS::INPUT].tensors[0]);
-        graph.connect(vtx.in0[i]["strm_out"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
-
-        graph.connect(vtx.out0[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
-        graph.connect(vtx.out0[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
-
-        graph.connect(vtx.out1[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]);
-        graph.connect(vtx.out1[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[1]);
-    }
-
-    std::cout << "Added Vertices!" << std::endl;
-
-    // Streams
-    std::cout << "Adding Streams..." << std::endl;
-
-    struct {
-        std::vector<poplar::DataStream> in0(num_streams);
-        std::vector<poplar::DataStream> out0(num_streams);
-        std::vector<poplar::DataStream> out1(num_streams);
-    } strm;
-
-    poplar::OptionFlags streamOpts {
-      {"bufferingDepth", "2"},
-    };
-
-    for (int i = 0; i < num_streams; i++) {
-        db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        strm.in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
-
-        db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        strm.out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
-
-        db_name = "Output Stream " + std::to_string(i) + " for output 1";
-        strm.out1[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
-    }
-
-    std::cout << "Added Streams!" << std::endl;
-
-    /* TO BE REWRITTEN END */
-
-    /* CPU Memory */
-
-    // CPU Vectors
-    struct {
-        std::vector<std::vector<float>> in0(num_streams, std::vector<float> (row*col, 5.0));
-        std::vector<std::vector<float>> out0(num_streams, std::vector<float> (row*col, 5.0));
-        std::vector<std::vector<float>> out1(num_streams, std::vector<float> (row*col, 5.0));
-    } cpu;
-
+    buildIOTemplateTRIANGLEUP(graph, myModels, comPat, myParams, num_streams)
 
     /* Programs */
 
@@ -320,9 +383,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         seq = poplar::program::Sequence();
 
-        seq.add(poplar::program::Copy(strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
+        seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
 
-        seq.add(poplar::program::Execute(cps.in[i]));
+        seq.add(poplar::program::Execute(comPat.cps.in[i]));
 
         // Consumption Task Programs
 
@@ -332,10 +395,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
         // Stream Outputs Programs
 
-        seq.add(poplar::program::Execute(cps.io.out[i]));
+        seq.add(poplar::program::Execute(comPat.cps.out[i]));
 
-        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], strm.out0[i]));
-        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[1], strm.out1[i]));
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], comPat.strm.out0[i]));
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[1], comPat.strm.out1[i]));
 
         // End Sequence
         progs[prog_idx++] = seq;
@@ -353,20 +416,22 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Loaded Device!" << std::endl;
 
+    /* CPU Memory */
+
+    // CPU Vectors
+    struct {
+        std::vector<std::vector<float>> in0(num_streams, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> out0(num_streams, std::vector<float> (row*col, 5.0));
+        std::vector<std::vector<float>> out1(num_streams, std::vector<float> (row*col, 5.0));
+    } cpu;
+
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    for (int i = 0; i < num_streams; i++) {
-        db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        engine.connectStream(db_name, cpu.in0[i].data(), cpu.in0[i].data() + cpu.in0[i].size());
-
-        db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        engine.connectStream(db_name, cpu.out0[i].data(), cpu.out0[i].data() + cpu.out0[i].size());
-
-        db_name = "Output Stream " + std::to_string(i) + " for output 1";
-        engine.connectStream(db_name, cpu.out1[i].data(), cpu.out1[i].data() + cpu.out1[i].size());
-    }
+    connectEngineStream(graph, cpu.in0, num_streams, 0, IO::INPUT);
+    connectEngineStream(graph, cpu.out0, num_streams, 0, IO::OUTPUT);
+    connectEngineStream(graph, cpu.out1, num_streams, 1, IO::OUTPUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
