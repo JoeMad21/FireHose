@@ -1,6 +1,6 @@
 #include "device_libraries/firehose_ipu.hpp"
 
-enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD};
+enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE};
 
 int main() {
 
@@ -24,6 +24,10 @@ int main() {
 
         case TASK::MAT_ADD:
             matAdd(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            break;
+
+        case TASK::TRANSPOSE:
+            tranpose(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
     }
 
