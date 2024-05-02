@@ -306,7 +306,7 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
     comPat.vtx.out1 = tempVTX;
 
     comPat.strm.in0 = tempDS;
-    comPat.vtx.in1 = tempDS;
+    comPat.strm.in1 = tempDS;
     comPat.strm.out0 = tempDS;
     comPat.strm.out1 = tempDS;
 
