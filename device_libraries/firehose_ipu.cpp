@@ -763,7 +763,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
                     #pragma omp critical(print)
                     {
                         printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
-                        printMatrix("Matrix B", cpu_in0[rel_id], col, rel_id, packet, 0);
+                        printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
@@ -948,7 +948,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
                     #pragma omp critical(print)
                     {
                         printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
-                        printMatrix("Matrix B", cpu_in0[rel_id], col, rel_id, packet, 0);
+                        printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
