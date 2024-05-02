@@ -1260,15 +1260,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     poplar::program::Sequence seq;
 
-    std::vector<std::size_t> inputFieldShape;
-    inputFieldShape.push_back(row);
-    inputFieldShape.push_back(col);
-
-    std::vector<std::size_t> kernelFieldShape;
-    kernelFieldShape.push_back(2);
-    kernelFieldShape.push_back(2);
-
-    auto convp = poplin::ConvParams(poplar::FLOAT, 4, inputFieldShape, kernelFieldShape, 1, 1, 1);
+    auto convp = poplin::ConvParams(poplar::FLOAT, 1, {3,3}, {2,2}, 1, 1);
 
     for(int i = 0; i < num_streams; i++) {
 
@@ -1278,32 +1270,20 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     for(int i = 0; i < num_streams; i++) {
 
-        std::cout << "HEREA" << std::endl;
-
         // Begin Sequence 
         seq = poplar::program::Sequence();
-
-        std::cout << "HEREB" << std::endl;
 
         // Stream Inputs Programs
 
         seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
 
-        std::cout << "HEREC" << std::endl;
-
         seq.add(poplar::program::Execute(comPat.cps.in[i]));
-
-        std::cout << "HERED" << std::endl;
 
         // Consumption Task Programs
 
-        poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], convp, true, seq, "Tranpose");
-
-        std::cout << "HEREE" << std::endl;
+        poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], convp, false, seq, "Convolution"); // PROBLEM LINE
 
         seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::OUTPUT].tensors[0]));
-
-        std::cout << "HEREF" << std::endl;
 
         // Stream Outputs Programs
 
