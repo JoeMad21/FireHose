@@ -8,3 +8,6 @@
 ./input*
 ./report/profile_*
 ./verify
+./*.gp
+./*.o
+./*.a
