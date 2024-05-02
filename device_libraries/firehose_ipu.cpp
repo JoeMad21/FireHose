@@ -154,15 +154,15 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
     switch(IO) {
         case IO::IN:
             title = "Input Stream ";
-            port = "for input ";
+            port = " for input ";
             break;
         case IO::OUT:
             title = "Output Stream ";
-            port = "for output  ";
+            port = " for output  ";
             break;
         default:
             title = "Input Stream ";
-            port = "for input ";
+            port = " for input ";
             std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
             break;
     }
@@ -222,15 +222,15 @@ void connectEngineStream(poplar::Graph& graph, poplar::Engine& engine, std::vect
     switch(IO) {
         case IO::IN:
             title = "Input Stream ";
-            port = "for input ";
+            port = " for input ";
             break;
         case IO::OUT:
             title = "Output Stream ";
-            port = "for output  ";
+            port = " for output  ";
             break;
         default:
             title = "Input Stream ";
-            port = "for input ";
+            port = " for input ";
             std::cout << "WARNING: DEFAULTED IN addStream()" << std::endl;
             break;
     }
