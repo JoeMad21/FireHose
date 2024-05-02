@@ -1286,7 +1286,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
         poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], convp, false, seq, "Convolution"); // PROBLEM LINE
         poputil::mapTensorLinearly(graph, conv_out);
 
-        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::OUTPUT].tensors[0]));
+        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::OUTPUT].tensors[0].reshape({3,3})));
 
         // Stream Outputs Programs
 
