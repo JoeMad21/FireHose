@@ -143,10 +143,9 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
     std::string db_name;
     std::string title;
     std::string port;
-    std::string buf_depth = std::to_string(buf_depth);
 
     poplar::OptionFlags streamOpts {
-      {"bufferingDepth", buf_depth},
+      {"bufferingDepth", std::to_string(buf_depth)},
     };
     
     switch(IO) {
