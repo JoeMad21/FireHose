@@ -253,7 +253,7 @@ void buildTensorTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myM
     // Duplicate Model (Still copied to vector even if there is no copy)
     // TO DO: Overload assignment operator
     for(int i = 0; i < num_streams; i++) {
-        myModels[i] = myModel;
+        myModels.push_back(myModel);
     }
     std::cout << "Built Model!" << std::endl;
 
