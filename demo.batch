@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name Tensor_Decomp
+#SBATCH --job-name FireHose
 #SBATCH --ipus=1
 #SBATCH --partition=p64
 #SBATCH --nodelist=gc-poplar-03
