@@ -136,6 +136,8 @@ void addComputeSet(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, i
         db_name = title + std::to_string(i);
         cps[i] = graph.addComputeSet(db_name);
     }
+
+    return;
 }
 
 void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std::pair<int,int> params, int buf_depth, int num_port, int num_streams, int IO) {
@@ -183,6 +185,8 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
 
     
     }
+
+    return;
 }
 
 void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset) {
@@ -195,6 +199,8 @@ void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::
         graph.setTileMapping(vtx[i], i+offset);
     }
 
+    return;
+
 }
 
 void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, std::vector<model>& myModels, int num_streams, int top_layer, int bottom_layer, int top_tensor, int bottom_tensor, std::string in, std::string out) {
@@ -202,9 +208,11 @@ void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, st
         graph.connect(vtx[i][in], myModels[i].layers[top_layer].tensors[top_tensor]);
         graph.connect(vtx[i][out], myModels[i].layers[bottom_layer].tensors[bottom_tensor]);
     }
+
+    return;
 }
 
-void connectEngineStream(poplar::Graph& graph, poplar::Engine& engine, std::vector<float>& cpu, int num_streams, int num_port, int IO) {
+void connectEngineStream(poplar::Graph& graph, poplar::Engine& engine, std::vector<std::vector<float>>& cpu, int num_streams, int num_port, int IO) {
 
     std::string db_name;
     std::string title;
@@ -230,6 +238,8 @@ void connectEngineStream(poplar::Graph& graph, poplar::Engine& engine, std::vect
         db_name = title + std::to_string(i) + port + std::to_string(num_port);
         engine.connectStream(db_name, cpu[i].data(), cpu[i].data() + cpu[i].size());
     }
+
+    return;
 }
 
 void buildTensorTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams) {
@@ -247,7 +257,7 @@ void buildTensorTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myM
     }
     std::cout << "Built Model!" << std::endl;
 
-    return myModels;
+    return;
 }
 
 void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, comPatternTriangleUP& comPat, std::pair<int,int> params, int num_streams) {
@@ -290,6 +300,8 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
     addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
 
     std::cout << "Added Streams!" << std::endl;
+
+    return;
 
 }
 
