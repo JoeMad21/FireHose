@@ -26,6 +26,7 @@
 #include <poplin/codelets.hpp>
 #include <poplin/experimental/QRFactorization.hpp>
 #include <poplin/MatMul.hpp>
+#include <poplin/ConvParams.hpp>
 
 struct layer {
     std::vector<poplar::Tensor> tensors;

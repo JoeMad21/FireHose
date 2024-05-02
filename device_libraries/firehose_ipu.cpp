@@ -1198,6 +1198,193 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
     return;
 }
 
+void convolution(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+
+    /* Create Shared Memory */
+
+    // Strings
+    std::string db_name;
+
+    // Programs
+    std::vector<poplar::program::Program> progs(num_streams);
+
+    // Flags
+    bool data_ready_flags[num_streams];
+
+    for (int i = 0; i < num_streams; i++) {
+        data_ready_flags[i] = false;
+    }
+
+    /* Get Program Context */
+    
+    // Get Device
+    std::cout << "Getting Device..." << std::endl;
+    poplar::Device device = getDevice(0, num_devices);
+    std::cout << "Got Device!" << std::endl;
+
+    // Graph
+    std::cout << "Creating Graph..." << std::endl;
+    poplar::Graph graph(device.getTarget());
+    std::cout << "Created Graph!" << std::endl;
+
+    /* Build Graph */
+
+    // Build Model
+    std::vector<model> myModels;
+    std::pair<int,int> myParams = std::make_pair(row, col);
+
+    buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
+
+    // Add Variable Tensors
+    // Not necessary
+
+    // Constant Tensors
+    // Not necessary
+
+    std::cout << "Added Constant Tensors!" << std::endl;
+
+    /* Add Codelets */
+
+    // Add standard codelets
+    std::cout << "Adding Codelets..." << std::endl;
+
+    popops::addCodelets(graph);
+    poplin::addCodelets(graph);
+
+    // Add custom codelets
+    graph.addCodelets("./device_libraries/io_codelet.gp");
+
+    std::cout << "Added Codelets!" << std::endl;
+
+    comPattern comPat;
+
+    buildIOTemplate(graph, myModels, comPat, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
+
+    /* Programs */
+
+    std::cout << "Adding Programs..." << std::endl;
+
+    int prog_idx = 0;
+
+    poplar::program::Sequence seq;
+
+    std::vector<std::size_t> inputFieldShape;
+    inputFieldShape.push_back(row);
+    inputFieldShape.push_back(col);
+
+    ConvParams(poplar::FLOAT, row*col, inputFieldShape, inputFieldShape, 1, 1, 1)
+
+    for(int i = 0; i < num_streams; i++) {
+
+        // Begin Sequence 
+        seq = poplar::program::Sequence();
+
+        // Stream Inputs Programs
+
+        seq = poplar::program::Sequence();
+
+        seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
+
+        seq.add(poplar::program::Execute(comPat.cps.in[i]));
+
+        // Consumption Task Programs
+
+        poplar::Tensor conv_out = poplin::convolution(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], "Tranpose");
+
+        seq.add(poplar::program::Copy(conv_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
+
+        // Stream Outputs Programs
+
+        //seq.add(poplar::program::Execute(comPat.cps.out[i]));
+
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], comPat.strm.out0[i]));
+
+        // End Sequence
+        progs[prog_idx++] = seq;
+    }
+
+    std::cout << "Added Programs!" << std::endl;
+
+    /* Create and Load Engine */
+
+    std::cout << "Loading Device..." << std::endl;
+
+    auto exe = poplar::compileGraph(graph, progs);
+    poplar::Engine engine(std::move(exe));
+    engine.load(device);
+
+    std::cout << "Loaded Device!" << std::endl;
+
+    /* CPU Memory */
+
+    // CPU Vectors
+    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+
+    /* Connect Streams */
+
+    std::cout << "Connecting Streams..." << std::endl;
+
+    connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
+
+    std::cout << "Connected Streams!" << std::endl << std::endl;
+
+    /* Run Parallel Threads for FireHose */
+
+    omp_set_num_threads(num_streams*2);
+
+    #pragma omp parallel
+    {
+        int thread_id = omp_get_thread_num();
+        int pc_id = thread_id % 2;
+        int rel_id = thread_id / 2;
+        
+        std::mt19937 gen(seed+rel_id);
+        std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
+
+        switch(pc_id) {
+            case PRODUCER:
+                for(int packet = 0; packet < num_packets; packet++) {
+                    while(data_ready_flags[rel_id]);
+
+
+                    for (int i = 0; i < row*col; i++) {
+                        cpu_in0[rel_id][i] = distribution(gen);
+                    }
+
+                    #pragma omp critical(print)
+                    {
+                        printMatrix("Input Matrix", cpu_in0[rel_id], col, rel_id, packet, 0);
+                    }
+
+                    data_ready_flags[rel_id] = true;
+                }
+                break;
+            
+            case CONSUMER:
+                for(int packet = 0; packet < num_packets; packet++) {
+                    while(!data_ready_flags[rel_id]);
+
+                    #pragma omp critical(ipu_work)
+                    {
+                        engine.run(rel_id);
+                    }
+
+                    #pragma omp critical(print)
+                    {
+                        printMatrix("Transposed Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                    }
+
+                    data_ready_flags[rel_id] = false;
+                }
+                break;
+        }
+    }
+
+    return;
+}
+
 //void placeholder(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
 
 //}
