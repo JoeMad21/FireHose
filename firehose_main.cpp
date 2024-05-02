@@ -4,8 +4,8 @@ enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
 
 int main() {
 
-    long unsigned int row = 32;
-    long unsigned int col = 32;
+    long unsigned int row = 64;
+    long unsigned int col = 64;
     long unsigned int num_packets = 256;
     long unsigned int num_streams = 1;
     long unsigned int num_devices = 1;
