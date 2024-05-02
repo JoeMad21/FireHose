@@ -375,7 +375,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     comPatternTriangleUP comPat;
 
-    buildIOTemplateTRIANGLEUP(graph, myModels, comPat, myParams, num_streams)
+    buildIOTemplateTRIANGLEUP(graph, myModels, comPat, myParams, num_streams);
 
     /* Programs */
 
