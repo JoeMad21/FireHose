@@ -1260,7 +1260,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     poplar::program::Sequence seq;
 
-    auto convp = poplin::ConvParams(poplar::FLOAT, 1, {3,3}, {2,2}, 1, 1);
+    auto convp = poplin::ConvParams(poplar::FLOAT, 1, {3,3}, {2,2}, 1, 1, 1);
 
     for(int i = 0; i < num_streams; i++) {
 
