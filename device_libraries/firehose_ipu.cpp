@@ -760,12 +760,12 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
             cpu_in1[0][i] = distribution(gen);
         }
 
-        printMatrix("Matrix A", cpu_in0[0], col, rel_id, packet, 0);
-        printMatrix("Matrix B", cpu_in1[0], col, rel_id, packet, 0);
+        printMatrix("Matrix A", cpu_in0[0], col, 0, packet, 0);
+        printMatrix("Matrix B", cpu_in1[0], col, 0, packet, 0);
 
         engine.run(rel_id);
 
-        printMatrix("Result Matrix", cpu_out0[0], col, rel_id, packet, 1);
+        printMatrix("Result Matrix", cpu_out0[0], col, 0, packet, 1);
     }
 
     //omp_set_num_threads(num_streams*2);
