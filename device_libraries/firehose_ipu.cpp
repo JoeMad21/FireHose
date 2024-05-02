@@ -1067,6 +1067,13 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
     poplar::program::Sequence seq;
 
+    std::vector<poplar::ComputeSet> cps;
+
+    for (int i = 0; i < num_streams; i++) {
+        db_name = "Compute Set for Pipeline " + std::to_string(i);
+        cps[i] = graph.addComputeSet(db_name);
+    }
+
     for(int i = 0; i < num_streams; i++) {
 
         // Begin Sequence 
@@ -1082,7 +1089,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
         // Consumption Task Programs
 
-        poplar::Tensor transpose_out = popops::rearrange::partialTranspose(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], comPat.cps.out[i], "Tranpose");
+        poplar::Tensor transpose_out = popops::rearrange::partialTranspose(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], cps[i], "Tranpose");
 
         seq.add(poplar::program::Copy(transpose_out, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]));
 
