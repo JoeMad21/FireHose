@@ -140,9 +140,7 @@ void addComputeSet(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, i
 
     return;
 }
-addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
-            addStream(graph, comPat.strm.in1, params, 2, 1, num_streams, IO::IN);
-            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+
 void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std::pair<int,int> params, int buf_depth, int num_port, int num_streams, int IO) {
 
     std::string db_name;
