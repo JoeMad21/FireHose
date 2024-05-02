@@ -263,17 +263,21 @@ void buildTensorTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myM
 void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, comPatternTriangleUP& comPat, std::pair<int,int> params, int num_streams) {
 
     std::cout << "Adding Vertices..." << std::endl;
+
+    std::vector<poplar::ComputeSet> tempCS(num_streams);
+    std::vector<poplar::VertexRef> tempVTX(num_streams);
+    std::vector<poplar::DataStream> tempDS(num_streams)
     
-    comPat.cps.in = std::vector<poplar::ComputeSet> tempCS(num_streams);
-    comPat.cps.out = std::vector<poplar::ComputeSet> tempCS(num_streams);
+    comPat.cps.in = tempCS;
+    comPat.cps.out = tempCS;
 
-    comPat.vtx.in0 = std::vector<poplar::VertexRef> tempVTX(num_streams);
-    comPat.vtx.out0 = std::vector<poplar::VertexRef> tempVTX(num_streams);
-    comPat.vtx.out1 = std::vector<poplar::VertexRef> tempVTX(num_streams);
+    comPat.vtx.in0 = tempVTX;
+    comPat.vtx.out0 = tempVTX;
+    comPat.vtx.out1 = tempVTX;
 
-    comPat.strm.in0 = std::vector<poplar::DataStream> tempDS(num_streams);
-    comPat.strm.out0 = std::vector<poplar::DataStream> tempDS(num_streams);
-    comPat.strm.out1 = std::vector<poplar::DataStream> tempDS(num_streams);
+    comPat.strm.in0 = tempDS;
+    comPat.strm.out0 = tempDS;
+    comPat.strm.out1 = tempDS;
 
 
     addComputeSet(graph, comPat.cps.in, num_streams, IO::IN);
