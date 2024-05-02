@@ -743,7 +743,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     std::cout << "Connecting Streams..." << std::endl;
 
     connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, num_streams, 1, IO::IN);
     connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
@@ -945,7 +945,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
     std::cout << "Connecting Streams..." << std::endl;
 
     connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, num_streams, 1, IO::IN);
     connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
@@ -1349,7 +1349,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     std::cout << "Connecting Streams..." << std::endl;
 
     connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, num_streams, 1, IO::IN);
     connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
