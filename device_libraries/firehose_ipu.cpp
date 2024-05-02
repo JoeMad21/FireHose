@@ -1108,7 +1108,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
         // Stream Outputs Programs
 
-        seq.add(poplar::program::Execute(comPat.cps.out[i]));
+        //seq.add(poplar::program::Execute(comPat.cps.out[i]));
 
         seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], comPat.strm.out0[i]));
 
