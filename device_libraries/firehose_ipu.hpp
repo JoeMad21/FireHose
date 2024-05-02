@@ -34,7 +34,7 @@ struct model {
     std::vector<layer> layers;
 };
 
-struct comPatternTriangleUP {
+struct comPattern {
 
     struct {
         std::vector<poplar::ComputeSet> in;
@@ -43,12 +43,14 @@ struct comPatternTriangleUP {
 
     struct {
         std::vector<poplar::VertexRef> in0;
+        std::vector<poplar::VertexRef> in1;
         std::vector<poplar::VertexRef> out0;
         std::vector<poplar::VertexRef> out1;
     } vtx;
 
     struct {
         std::vector<poplar::DataStream> in0;
+        std::vector<poplar::DataStream> in1;
         std::vector<poplar::DataStream> out0;
         std::vector<poplar::DataStream> out1;
     } strm;
@@ -73,9 +75,9 @@ void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, st
 
 void connectEngineStream(poplar::Graph& graph, std::vector<float>& cpu, int num_streams, int num_port, int IO);
 
-void buildTensorTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams);
+void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams, int mode);
 
-void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, comPatternTriangleUP& comPat, std::pair<int,int> params, int num_streams);
+void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPattern& comPat, std::pair<int,int> params, int num_streams, int mode);
 
 void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file);
 

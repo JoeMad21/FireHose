@@ -8,6 +8,7 @@ enum HARDWARE {IPU, MODEL, CPU};
 enum MAPPING {LINEAR, SET};
 enum LAYERS {INPUT, CONSUMPTION, OUTPUT};
 enum IO {IN, OUT};
+enum COMPATSHAPE {TRIANGLEUP, TRIANGLEQR, TRIANGLEDOWN, SQUARE, LINE};
 
 
 
@@ -242,13 +243,41 @@ void connectEngineStream(poplar::Graph& graph, poplar::Engine& engine, std::vect
     return;
 }
 
-void buildTensorTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams) {
+void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams, int mode) {
     std::cout << "Building Model..." << std::endl;
     model myModel;
 
-    buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
-    buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
-    buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
+    switch(mode) {
+        case COMPAT::TRIANGLEUP:
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
+            break;
+
+        case COMPAT::TRIANGLEQR:
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
+            break;
+
+        case COMPAT::TRIANGLEDOWN:
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1);
+            break;
+
+        case COMPAT::SQUARE:
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
+            break;
+
+        case COMPAT::LINE:
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1);
+            break;
+    }
 
     // Duplicate Model (Still copied to vector even if there is no copy)
     // TO DO: Overload assignment operator
@@ -260,7 +289,7 @@ void buildTensorTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myM
     return;
 }
 
-void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModels, comPatternTriangleUP& comPat, std::pair<int,int> params, int num_streams) {
+void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPattern& comPat, std::pair<int,int> params, int num_streams, int mode) {
 
     std::cout << "Adding Vertices..." << std::endl;
 
@@ -272,10 +301,12 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
     comPat.cps.out = tempCS;
 
     comPat.vtx.in0 = tempVTX;
+    comPat.vtx.in1 = tempVTX;
     comPat.vtx.out0 = tempVTX;
     comPat.vtx.out1 = tempVTX;
 
     comPat.strm.in0 = tempDS;
+    comPat.vtx.in1 = tempVTX;
     comPat.strm.out0 = tempDS;
     comPat.strm.out1 = tempDS;
 
@@ -283,25 +314,105 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
     addComputeSet(graph, comPat.cps.in, num_streams, IO::IN);
     addComputeSet(graph, comPat.cps.out, num_streams, IO::OUT);
 
-    addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
-    addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
-    addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9);
+    switch(mode) {
+        case COMPATSHAPE::TRIANGLEUP:
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9);
+            break;
+        case COMPATSHAPE::TRIANGLEQR:
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9);
+            break;
+        case COMPATSHAPE::TRIANGLEDOWN:
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in1, num_streams, 7);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 9);
+            break;
+        case COMPATSHAPE::SQUARE:
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in1, num_streams, 7);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 9);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 11);
+            break;
+        case COMPATSHAPE::LINE:
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
+            break;
+    }
 
     std::string in = "strm_in";
     std::string out = "strm_out";
 
-    connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
-    connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
-    connectVertex(graph, comPat.vtx.out1, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 1, 1, in, out);
+    switch(mode) {
+        case COMPATSHAPE::TRIANGLEUP:
+            connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
+            connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
+            connectVertex(graph, comPat.vtx.out1, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 1, in, out);
+            break;
+
+        case COMPATSHAPE::TRIANGLEQR:
+            connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
+            connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
+            connectVertex(graph, comPat.vtx.out1, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 1, 1, in, out);
+            break;
+
+        case COMPATSHAPE::TRIANGLEDOWN:
+            connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
+            connectVertex(graph, comPat.vtx.in1, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 1, 0, in, out);
+            connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
+            break;
+
+        case COMPATSHAPE::SQUARE:
+            connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
+            connectVertex(graph, comPat.vtx.in1, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 1, 0, in, out);
+            connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
+            connectVertex(graph, comPat.vtx.out1, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 1, in, out);
+            break;
+
+        case COMPATSHAPE::LINE:
+            connectVertex(graph, comPat.vtx.in0, myModels, num_streams, LAYERS::INPUT, LAYERS::CONSUMPTION, 0, 0, in, out);
+            connectVertex(graph, comPat.vtx.out0, myModels, num_streams, LAYERS::CONSUMPTION, LAYERS::OUTPUT, 0, 0, in, out);
+            break;
+    }
 
     std::cout << "Added Vertices!" << std::endl;
 
     // Streams
     std::cout << "Adding Streams..." << std::endl;
 
-    addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
-    addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
-    addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
+    switch(mode) {
+        case COMPATSHAPE::TRIANGLEUP:
+            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
+            break;
+        
+        case COMPATSHAPE::TRIANGLEQR:
+            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
+            break;
+
+        case COMPATSHAPE::TRIANGLEDOWN:
+            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.in1, params, 2, 1, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+            break;
+
+        case COMPATSHAPE::SQUARE:
+            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.in1, params, 2, 1, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
+            break;
+
+        case COMPATSHAPE::LINE:
+            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+            break;
+    }
 
     std::cout << "Added Streams!" << std::endl;
 
@@ -344,7 +455,7 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(row, col);
 
-    buildTensorTemplateTRIANGLEUP(graph, myModels, myParams, num_streams);
+    buildTensorTemplate(graph, myModels, myParams, num_streams);
 
     // Add Variable Tensors
     // Not necessary
@@ -373,9 +484,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Added Codelets!" << std::endl;
 
-    comPatternTriangleUP comPat;
+    comPattern comPat;
 
-    buildIOTemplateTRIANGLEUP(graph, myModels, comPat, myParams, num_streams);
+    buildIOTemplate(graph, myModels, comPat, myParams, num_streams);
 
     /* Programs */
 
@@ -500,27 +611,10 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
 void matMul(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
 
-    /* Get an IPU Device */
+    /* Create Shared Memory */
 
-    std::cout << "Getting Device..." << std::endl;
-
-    auto manager = poplar::DeviceManager::createDeviceManager();
-    auto hwDevices = manager.getDevices(poplar::TargetType::IPU, num_devices);
-    auto it = std::find_if(hwDevices.begin(), hwDevices.end(), [](poplar::Device &device) { return device.attach(); });
-    poplar::Device device;
-
-    if (it != hwDevices.end()) {
-        device = std::move(*it);
-    }
-
-    std::cout << "Got Device!" << std::endl;
-
-    /* Expose Shared Memory */
-
-    // Graph
-    std::cout << "Creating Graph..." << std::endl;
-    poplar::Graph graph(device.getTarget());
-    std::cout << "Created Graph!" << std::endl;
+    // Strings
+    std::string db_name;
 
     // Programs
     std::vector<poplar::program::Program> progs(num_streams);
@@ -532,179 +626,91 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
         data_ready_flags[i] = false;
     }
 
-    // Variable Tensors
-    std::cout << "Adding Tensors..." << std::endl;
+    /* Get Program Context */
+    
+    // Get Device
+    std::cout << "Getting Device..." << std::endl;
+    poplar::Device device = getDevice(0, num_devices);
+    std::cout << "Got Device!" << std::endl;
 
-    std::vector<poplar::Tensor> v_io_in0(num_streams);
-    std::vector<poplar::Tensor> v_con0(num_streams);
+    // Graph
+    std::cout << "Creating Graph..." << std::endl;
+    poplar::Graph graph(device.getTarget());
+    std::cout << "Created Graph!" << std::endl;
 
-    std::vector<poplar::Tensor> v_io_in1(num_streams);
-    std::vector<poplar::Tensor> v_con1(num_streams);
+    /* Build Graph */
 
-    std::vector<poplar::Tensor> v_io_out0(num_streams);
+    // Build Model
+    std::vector<model> myModels;
+    std::pair<int,int> myParams = std::make_pair(row, col);
 
-    std::string db_name;
+    buildTensorTemplateTRIANGLEDOWN(graph, myModels, myParams, num_streams);
 
-    for (int i = 0; i < num_streams; i++) {
-
-        /* Input to QR Factorization */
-        db_name = "Input Tensor " + std::to_string(i) + " of Set 0";
-        v_io_in0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_io_in0[i]);
-
-        /* Input to QR Factorization */
-        db_name = "Input Tensor " + std::to_string(i) + " of Set 1";
-        v_io_in1[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_io_in1[i]);
-
-        db_name = "Consumption Tensor " + std::to_string(i) + " of Set 0";
-        v_con0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_con0[i]);
-
-        db_name = "Consumption Tensor " + std::to_string(i) + " of Set 1";
-        v_con1[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_con1[i]);
-
-        db_name = "Output Tensor " + std::to_string(i) + " of Set 0";
-        v_io_out0[i] = graph.addVariable(poplar::FLOAT, {row, col}, db_name);
-        poputil::mapTensorLinearly(graph, v_io_out0[i]);
-    }
+    // Add Variable Tensors
+    // Not necessary
 
     // Constant Tensors
-    //None needed
+    std::cout << "Adding Constant Tensors..." << std::endl;
 
-    std::cout << "Added Tensors!" << std::endl;
+    std::vector<float> vec_id;
+    createIdentityMatrix(vec_id, row, col);
+
+    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
+    poputil::mapTensorLinearly(graph, c_id);
+
+    std::cout << "Added Constant Tensors!" << std::endl;
+
+    /* Add Codelets */
 
     // Add standard codelets
     std::cout << "Adding Codelets..." << std::endl;
 
     popops::addCodelets(graph);
+    poplin::addCodelets(graph);
 
     // Add custom codelets
     graph.addCodelets("./device_libraries/io_codelet.gp");
 
     std::cout << "Added Codelets!" << std::endl;
 
-    // Vertices
-    std::cout << "Adding Vertices..." << std::endl;
+    comPatterncomPat;
 
-    std::vector<poplar::ComputeSet> cps_io_in(num_streams);
-    std::vector<poplar::ComputeSet> cps_io_out(num_streams);
+    buildIOTemplateTRIANGLEDOWN(graph, myModels, comPat, myParams, num_streams);
 
-    for (int i = 0; i < num_streams; i++) {
-        db_name = "IO in CS " + std::to_string(i);
-        cps_io_in[i] = graph.addComputeSet(db_name);
-
-        db_name = "IO in CS " + std::to_string(i);
-        cps_io_out[i] = graph.addComputeSet(db_name);
-    }
-
-    std::vector<poplar::VertexRef> vtx_in0(num_streams);
-    std::vector<poplar::VertexRef> vtx_in1(num_streams);
-    std::vector<poplar::VertexRef> vtx_out0(num_streams);
-
-    for (int i = 0; i < num_streams; i++) {
-
-        vtx_in0[i] = graph.addVertex(cps_io_in[i], "IOVertex");
-        graph.setTileMapping(vtx_in0[i], i+5);
-        vtx_in1[i] = graph.addVertex(cps_io_in[i], "IOVertex");
-        graph.setTileMapping(vtx_in1[i], i+7);
-
-        vtx_out0[i] = graph.addVertex(cps_io_out[i], "IOVertex");
-        graph.setTileMapping(vtx_out0[i], i+9);
-    }
-
-    for(int i = 0; i < num_streams; i++) {
-        graph.connect(vtx_in0[i]["strm_in"], v_io_in0[i]);
-        graph.connect(vtx_in0[i]["strm_out"], v_con0[i]);
-
-        graph.connect(vtx_in1[i]["strm_in"], v_io_in1[i]);
-        graph.connect(vtx_in1[i]["strm_out"], v_con1[i]);
-
-        graph.connect(vtx_out0[i]["strm_in"], v_con0[i]);
-        graph.connect(vtx_out0[i]["strm_out"], v_io_out0[i]);
-    }
-
-    std::cout << "Added Vertices!" << std::endl;
-
-    // Streams
-    std::cout << "Adding Streams..." << std::endl;
-
-    std::vector<poplar::DataStream> strm_in0(num_streams);
-    std::vector<poplar::DataStream> strm_in1(num_streams);
-    std::vector<poplar::DataStream> strm_out0(num_streams);
-
-    poplar::OptionFlags streamOpts {
-      {"bufferingDepth", "2"},
-    };
-
-    for (int i = 0; i < num_streams; i++) {
-        db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        strm_in0[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
-
-        db_name = "Input Stream " + std::to_string(i) + " for input 1";
-        strm_in1[i] = graph.addHostToDeviceFIFO(db_name, poplar::FLOAT, row*col, poplar::ReplicatedStreamMode::REPLICATE, streamOpts);
-
-        db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        strm_out0[i] = graph.addDeviceToHostFIFO(db_name, poplar::FLOAT, row*col, streamOpts);
-    }
-
-    std::cout << "Added Streams!" << std::endl;
-
-    // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    /* Programs */
 
     std::cout << "Adding Programs..." << std::endl;
 
-    /* Stream Inputs Programs */
-
     int prog_idx = 0;
 
-    auto seq = poplar::program::Sequence();
+    poplar::program::Sequence seq;
 
     for(int i = 0; i < num_streams; i++) {
 
+        // Begin Sequence 
         seq = poplar::program::Sequence();
 
-        seq.add(poplar::program::Copy(strm_in0[i], v_io_in0[i]));
-        seq.add(poplar::program::Copy(strm_in1[i], v_io_in1[i]));
-
-        seq.add(poplar::program::Execute(cps_io_in[i]));
-
-        progs[prog_idx++] = seq;
-    }
-
-    /* Consumption Task Programs */
-
-    poplin::addCodelets(graph);
-
-    for(int i = 0; i < num_streams; i++) {
+        // Stream Inputs Programs
 
         seq = poplar::program::Sequence();
 
-        //seq.add(poplar::program::Copy(c_id, v_con1[i]));
+        seq.add(poplar::program::Copy(comPat.strm.in0[i], myModels[i].layers[LAYERS::INPUT].tensors[0]));
 
-        //poplin::experimental::QRFactorization(graph, v_con0[i], v_con1[i], seq);
+        seq.add(poplar::program::Execute(comPat.cps.in[i]));
 
-        poplar::Tensor matmul_out = poplin::matMul(graph, v_con0[i], v_con1[i], seq, "MatMul");
+        // Consumption Task Programs
 
-        seq.add(poplar::program::Copy(matmul_out, v_con0[i]));
+        seq.add(poplar::program::Copy(c_id, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]));
 
-        progs[prog_idx++] = seq;
-    }
+        poplin::experimental::QRFactorization(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0], myModels[i].layers[LAYERS::CONSUMPTION].tensors[1], seq);
 
-    /* Stream Outputs Programs */
+        // Stream Outputs Programs
 
-    for(int i = 0; i < num_streams; i++) {
+        seq.add(poplar::program::Execute(comPat.cps.out[i]));
 
-        seq = poplar::program::Sequence();
+        seq.add(poplar::program::Copy(myModels[i].layers[LAYERS::OUTPUT].tensors[0], comPat.strm.out0[i]));
 
-        seq.add(poplar::program::Execute(cps_io_out[i]));
-
-        seq.add(poplar::program::Copy(v_io_out0[i], strm_out0[i]));
-
+        // End Sequence
         progs[prog_idx++] = seq;
     }
 
@@ -720,20 +726,20 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     std::cout << "Loaded Device!" << std::endl;
 
+    /* CPU Memory */
+
+    // CPU Vectors
+    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_out1(num_streams, std::vector<float> (row*col, 5.0));
+
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    for (int i = 0; i < num_streams; i++) {
-        db_name = "Input Stream " + std::to_string(i) + " for input 0";
-        engine.connectStream(db_name, cpu_in0[i].data(), cpu_in0[i].data() + cpu_in0[i].size());
-
-        db_name = "Input Stream " + std::to_string(i) + " for input 1";
-        engine.connectStream(db_name, cpu_in1[i].data(), cpu_in1[i].data() + cpu_in1[i].size());
-
-        db_name = "Output Stream " + std::to_string(i) + " for output 0";
-        engine.connectStream(db_name, cpu_out0[i].data(), cpu_out0[i].data() + cpu_out0[i].size());
-    }
+    connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_out1, num_streams, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
@@ -746,7 +752,6 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
         int thread_id = omp_get_thread_num();
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
-        //int packet = 0;
         
         std::mt19937 gen(seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
@@ -761,15 +766,8 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
                         cpu_in0[rel_id][i] = distribution(gen);
                     }
 
-                    for (int i = 0; i < row*col; i++) {
-                        cpu_in1[rel_id][i] = distribution(gen);
-                    }
-
                     #pragma omp critical(print)
-                    {
-                        printMatrix("MATRIX A", cpu_in0[rel_id], col, rel_id, packet, 0);
-                        printMatrix("MATRIX B", cpu_in1[rel_id], col, rel_id, packet, 0);
-                    }
+                    printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet, 0);
 
                     data_ready_flags[rel_id] = true;
                 }
@@ -782,13 +780,12 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
                     #pragma omp critical(ipu_work)
                     {
                         engine.run(rel_id);
-                        engine.run(num_streams+rel_id);
-                        engine.run((num_streams*2)+rel_id);
                     }
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("RESULT MATRIX", cpu_out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
