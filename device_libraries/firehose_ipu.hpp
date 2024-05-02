@@ -52,7 +52,7 @@ struct comPatternTriangleUP {
         std::vector<poplar::DataStream> out0;
         std::vector<poplar::DataStream> out1;
     } strm;
-}
+};
 
 
 void printMatrix(std::string matrix_name, std::vector<float> matrix, int cols, int id, int packet, int io);

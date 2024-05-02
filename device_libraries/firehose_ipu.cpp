@@ -7,7 +7,7 @@
 enum HARDWARE {IPU, MODEL, CPU};
 enum MAPPING {LINEAR, SET};
 enum LAYERS {INPUT, CONSUMPTION, OUTPUT};
-enum IO {INPUT, OUTPUT}
+enum IO {IN, OUT};
 
 
 
@@ -150,11 +150,11 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
     };
     
     switch(IO) {
-        case IO::INPUT:
+        case IO::IN:
             title = "Input Stream ";
             port = "for input ";
             break;
-        case IO::OUTPUT:
+        case IO::OUT:
             title = "Output Stream ";
             port = "for output  ";
             break;
@@ -166,7 +166,7 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
     }
 
     switch(IO) {
-        case IO::INPUT:
+        case IO::IN:
             
             for (int i = 0; i < num_streams; i++) {
                 db_name = title + std::to_string(i) + port + std::to_string(num_port);
@@ -174,7 +174,7 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
             }
             break;
 
-        case IO::OUTPUT:
+        case IO::OUT:
 
             for (int i = 0; i < num_streams; i++) {
                 db_name = title + std::to_string(i) + port + std::to_string(num_port);
@@ -216,11 +216,11 @@ void connectEngineStream(poplar::Graph& graph, std::vector<float>& cpu, int num_
     std::string title;
     
     switch(IO) {
-        case IO::INPUT:
+        case IO::IN:
             title = "Input Stream ";
             port = "for input ";
             break;
-        case IO::OUTPUT:
+        case IO::OUT:
             title = "Output Stream ";
             port = "for output  ";
             break;
@@ -271,8 +271,8 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
     comPat.strm.out1 = std::vector<poplar::DataStream> tempDS(num_streams);
 
 
-    addComputeSet(graph, comPat.cps.in, num_streams, IO::INPUT);
-    addComputeSet(graph, comPat.cps.out, num_streams, IO::OUTPUT);
+    addComputeSet(graph, comPat.cps.in, num_streams, IO::IN);
+    addComputeSet(graph, comPat.cps.out, num_streams, IO::OUT);
 
     addVertex(graph, comPat.vtx.in0, num_streams, 5);
     addVertex(graph, comPat.vtx.out0, num_streams, 7);
@@ -290,9 +290,9 @@ void buildIOTemplateTRIANGLEUP(poplar::Graph& graph, std::vector<model>& myModel
     // Streams
     std::cout << "Adding Streams..." << std::endl;
 
-    addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::INPUT);
-    addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUTPUT);
-    addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUTPUT);
+    addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
+    addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+    addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
 
     std::cout << "Added Streams!" << std::endl;
 
@@ -429,9 +429,9 @@ void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned in
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, cpu.in0, num_streams, 0, IO::INPUT);
-    connectEngineStream(graph, cpu.out0, num_streams, 0, IO::OUTPUT);
-    connectEngineStream(graph, cpu.out1, num_streams, 1, IO::OUTPUT);
+    connectEngineStream(graph, cpu.in0, num_streams, 0, IO::IN);
+    connectEngineStream(graph, cpu.out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, cpu.out1, num_streams, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
