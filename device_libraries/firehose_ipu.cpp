@@ -1067,11 +1067,11 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
     poplar::program::Sequence seq;
 
-    std::vector<poplar::ComputeSet> cps;
+    std::vector<poplar::ComputeSet> cps(num_streams);
 
     for (int i = 0; i < num_streams; i++) {
         db_name = "Compute Set for Pipeline " + std::to_string(i);
-        cps.push_back(graph.addComputeSet(db_name));
+        cps[i] = graph.addComputeSet(db_name);
     }
 
     for(int i = 0; i < num_streams; i++) {
