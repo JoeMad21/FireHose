@@ -27,7 +27,7 @@ int main() {
             break;
 
         case TASK::TRANSPOSE:
-            tranpose(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            transpose(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
     }
 
