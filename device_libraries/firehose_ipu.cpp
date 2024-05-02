@@ -1270,6 +1270,8 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
         poputil::mapTensorLinearly(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
         poputil::mapTensorLinearly(graph, myModels[i].layers[LAYERS::CONSUMPTION].tensors[1]);
         poputil::mapTensorLinearly(graph, myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
+
+        comPat.strm.out0[i] = graph.addDeviceToHostFIFO("whatever", poplar::FLOAT, 2*2, streamOpts)
     }
 
     for(int i = 0; i < num_streams; i++) {
