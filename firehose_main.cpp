@@ -4,14 +4,14 @@ enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
 
 int main() {
 
-    long unsigned int row = 512;
-    long unsigned int col = 512;
-    long unsigned int num_packets = 256;
-    long unsigned int num_streams = 1;
+    long unsigned int row = 3;
+    long unsigned int col = 3;
+    long unsigned int num_packets = 3;
+    long unsigned int num_streams = 3;
     long unsigned int num_devices = 1;
     long unsigned int seed = 42;
     bool get_from_file = false;
-    int con_task = TASK::MAT_MUL;
+    int con_task = TASK::TENSOR_DECOMP;
 
     switch(con_task) {
         case TASK::TENSOR_DECOMP:
