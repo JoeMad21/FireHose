@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "STARTING\n"
+echo "STARTING"
 
 for value in {1..3}
 do
@@ -9,4 +9,4 @@ do
     make clean
 done
 
-echo "DONE\n"
+echo "DONE"
