@@ -491,7 +491,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     std::vector<float> vec_id;
     createIdentityMatrix(vec_id, vm_row, vm_col);
 
-    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {vm_row, vm_col}, vec_id.data(), "Constant Identity Tensor");
+    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {(long unsigned int)vm_row, (long unsigned int)vm_col}, vec_id.data(), "Constant Identity Tensor");
     poputil::mapTensorLinearly(graph, c_id);
 
     std::cout << "Added Constant Tensors!" << std::endl;
