@@ -466,7 +466,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm_vm_num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -640,12 +640,12 @@ void matMul(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -667,7 +667,7 @@ void matMul(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     // Add Variable Tensors
     // Not necessary
@@ -690,7 +690,7 @@ void matMul(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     /* Programs */
 
@@ -700,7 +700,7 @@ void matMul(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    for(int i = 0; i < num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -743,17 +743,17 @@ void matMul(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, num_streams, 1, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, vm_num_streams, 1, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
@@ -777,7 +777,7 @@ void matMul(boost::program_options::variables_map& vm) {
         printMatrix("Result Matrix", cpu_out0[0], vm_col, 0, packet, 1);
     }
 
-    //omp_set_num_threads(num_streams*2);
+    //omp_set_num_threads(vm_num_streams*2);
 
     // #pragma omp parallel
     // {
@@ -840,12 +840,12 @@ void matAdd(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -867,7 +867,7 @@ void matAdd(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     // Add Variable Tensors
     // Not necessary
@@ -892,7 +892,7 @@ void matAdd(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     /* Programs */
 
@@ -902,7 +902,7 @@ void matAdd(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    for(int i = 0; i < num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -945,23 +945,23 @@ void matAdd(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, num_streams, 1, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, vm_num_streams, 1, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(num_streams*2);
+    omp_set_num_threads(vm_num_streams*2);
 
     #pragma omp parallel
     {
@@ -1024,12 +1024,12 @@ void transpose(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -1051,7 +1051,7 @@ void transpose(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::LINE);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::LINE);
 
     // Add Variable Tensors
     // Not necessary
@@ -1077,7 +1077,7 @@ void transpose(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, num_streams, COMPATSHAPE::LINE);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::LINE);
 
     /* Programs */
 
@@ -1087,26 +1087,26 @@ void transpose(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    std::vector<poplar::ComputeSet> cps(num_streams);
-    std::vector<poplar::VertexRef> vtx(num_streams);
+    std::vector<poplar::ComputeSet> cps(vm_num_streams);
+    std::vector<poplar::VertexRef> vtx(vm_num_streams);
 
-    for (int i = 0; i < num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         db_name = "Compute Set for Pipeline " + std::to_string(i);
         cps[i] = graph.addComputeSet(db_name);
     }
 
-    for (int i = 0; i < num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
 
         vtx[i] = graph.addVertex(cps[i], "transposeVertex");
         graph.setTileMapping(vtx[i], i+15);
     }
 
-    for(int i = 0; i < num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
         graph.connect(vtx[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
         graph.connect(vtx[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
     }
 
-    for(int i = 0; i < num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -1150,21 +1150,21 @@ void transpose(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(num_streams*2);
+    omp_set_num_threads(vm_num_streams*2);
 
     #pragma omp parallel
     {
