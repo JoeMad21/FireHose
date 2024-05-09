@@ -21,12 +21,14 @@ clean_lib:
 	rm ./device_libraries/mylib.o
 
 clean_logs:
-	rm tensor_decomp_test_*
+	rm firehose_*
 
 clean_output:
 	./reset.sh
 
 clean: clean_app clean_lib clean_logs clean_output
+
+refresh: clean_logs clean_output
 
 get:
 	git pull
