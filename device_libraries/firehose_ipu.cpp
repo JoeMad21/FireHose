@@ -480,7 +480,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm_num_streamss, COMPATSHAPE::TRIANGLEQR);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR);
 
     // Add Variable Tensors
     // Not necessary
@@ -511,7 +511,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streamss, COMPATSHAPE::TRIANGLEQR);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR);
 
     /* Programs */
 
@@ -521,7 +521,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    for(int i = 0; i < vm_num_streamss; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -564,23 +564,23 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(vm_num_streamss, std::vector<float> (vm_row*vm_col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(vm_num_streamss, std::vector<float> (vm_row*vm_col, 5.0));
-    std::vector<std::vector<float>> cpu_out1(vm_num_streamss, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out1(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, vm_num_streamss, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, vm_num_streamss, 0, IO::OUT);
-    connectEngineStream(graph, engine, cpu_out1, vm_num_streamss, 1, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_out1, vm_num_streams, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(vm_num_streamss*2);
+    omp_set_num_threads(vm_num_streams*2);
 
     #pragma omp parallel
     {
@@ -1225,12 +1225,12 @@ void convolution(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(vm_num_streamss);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[vm_num_streamss];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < vm_num_streamss; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -1252,7 +1252,7 @@ void convolution(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm_num_streamss, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     // Add Variable Tensors
     // Not necessary
@@ -1277,7 +1277,7 @@ void convolution(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streamss, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     /* Programs */
 
@@ -1293,7 +1293,7 @@ void convolution(boost::program_options::variables_map& vm) {
       {"bufferingDepth", "2"},
     };
 
-    for(int i = 0; i < vm_num_streamss; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
         
         myModels[i].layers[LAYERS::CONSUMPTION].tensors[0] = graph.addVariable(poplar::FLOAT, {1, 1, 3, 3}, "placeholder input tensor");
         myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder weight tensor");
@@ -1305,7 +1305,7 @@ void convolution(boost::program_options::variables_map& vm) {
         comPat.strm.out0[i] = graph.addDeviceToHostFIFO("whatever", poplar::FLOAT, 2*2, streamOpts);
     }
 
-    for(int i = 0; i < vm_num_streamss; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -1349,23 +1349,23 @@ void convolution(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(vm_num_streamss, std::vector<float> (vm_row*vm_col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(vm_num_streamss, std::vector<float> (2*2, 5.0));
-    std::vector<std::vector<float>> cpu_out0(vm_num_streamss, std::vector<float> (2*2, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(vm_num_streams, std::vector<float> (2*2, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (2*2, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, vm_num_streamss, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, vm_num_streamss, 1, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, vm_num_streamss, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, vm_num_streams, 1, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(vm_num_streamss*2);
+    omp_set_num_threads(vm_num_streams*2);
 
     #pragma omp parallel
     {
