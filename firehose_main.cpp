@@ -4,7 +4,9 @@ enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
 
 int main(int argc, char *argv[]) {
 
-    boost::program_options::options_description desc("Options");
+    namespace po::boost::program_options;
+
+    po::options_description desc("Options");
 
     int row = 3;
     int col = 3;
@@ -17,18 +19,18 @@ int main(int argc, char *argv[]) {
 
     desc.add_options()
         ("help", "produce help message")
-        ("row", value<int>(&row)->default_value(3), "number of rows in matrices")
-        ("col", value<int>(&col)->default_value(3), "number of columns in matrices")
-        ("num_packets", value<int>(&num_packets)->default_value(3), "number of packets")
-        ("num_streams", value<int>(&num_streams)->default_value(3), "number of streams")
-        ("num_devices", value<int>(&num_devices)->default_value(1), "number of devices")
-        ("seed", value<int>(&seed)->default_value(42), "seed for random generation")
-        ("get_from_file", value<bool>(&get_from_file)->default_value(false), "whether or not to read input from a file")
-        ("con_task", value<int>(&con_task)->default_value(TASK::MAT_MUL), "the chosen consumption task");
+        ("row", po::value<int>(&row)->default_value(3), "number of rows in matrices")
+        ("col", po::value<int>(&col)->default_value(3), "number of columns in matrices")
+        ("num_packets", po::value<int>(&num_packets)->default_value(3), "number of packets")
+        ("num_streams", po::value<int>(&num_streams)->default_value(3), "number of streams")
+        ("num_devices", po::value<int>(&num_devices)->default_value(1), "number of devices")
+        ("seed", po::value<int>(&seed)->default_value(42), "seed for random generation")
+        ("get_from_file", po::value<bool>(&get_from_file)->default_value(false), "whether or not to read input from a file")
+        ("con_task", po::value<int>(&con_task)->default_value(TASK::MAT_MUL), "the chosen consumption task");
 
-        boost::program_options::variables_map vm;
-        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-        boost::program_options::notify(vm);
+        po::variables_map vm;
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);
 
         if(vm.count("help")) {
             std::cout << desc << std::endl;
