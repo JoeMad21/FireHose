@@ -102,7 +102,7 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
 
     for(int i = 0; i < num_tensors; i++) {
         db_name = "Layer " + std::to_string(layer_id) + " Tensor " + std::to_string(i);
-        myLayer.tensors.push_back(graph.addVariable(poplar::FLOAT, {params.first, params.second}, db_name));
+        myLayer.tensors.push_back(graph.addVariable(poplar::FLOAT, {(long unsigned int)params.first, (long unsigned int)params.second}, db_name));
 
         switch(map) {
         case MAPPING::LINEAR:
