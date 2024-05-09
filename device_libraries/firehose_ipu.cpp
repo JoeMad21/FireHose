@@ -1,4 +1,4 @@
-ed#include "firehose_ipu.hpp"
+#include "firehose_ipu.hpp"
 
 #define NUM_PROGRAMS 3
 #define PRODUCER 0
