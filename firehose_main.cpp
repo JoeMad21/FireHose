@@ -39,23 +39,23 @@ int main(int argc, char *argv[]) {
 
     switch(vm["con_task"].as<int>()) {
         case TASK::TENSOR_DECOMP:
-            tensorDecomp(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            tensorDecomp(vm);
             break;
 
         case TASK::MAT_MUL:
-            matMul(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            matMul(vm);
             break;
 
         case TASK::MAT_ADD:
-            matAdd(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            matAdd(vm);
             break;
 
         case TASK::TRANSPOSE:
-            transpose(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            transpose(vm);
             break;
 
         case TASK::CONVOLUTION:
-            convolution(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
+            convolution(vm);
             break;
     }
 

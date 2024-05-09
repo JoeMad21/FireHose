@@ -4,6 +4,15 @@
 #define PRODUCER 0
 #define CONSUMER 1
 
+#define row vm["row"].as<int>()
+#define col vm["col"].as<int>()
+#define num_packets vm["num_packets"].as<int>()
+#define num_streams vm["num_streams"].as<int>()
+#define num_devices vm["num_devices"].as<int>()
+#define seed vm["seed"].as<int>()
+#define get_from_file vm["get_from_file"].as<int>()
+#define con_task vm["con_task"].as<int>()
+
 enum HARDWARE {IPU, MODEL, CPU};
 enum MAPPING {LINEAR, SET};
 enum LAYERS {INPUT, CONSUMPTION, OUTPUT};
@@ -436,7 +445,7 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
 
 }
 
-void tensorDecomp(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+void tensorDecomp(boost::program_options::variables_map& vm) {
 
     /* Create Shared Memory */
 
