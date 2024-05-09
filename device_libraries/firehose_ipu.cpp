@@ -1,17 +1,17 @@
-#include "firehose_ipu.hpp"
+ed#include "firehose_ipu.hpp"
 
 #define NUM_PROGRAMS 3
 #define PRODUCER 0
 #define CONSUMER 1
 
-#define row vm["row"].as<int>()
-#define col vm["col"].as<int>()
-#define num_packets vm["num_packets"].as<int>()
-#define num_streams vm["num_streams"].as<int>()
-#define num_devices vm["num_devices"].as<int>()
-#define seed vm["seed"].as<int>()
-#define get_from_file vm["get_from_file"].as<int>()
-#define con_task vm["con_task"].as<int>()
+#define vm_row vm["row"].as<int>()
+#define vm_col vm["col"].as<int>()
+#define vm_num_packets vm["num_packets"].as<int>()
+#define vm_num_streams vm["num_streams"].as<int>()
+#define vm_num_devices vm["num_devices"].as<int>()
+#define vm_seed vm["seed"].as<int>()
+#define vm_get_from_file vm["get_from_file"].as<int>()
+#define vm_con_task vm["con_task"].as<int>()
 
 enum HARDWARE {IPU, MODEL, CPU};
 enum MAPPING {LINEAR, SET};
@@ -453,12 +453,12 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -466,7 +466,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, num_devices);
+    poplar::Device device = getDevice(0, vm_vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -478,9 +478,9 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(row, col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEQR);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streamss, COMPATSHAPE::TRIANGLEQR);
 
     // Add Variable Tensors
     // Not necessary
@@ -489,9 +489,9 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     std::cout << "Adding Constant Tensors..." << std::endl;
 
     std::vector<float> vec_id;
-    createIdentityMatrix(vec_id, row, col);
+    createIdentityMatrix(vec_id, vm_row, vm_col);
 
-    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {row, col}, vec_id.data(), "Constant Identity Tensor");
+    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {vm_row, vm_col}, vec_id.data(), "Constant Identity Tensor");
     poputil::mapTensorLinearly(graph, c_id);
 
     std::cout << "Added Constant Tensors!" << std::endl;
@@ -511,7 +511,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, num_streams, COMPATSHAPE::TRIANGLEQR);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streamss, COMPATSHAPE::TRIANGLEQR);
 
     /* Programs */
 
@@ -521,7 +521,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    for(int i = 0; i < num_streams; i++) {
+    for(int i = 0; i < vm_num_streamss; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -564,23 +564,23 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out1(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streamss, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streamss, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out1(vm_num_streamss, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
-    connectEngineStream(graph, engine, cpu_out1, num_streams, 1, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streamss, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streamss, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_out1, vm_num_streamss, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(num_streams*2);
+    omp_set_num_threads(vm_num_streamss*2);
 
     #pragma omp parallel
     {
@@ -588,28 +588,28 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
         
-        std::mt19937 gen(seed+rel_id);
+        std::mt19937 gen(vm_seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         switch(pc_id) {
             case PRODUCER:
-                for(int packet = 0; packet < num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(data_ready_flags[rel_id]);
 
 
-                    for (int i = 0; i < row*col; i++) {
+                    for (int i = 0; i < vm_row*vm_col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
-                    printMatrix("GenMatrix", cpu_in0[rel_id], col, rel_id, packet, 0);
+                    printMatrix("GenMatrix", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
 
                     data_ready_flags[rel_id] = true;
                 }
                 break;
             
             case CONSUMER:
-                for(int packet = 0; packet < num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(!data_ready_flags[rel_id]);
 
                     #pragma omp critical(ipu_work)
@@ -619,8 +619,8 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("QMatrix", cpu_out0[rel_id], col, rel_id, packet, 1);
-                        printMatrix("RMatrix", cpu_out1[rel_id], col, rel_id, packet, 1);
+                        printMatrix("QMatrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
+                        printMatrix("RMatrix", cpu_out1[rel_id], vm_col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
@@ -632,7 +632,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     return;
 }
 
-void matMul(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+void matMul(boost::program_options::variables_map& vm) {
 
     /* Create Shared Memory */
 
@@ -653,7 +653,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -665,7 +665,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(row, col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
     buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
@@ -743,9 +743,9 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
@@ -759,22 +759,22 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     /* Run Parallel Threads for FireHose */
 
-    std::mt19937 gen(seed+0);
+    std::mt19937 gen(vm_seed+0);
     std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-    for (int packet = 0; packet < num_packets; packet++) {
+    for (int packet = 0; packet < vm_num_packets; packet++) {
 
-        for (int i = 0; i < row*col; i++) {
+        for (int i = 0; i < vm_row*vm_col; i++) {
             cpu_in0[0][i] = distribution(gen);
             cpu_in1[0][i] = distribution(gen);
         }
 
-        printMatrix("Matrix A", cpu_in0[0], col, 0, packet, 0);
-        printMatrix("Matrix B", cpu_in1[0], col, 0, packet, 0);
+        printMatrix("Matrix A", cpu_in0[0], vm_col, 0, packet, 0);
+        printMatrix("Matrix B", cpu_in1[0], vm_col, 0, packet, 0);
 
         engine.run(0);
 
-        printMatrix("Result Matrix", cpu_out0[0], col, 0, packet, 1);
+        printMatrix("Result Matrix", cpu_out0[0], vm_col, 0, packet, 1);
     }
 
     //omp_set_num_threads(num_streams*2);
@@ -785,24 +785,24 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     //     int pc_id = thread_id % 2;
     //     int rel_id = thread_id / 2;
         
-    //     std::mt19937 gen(seed+rel_id);
+    //     std::mt19937 gen(vm_seed+rel_id);
     //     std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
     //     switch(pc_id) {
     //         case PRODUCER:
-    //             for(int packet = 0; packet < num_packets; packet++) {
+    //             for(int packet = 0; packet < vm_num_packets; packet++) {
     //                 while(data_ready_flags[rel_id]);
 
 
-    //                 for (int i = 0; i < row*col; i++) {
+    //                 for (int i = 0; i < vm_row*vm_col; i++) {
     //                     cpu_in0[rel_id][i] = distribution(gen);
     //                     cpu_in1[rel_id][i] = distribution(gen);
     //                 }
 
     //                 #pragma omp critical(print)
     //                 {
-    //                     printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
-    //                     printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
+    //                     printMatrix("Matrix A", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
+    //                     printMatrix("Matrix B", cpu_in1[rel_id], vm_col, rel_id, packet, 0);
     //                 }
 
     //                 data_ready_flags[rel_id] = true;
@@ -810,7 +810,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     //             break;
             
     //         case CONSUMER:
-    //             for(int packet = 0; packet < num_packets; packet++) {
+    //             for(int packet = 0; packet < vm_num_packets; packet++) {
     //                 while(!data_ready_flags[rel_id]);
 
     //                 #pragma omp critical(ipu_work)
@@ -820,7 +820,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
 
     //                 #pragma omp critical(print)
     //                 {
-    //                     printMatrix("Result Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+    //                     printMatrix("Result Matrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
     //                 }
 
     //                 data_ready_flags[rel_id] = false;
@@ -832,7 +832,7 @@ void matMul(long unsigned int row, long unsigned int col, long unsigned int num_
     return;
 }
 
-void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+void matAdd(boost::program_options::variables_map& vm) {
 
     /* Create Shared Memory */
 
@@ -853,7 +853,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -865,7 +865,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(row, col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
     buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
@@ -945,9 +945,9 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
@@ -969,24 +969,24 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
         
-        std::mt19937 gen(seed+rel_id);
+        std::mt19937 gen(vm_seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         switch(pc_id) {
             case PRODUCER:
-                for(int packet = 0; packet < num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(data_ready_flags[rel_id]);
 
 
-                    for (int i = 0; i < row*col; i++) {
+                    for (int i = 0; i < vm_row*vm_col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
                         cpu_in1[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Matrix A", cpu_in0[rel_id], col, rel_id, packet, 0);
-                        printMatrix("Matrix B", cpu_in1[rel_id], col, rel_id, packet, 0);
+                        printMatrix("Matrix A", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
+                        printMatrix("Matrix B", cpu_in1[rel_id], vm_col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
@@ -994,7 +994,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
                 break;
             
             case CONSUMER:
-                for(int packet = 0; packet < num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(!data_ready_flags[rel_id]);
 
                     #pragma omp critical(ipu_work)
@@ -1004,7 +1004,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Result Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("Result Matrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
@@ -1016,7 +1016,7 @@ void matAdd(long unsigned int row, long unsigned int col, long unsigned int num_
     return;
 }
 
-void transpose(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+void transpose(boost::program_options::variables_map& vm) {
 
     /* Create Shared Memory */
 
@@ -1037,7 +1037,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -1049,7 +1049,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(row, col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
     buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::LINE);
 
@@ -1150,8 +1150,8 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (row*col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
@@ -1172,22 +1172,22 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
         
-        std::mt19937 gen(seed+rel_id);
+        std::mt19937 gen(vm_seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         switch(pc_id) {
             case PRODUCER:
-                for(int packet = 0; packet < num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(data_ready_flags[rel_id]);
 
 
-                    for (int i = 0; i < row*col; i++) {
+                    for (int i = 0; i < vm_row*vm_col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Input Matrix", cpu_in0[rel_id], col, rel_id, packet, 0);
+                        printMatrix("Input Matrix", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
@@ -1195,7 +1195,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
                 break;
             
             case CONSUMER:
-                for(int packet = 0; packet < num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(!data_ready_flags[rel_id]);
 
                     #pragma omp critical(ipu_work)
@@ -1205,7 +1205,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Transposed Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("Transposed Matrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
@@ -1217,7 +1217,7 @@ void transpose(long unsigned int row, long unsigned int col, long unsigned int n
     return;
 }
 
-void convolution(long unsigned int row, long unsigned int col, long unsigned int num_packets, long unsigned int num_streams, long unsigned int num_devices, long unsigned int seed, bool get_from_file) {
+void convolution(boost::program_options::variables_map& vm) {
 
     /* Create Shared Memory */
 
@@ -1225,12 +1225,12 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streamss);
 
     // Flags
-    bool data_ready_flags[num_streams];
+    bool data_ready_flags[vm_num_streamss];
 
-    for (int i = 0; i < num_streams; i++) {
+    for (int i = 0; i < vm_num_streamss; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -1238,7 +1238,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -1250,9 +1250,9 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(row, col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streamss, COMPATSHAPE::TRIANGLEDOWN);
 
     // Add Variable Tensors
     // Not necessary
@@ -1277,7 +1277,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streamss, COMPATSHAPE::TRIANGLEDOWN);
 
     /* Programs */
 
@@ -1293,7 +1293,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
       {"bufferingDepth", "2"},
     };
 
-    for(int i = 0; i < num_streams; i++) {
+    for(int i = 0; i < vm_num_streamss; i++) {
         
         myModels[i].layers[LAYERS::CONSUMPTION].tensors[0] = graph.addVariable(poplar::FLOAT, {1, 1, 3, 3}, "placeholder input tensor");
         myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder weight tensor");
@@ -1305,7 +1305,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
         comPat.strm.out0[i] = graph.addDeviceToHostFIFO("whatever", poplar::FLOAT, 2*2, streamOpts);
     }
 
-    for(int i = 0; i < num_streams; i++) {
+    for(int i = 0; i < vm_num_streamss; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -1349,23 +1349,23 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(num_streams, std::vector<float> (row*col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(num_streams, std::vector<float> (2*2, 5.0));
-    std::vector<std::vector<float>> cpu_out0(num_streams, std::vector<float> (2*2, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streamss, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(vm_num_streamss, std::vector<float> (2*2, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streamss, std::vector<float> (2*2, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, num_streams, 1, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streamss, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, vm_num_streamss, 1, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streamss, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(num_streams*2);
+    omp_set_num_threads(vm_num_streamss*2);
 
     #pragma omp parallel
     {
@@ -1373,22 +1373,22 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
         
-        std::mt19937 gen(seed+rel_id);
+        std::mt19937 gen(vm_seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         switch(pc_id) {
             case PRODUCER:
-                for(int packet = 0; packet < num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(data_ready_flags[rel_id]);
 
 
-                    for (int i = 0; i < row*col; i++) {
+                    for (int i = 0; i < vm_row*vm_col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Input Matrix", cpu_in0[rel_id], col, rel_id, packet, 0);
+                        printMatrix("Input Matrix", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
@@ -1396,7 +1396,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
                 break;
             
             case CONSUMER:
-                for(int packet = 0; packet < num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(!data_ready_flags[rel_id]);
 
                     #pragma omp critical(ipu_work)
@@ -1406,7 +1406,7 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Transposed Matrix", cpu_out0[rel_id], col, rel_id, packet, 1);
+                        printMatrix("Transposed Matrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
@@ -1418,6 +1418,6 @@ void convolution(long unsigned int row, long unsigned int col, long unsigned int
     return;
 }
 
-//void placeholder(long unsigned int row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
+//void placeholder(long unsigned int vm_row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
 
 //}
