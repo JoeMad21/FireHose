@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-    switch(vm["con_task"]) {
+    switch(vm["con_task"].as<int>()) {
         case TASK::TENSOR_DECOMP:
             tensorDecomp(row, col, num_packets, num_streams, num_devices, seed, get_from_file);
             break;
