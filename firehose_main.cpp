@@ -4,7 +4,7 @@ enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
 
 int main(int argc, char *argv[]) {
 
-    namespace po::boost::program_options;
+    namespace po = boost::program_options;
 
     po::options_description desc("Options");
 
