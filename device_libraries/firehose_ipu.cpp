@@ -512,7 +512,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR, int hw);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR, vm_device);
 
     /* Programs */
 
@@ -691,7 +691,7 @@ void matMul(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, int hw);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, vm_device);
 
     /* Programs */
 
@@ -893,7 +893,7 @@ void matAdd(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, int hw);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, vm_device);
 
     /* Programs */
 
@@ -1078,7 +1078,7 @@ void transpose(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::LINE, int hw);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::LINE, vm_device);
 
     /* Programs */
 
@@ -1278,7 +1278,7 @@ void convolution(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, int hw);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, vm_device);
 
     /* Programs */
 
