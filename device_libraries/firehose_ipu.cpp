@@ -4,6 +4,7 @@
 #define PRODUCER 0
 #define CONSUMER 1
 
+#define vm_device vm["device"].as<int>()
 #define vm_row vm["row"].as<int>()
 #define vm_col vm["col"].as<int>()
 #define vm_num_packets vm["num_packets"].as<int>()
@@ -466,7 +467,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm_num_devices);
+    poplar::Device device = getDevice(vm_device, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -653,7 +654,7 @@ void matMul(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm_num_devices);
+    poplar::Device device = getDevice(vm_device, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -853,7 +854,7 @@ void matAdd(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm_num_devices);
+    poplar::Device device = getDevice(vm_device, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -1037,7 +1038,7 @@ void transpose(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm_num_devices);
+    poplar::Device device = getDevice(vm_device, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -1238,7 +1239,7 @@ void convolution(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm_num_devices);
+    poplar::Device device = getDevice(vm_device, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph

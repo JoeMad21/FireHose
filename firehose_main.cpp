@@ -1,6 +1,8 @@
 #include "device_libraries/firehose_ipu.hpp"
 
 enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
+enum HARDWARE {IPU, MODEL, CPU};
+
 
 int main(int argc, char *argv[]) {
 
@@ -8,6 +10,7 @@ int main(int argc, char *argv[]) {
 
     po::options_description desc("Options");
 
+    int device = HARDWARE::IPU;
     int row = 3;
     int col = 3;
     int num_packets = 3;
@@ -19,6 +22,7 @@ int main(int argc, char *argv[]) {
 
     desc.add_options()
         ("help", "produce help message")
+        ("device", po::value<int>(&device)->default_value(HARDWARE::IPU), "Device mode selected")
         ("row", po::value<int>(&row)->default_value(3), "number of rows in matrices")
         ("col", po::value<int>(&col)->default_value(3), "number of columns in matrices")
         ("num_packets", po::value<int>(&num_packets)->default_value(3), "number of packets")
