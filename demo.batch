@@ -8,4 +8,6 @@
 #SBATCH --time=00:05:00
 #SBATCH --output=ft_%j.log
 
-srun ./firehose
+ct=$1
+
+srun ./firehose --con_task $ct
