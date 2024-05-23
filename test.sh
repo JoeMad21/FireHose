@@ -8,7 +8,7 @@ for task in {1..3}
 do
     for dim in {2, 4, 8}
     do
-        export POPLAR_ENGINE_OPTIONS='{"autoReport.directory":"./fout_${task}"}'
+        #export POPLAR_ENGINE_OPTIONS='{"autoReport.directory":"./fout_${task}"}'
         sbatch demo.batch
         sleep 5m
         make refresh
