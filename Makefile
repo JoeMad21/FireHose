@@ -21,7 +21,7 @@ clean_lib:
 	rm ./device_libraries/mylib.o
 
 clean_logs:
-	rm firehose_*
+	rm ft_*
 
 clean_output:
 	./reset.sh
