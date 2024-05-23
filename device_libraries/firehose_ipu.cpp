@@ -208,6 +208,7 @@ void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::
 
         vtx[i] = graph.addVertex(cps[i], "IOVertex");
         graph.setTileMapping(vtx[i], !hw ? i+offset : 0);
+        graph.setPerfEstimate(vtx[i], 40, 40);
     }
 
     return;
@@ -1100,6 +1101,7 @@ void transpose(boost::program_options::variables_map& vm) {
 
         vtx[i] = graph.addVertex(cps[i], "transposeVertex");
         graph.setTileMapping(vtx[i], !vm_device ? i+15 : 0);
+        graph.setPerfEstimate(vtx[i], 40, 40);
     }
 
     for(int i = 0; i < vm_num_streams; i++) {
