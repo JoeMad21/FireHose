@@ -1099,7 +1099,7 @@ void transpose(boost::program_options::variables_map& vm) {
     for (int i = 0; i < vm_num_streams; i++) {
 
         vtx[i] = graph.addVertex(cps[i], "transposeVertex");
-        graph.setTileMapping(vtx[i], !vm_hw ? i+15 : 0);
+        graph.setTileMapping(vtx[i], !vm_device ? i+15 : 0);
     }
 
     for(int i = 0; i < vm_num_streams; i++) {
