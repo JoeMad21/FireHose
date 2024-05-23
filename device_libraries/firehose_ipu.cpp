@@ -4,14 +4,14 @@
 #define PRODUCER 0
 #define CONSUMER 1
 
-#define vm::row vm["row"].as<int>()
-#define vm::col vm["col"].as<int>()
-#define vm::num_packets vm["num_packets"].as<int>()
-#define vm::num_streams vm["num_streams"].as<int>()
-#define vm::num_devices vm["num_devices"].as<int>()
-#define vm::seed vm["seed"].as<int>()
-#define vm::get_from_file vm["get_from_file"].as<int>()
-#define vm::con_task vm["con_task"].as<int>()
+#define vm_row vm["row"].as<int>()
+#define vm_col vm["col"].as<int>()
+#define vm_num_packets vm["num_packets"].as<int>()
+#define vm_num_streams vm["num_streams"].as<int>()
+#define vm_num_devices vm["num_devices"].as<int>()
+#define vm_seed vm["seed"].as<int>()
+#define vm_get_from_file vm["get_from_file"].as<int>()
+#define vm_con_task vm["con_task"].as<int>()
 
 enum HARDWARE {IPU, MODEL, CPU};
 enum MAPPING {LINEAR, SET};
@@ -453,12 +453,12 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(vm::num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[vm::num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < vm::num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -466,7 +466,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm::num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -478,9 +478,9 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(vm::row, vm::col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm::num_streams, COMPATSHAPE::TRIANGLEQR);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR);
 
     // Add Variable Tensors
     // Not necessary
@@ -489,9 +489,9 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     std::cout << "Adding Constant Tensors..." << std::endl;
 
     std::vector<float> vec_id;
-    createIdentityMatrix(vec_id, vm::row, vm::col);
+    createIdentityMatrix(vec_id, vm_row, vm_col);
 
-    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {(long unsigned int)vm::row, (long unsigned int)vm::col}, vec_id.data(), "Constant Identity Tensor");
+    poplar::Tensor c_id = graph.addConstant<float>(poplar::FLOAT, {(long unsigned int)vm_row, (long unsigned int)vm_col}, vec_id.data(), "Constant Identity Tensor");
     poputil::mapTensorLinearly(graph, c_id);
 
     std::cout << "Added Constant Tensors!" << std::endl;
@@ -511,7 +511,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm::num_streams, COMPATSHAPE::TRIANGLEQR);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR);
 
     /* Programs */
 
@@ -521,7 +521,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    for(int i = 0; i < vm::num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -564,23 +564,23 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
-    std::vector<std::vector<float>> cpu_out1(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out1(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, vm::num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, vm::num_streams, 0, IO::OUT);
-    connectEngineStream(graph, engine, cpu_out1, vm::num_streams, 1, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_out1, vm_num_streams, 1, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(vm::num_streams*2);
+    omp_set_num_threads(vm_num_streams*2);
 
     #pragma omp parallel
     {
@@ -588,28 +588,28 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
         
-        std::mt19937 gen(vm::seed+rel_id);
+        std::mt19937 gen(vm_seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         switch(pc_id) {
             case PRODUCER:
-                for(int packet = 0; packet < vm::num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(data_ready_flags[rel_id]);
 
 
-                    for (int i = 0; i < vm::row*vm::col; i++) {
+                    for (int i = 0; i < vm_row*vm_col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
-                    printMatrix("GenMatrix", cpu_in0[rel_id], vm::col, rel_id, packet, 0);
+                    printMatrix("GenMatrix", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
 
                     data_ready_flags[rel_id] = true;
                 }
                 break;
             
             case CONSUMER:
-                for(int packet = 0; packet < vm::num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(!data_ready_flags[rel_id]);
 
                     #pragma omp critical(ipu_work)
@@ -619,8 +619,8 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("QMatrix", cpu_out0[rel_id], vm::col, rel_id, packet, 1);
-                        printMatrix("RMatrix", cpu_out1[rel_id], vm::col, rel_id, packet, 1);
+                        printMatrix("QMatrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
+                        printMatrix("RMatrix", cpu_out1[rel_id], vm_col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
@@ -640,12 +640,12 @@ void matMul(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(vm::num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[vm::num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < vm::num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -653,7 +653,7 @@ void matMul(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm::num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -665,9 +665,9 @@ void matMul(boost::program_options::variables_map& vm) {
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(vm::row, vm::col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm::num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     // Add Variable Tensors
     // Not necessary
@@ -690,7 +690,7 @@ void matMul(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm::num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     /* Programs */
 
@@ -700,7 +700,7 @@ void matMul(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    for(int i = 0; i < vm::num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -743,41 +743,41 @@ void matMul(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, vm::num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, vm::num_streams, 1, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, vm::num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, vm_num_streams, 1, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    std::mt19937 gen(vm::seed+0);
+    std::mt19937 gen(vm_seed+0);
     std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
-    for (int packet = 0; packet < vm::num_packets; packet++) {
+    for (int packet = 0; packet < vm_num_packets; packet++) {
 
-        for (int i = 0; i < vm::row*vm::col; i++) {
+        for (int i = 0; i < vm_row*vm_col; i++) {
             cpu_in0[0][i] = distribution(gen);
             cpu_in1[0][i] = distribution(gen);
         }
 
-        printMatrix("Matrix A", cpu_in0[0], vm::col, 0, packet, 0);
-        printMatrix("Matrix B", cpu_in1[0], vm::col, 0, packet, 0);
+        printMatrix("Matrix A", cpu_in0[0], vm_col, 0, packet, 0);
+        printMatrix("Matrix B", cpu_in1[0], vm_col, 0, packet, 0);
 
         engine.run(0);
 
-        printMatrix("Result Matrix", cpu_out0[0], vm::col, 0, packet, 1);
+        printMatrix("Result Matrix", cpu_out0[0], vm_col, 0, packet, 1);
     }
 
-    //omp_set_num_threads(vm::num_streams*2);
+    //omp_set_num_threads(vm_num_streams*2);
 
     // #pragma omp parallel
     // {
@@ -785,24 +785,24 @@ void matMul(boost::program_options::variables_map& vm) {
     //     int pc_id = thread_id % 2;
     //     int rel_id = thread_id / 2;
         
-    //     std::mt19937 gen(vm::seed+rel_id);
+    //     std::mt19937 gen(vm_seed+rel_id);
     //     std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
     //     switch(pc_id) {
     //         case PRODUCER:
-    //             for(int packet = 0; packet < vm::num_packets; packet++) {
+    //             for(int packet = 0; packet < vm_num_packets; packet++) {
     //                 while(data_ready_flags[rel_id]);
 
 
-    //                 for (int i = 0; i < vm::row*vm::col; i++) {
+    //                 for (int i = 0; i < vm_row*vm_col; i++) {
     //                     cpu_in0[rel_id][i] = distribution(gen);
     //                     cpu_in1[rel_id][i] = distribution(gen);
     //                 }
 
     //                 #pragma omp critical(print)
     //                 {
-    //                     printMatrix("Matrix A", cpu_in0[rel_id], vm::col, rel_id, packet, 0);
-    //                     printMatrix("Matrix B", cpu_in1[rel_id], vm::col, rel_id, packet, 0);
+    //                     printMatrix("Matrix A", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
+    //                     printMatrix("Matrix B", cpu_in1[rel_id], vm_col, rel_id, packet, 0);
     //                 }
 
     //                 data_ready_flags[rel_id] = true;
@@ -810,7 +810,7 @@ void matMul(boost::program_options::variables_map& vm) {
     //             break;
             
     //         case CONSUMER:
-    //             for(int packet = 0; packet < vm::num_packets; packet++) {
+    //             for(int packet = 0; packet < vm_num_packets; packet++) {
     //                 while(!data_ready_flags[rel_id]);
 
     //                 #pragma omp critical(ipu_work)
@@ -820,7 +820,7 @@ void matMul(boost::program_options::variables_map& vm) {
 
     //                 #pragma omp critical(print)
     //                 {
-    //                     printMatrix("Result Matrix", cpu_out0[rel_id], vm::col, rel_id, packet, 1);
+    //                     printMatrix("Result Matrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
     //                 }
 
     //                 data_ready_flags[rel_id] = false;
@@ -840,12 +840,12 @@ void matAdd(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(vm::num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[vm::num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < vm::num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -853,7 +853,7 @@ void matAdd(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm::num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -865,9 +865,9 @@ void matAdd(boost::program_options::variables_map& vm) {
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(vm::row, vm::col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm::num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     // Add Variable Tensors
     // Not necessary
@@ -892,7 +892,7 @@ void matAdd(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm::num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     /* Programs */
 
@@ -902,7 +902,7 @@ void matAdd(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    for(int i = 0; i < vm::num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -945,23 +945,23 @@ void matAdd(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, vm::num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, vm::num_streams, 1, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, vm::num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, vm_num_streams, 1, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(vm::num_streams*2);
+    omp_set_num_threads(vm_num_streams*2);
 
     #pragma omp parallel
     {
@@ -969,24 +969,24 @@ void matAdd(boost::program_options::variables_map& vm) {
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
         
-        std::mt19937 gen(vm::seed+rel_id);
+        std::mt19937 gen(vm_seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         switch(pc_id) {
             case PRODUCER:
-                for(int packet = 0; packet < vm::num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(data_ready_flags[rel_id]);
 
 
-                    for (int i = 0; i < vm::row*vm::col; i++) {
+                    for (int i = 0; i < vm_row*vm_col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
                         cpu_in1[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Matrix A", cpu_in0[rel_id], vm::col, rel_id, packet, 0);
-                        printMatrix("Matrix B", cpu_in1[rel_id], vm::col, rel_id, packet, 0);
+                        printMatrix("Matrix A", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
+                        printMatrix("Matrix B", cpu_in1[rel_id], vm_col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
@@ -994,7 +994,7 @@ void matAdd(boost::program_options::variables_map& vm) {
                 break;
             
             case CONSUMER:
-                for(int packet = 0; packet < vm::num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(!data_ready_flags[rel_id]);
 
                     #pragma omp critical(ipu_work)
@@ -1004,7 +1004,7 @@ void matAdd(boost::program_options::variables_map& vm) {
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Result Matrix", cpu_out0[rel_id], vm::col, rel_id, packet, 1);
+                        printMatrix("Result Matrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
@@ -1024,12 +1024,12 @@ void transpose(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(vm::num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[vm::num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < vm::num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -1037,7 +1037,7 @@ void transpose(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm::num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -1049,9 +1049,9 @@ void transpose(boost::program_options::variables_map& vm) {
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(vm::row, vm::col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm::num_streams, COMPATSHAPE::LINE);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::LINE);
 
     // Add Variable Tensors
     // Not necessary
@@ -1077,7 +1077,7 @@ void transpose(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm::num_streams, COMPATSHAPE::LINE);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::LINE);
 
     /* Programs */
 
@@ -1087,26 +1087,26 @@ void transpose(boost::program_options::variables_map& vm) {
 
     poplar::program::Sequence seq;
 
-    std::vector<poplar::ComputeSet> cps(vm::num_streams);
-    std::vector<poplar::VertexRef> vtx(vm::num_streams);
+    std::vector<poplar::ComputeSet> cps(vm_num_streams);
+    std::vector<poplar::VertexRef> vtx(vm_num_streams);
 
-    for (int i = 0; i < vm::num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         db_name = "Compute Set for Pipeline " + std::to_string(i);
         cps[i] = graph.addComputeSet(db_name);
     }
 
-    for (int i = 0; i < vm::num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
 
         vtx[i] = graph.addVertex(cps[i], "transposeVertex");
         graph.setTileMapping(vtx[i], i+15);
     }
 
-    for(int i = 0; i < vm::num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
         graph.connect(vtx[i]["strm_in"], myModels[i].layers[LAYERS::CONSUMPTION].tensors[0]);
         graph.connect(vtx[i]["strm_out"], myModels[i].layers[LAYERS::OUTPUT].tensors[0]);
     }
 
-    for(int i = 0; i < vm::num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -1150,21 +1150,21 @@ void transpose(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
-    std::vector<std::vector<float>> cpu_out0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, vm::num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, vm::num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(vm::num_streams*2);
+    omp_set_num_threads(vm_num_streams*2);
 
     #pragma omp parallel
     {
@@ -1172,22 +1172,22 @@ void transpose(boost::program_options::variables_map& vm) {
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
         
-        std::mt19937 gen(vm::seed+rel_id);
+        std::mt19937 gen(vm_seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         switch(pc_id) {
             case PRODUCER:
-                for(int packet = 0; packet < vm::num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(data_ready_flags[rel_id]);
 
 
-                    for (int i = 0; i < vm::row*vm::col; i++) {
+                    for (int i = 0; i < vm_row*vm_col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Input Matrix", cpu_in0[rel_id], vm::col, rel_id, packet, 0);
+                        printMatrix("Input Matrix", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
@@ -1195,7 +1195,7 @@ void transpose(boost::program_options::variables_map& vm) {
                 break;
             
             case CONSUMER:
-                for(int packet = 0; packet < vm::num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(!data_ready_flags[rel_id]);
 
                     #pragma omp critical(ipu_work)
@@ -1205,7 +1205,7 @@ void transpose(boost::program_options::variables_map& vm) {
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Transposed Matrix", cpu_out0[rel_id], vm::col, rel_id, packet, 1);
+                        printMatrix("Transposed Matrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
@@ -1225,12 +1225,12 @@ void convolution(boost::program_options::variables_map& vm) {
     std::string db_name;
 
     // Programs
-    std::vector<poplar::program::Program> progs(vm::num_streams);
+    std::vector<poplar::program::Program> progs(vm_num_streams);
 
     // Flags
-    bool data_ready_flags[vm::num_streams];
+    bool data_ready_flags[vm_num_streams];
 
-    for (int i = 0; i < vm::num_streams; i++) {
+    for (int i = 0; i < vm_num_streams; i++) {
         data_ready_flags[i] = false;
     }
 
@@ -1238,7 +1238,7 @@ void convolution(boost::program_options::variables_map& vm) {
     
     // Get Device
     std::cout << "Getting Device..." << std::endl;
-    poplar::Device device = getDevice(0, vm::num_devices);
+    poplar::Device device = getDevice(0, vm_num_devices);
     std::cout << "Got Device!" << std::endl;
 
     // Graph
@@ -1250,9 +1250,9 @@ void convolution(boost::program_options::variables_map& vm) {
 
     // Build Model
     std::vector<model> myModels;
-    std::pair<int,int> myParams = std::make_pair(vm::row, vm::col);
+    std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm::num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     // Add Variable Tensors
     // Not necessary
@@ -1277,7 +1277,7 @@ void convolution(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm::num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
 
     /* Programs */
 
@@ -1293,7 +1293,7 @@ void convolution(boost::program_options::variables_map& vm) {
       {"bufferingDepth", "2"},
     };
 
-    for(int i = 0; i < vm::num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
         
         myModels[i].layers[LAYERS::CONSUMPTION].tensors[0] = graph.addVariable(poplar::FLOAT, {1, 1, 3, 3}, "placeholder input tensor");
         myModels[i].layers[LAYERS::CONSUMPTION].tensors[1] = graph.addVariable(poplar::FLOAT, {1, 1, 2, 2}, "placeholder weight tensor");
@@ -1305,7 +1305,7 @@ void convolution(boost::program_options::variables_map& vm) {
         comPat.strm.out0[i] = graph.addDeviceToHostFIFO("whatever", poplar::FLOAT, 2*2, streamOpts);
     }
 
-    for(int i = 0; i < vm::num_streams; i++) {
+    for(int i = 0; i < vm_num_streams; i++) {
 
         // Begin Sequence 
         seq = poplar::program::Sequence();
@@ -1349,23 +1349,23 @@ void convolution(boost::program_options::variables_map& vm) {
     /* CPU Memory */
 
     // CPU Vectors
-    std::vector<std::vector<float>> cpu_in0(vm::num_streams, std::vector<float> (vm::row*vm::col, 5.0));
-    std::vector<std::vector<float>> cpu_in1(vm::num_streams, std::vector<float> (2*2, 5.0));
-    std::vector<std::vector<float>> cpu_out0(vm::num_streams, std::vector<float> (2*2, 5.0));
+    std::vector<std::vector<float>> cpu_in0(vm_num_streams, std::vector<float> (vm_row*vm_col, 5.0));
+    std::vector<std::vector<float>> cpu_in1(vm_num_streams, std::vector<float> (2*2, 5.0));
+    std::vector<std::vector<float>> cpu_out0(vm_num_streams, std::vector<float> (2*2, 5.0));
 
     /* Connect Streams */
 
     std::cout << "Connecting Streams..." << std::endl;
 
-    connectEngineStream(graph, engine, cpu_in0, vm::num_streams, 0, IO::IN);
-    connectEngineStream(graph, engine, cpu_in1, vm::num_streams, 1, IO::IN);
-    connectEngineStream(graph, engine, cpu_out0, vm::num_streams, 0, IO::OUT);
+    connectEngineStream(graph, engine, cpu_in0, vm_num_streams, 0, IO::IN);
+    connectEngineStream(graph, engine, cpu_in1, vm_num_streams, 1, IO::IN);
+    connectEngineStream(graph, engine, cpu_out0, vm_num_streams, 0, IO::OUT);
 
     std::cout << "Connected Streams!" << std::endl << std::endl;
 
     /* Run Parallel Threads for FireHose */
 
-    omp_set_num_threads(vm::num_streams*2);
+    omp_set_num_threads(vm_num_streams*2);
 
     #pragma omp parallel
     {
@@ -1373,22 +1373,22 @@ void convolution(boost::program_options::variables_map& vm) {
         int pc_id = thread_id % 2;
         int rel_id = thread_id / 2;
         
-        std::mt19937 gen(vm::seed+rel_id);
+        std::mt19937 gen(vm_seed+rel_id);
         std::uniform_real_distribution<float> distribution(0.0f, 100.0f);
 
         switch(pc_id) {
             case PRODUCER:
-                for(int packet = 0; packet < vm::num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(data_ready_flags[rel_id]);
 
 
-                    for (int i = 0; i < vm::row*vm::col; i++) {
+                    for (int i = 0; i < vm_row*vm_col; i++) {
                         cpu_in0[rel_id][i] = distribution(gen);
                     }
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Input Matrix", cpu_in0[rel_id], vm::col, rel_id, packet, 0);
+                        printMatrix("Input Matrix", cpu_in0[rel_id], vm_col, rel_id, packet, 0);
                     }
 
                     data_ready_flags[rel_id] = true;
@@ -1396,7 +1396,7 @@ void convolution(boost::program_options::variables_map& vm) {
                 break;
             
             case CONSUMER:
-                for(int packet = 0; packet < vm::num_packets; packet++) {
+                for(int packet = 0; packet < vm_num_packets; packet++) {
                     while(!data_ready_flags[rel_id]);
 
                     #pragma omp critical(ipu_work)
@@ -1406,7 +1406,7 @@ void convolution(boost::program_options::variables_map& vm) {
 
                     #pragma omp critical(print)
                     {
-                        printMatrix("Transposed Matrix", cpu_out0[rel_id], vm::col, rel_id, packet, 1);
+                        printMatrix("Transposed Matrix", cpu_out0[rel_id], vm_col, rel_id, packet, 1);
                     }
 
                     data_ready_flags[rel_id] = false;
@@ -1418,6 +1418,6 @@ void convolution(boost::program_options::variables_map& vm) {
     return;
 }
 
-//void placeholder(long unsigned int vm::row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
+//void placeholder(long unsigned int vm_row, long unsigned int col, long unsigned int num_streams, long unsigned int num_devices) {
 
 //}
