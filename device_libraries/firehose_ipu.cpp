@@ -303,7 +303,7 @@ void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std
     return;
 }
 
-void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPattern& comPat, std::pair<int,int> params, int num_streams, int mode) {
+void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPattern& comPat, std::pair<int,int> params, int num_streams, int mode, int hw) {
 
     std::cout << "Adding Vertices..." << std::endl;
 
@@ -330,29 +330,29 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
 
     switch(mode) {
         case COMPATSHAPE::TRIANGLEUP:
-            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
-            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
-            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5, hw);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7, hw);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9, hw);
             break;
         case COMPATSHAPE::TRIANGLEQR:
-            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
-            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
-            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5, hw);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7, hw);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 9, hw);
             break;
         case COMPATSHAPE::TRIANGLEDOWN:
-            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
-            addVertex(graph, comPat.cps.in, comPat.vtx.in1, num_streams, 7);
-            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 9);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5, hw);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in1, num_streams, 7, hw);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 9, hw);
             break;
         case COMPATSHAPE::SQUARE:
-            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
-            addVertex(graph, comPat.cps.in, comPat.vtx.in1, num_streams, 7);
-            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 9);
-            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 11);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5, hw);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in1, num_streams, 7, hw);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 9, hw);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out1, num_streams, 11, hw);
             break;
         case COMPATSHAPE::LINE:
-            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5);
-            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7);
+            addVertex(graph, comPat.cps.in, comPat.vtx.in0, num_streams, 5, hw);
+            addVertex(graph, comPat.cps.out, comPat.vtx.out0, num_streams, 7, hw);
             break;
 
         default:
@@ -512,7 +512,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR, int hw);
 
     /* Programs */
 
@@ -691,7 +691,7 @@ void matMul(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, int hw);
 
     /* Programs */
 
@@ -893,7 +893,7 @@ void matAdd(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, int hw);
 
     /* Programs */
 
@@ -1078,7 +1078,7 @@ void transpose(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::LINE);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::LINE, int hw);
 
     /* Programs */
 
@@ -1278,7 +1278,7 @@ void convolution(boost::program_options::variables_map& vm) {
 
     comPattern comPat;
 
-    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildIOTemplate(graph, myModels, comPat, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, int hw);
 
     /* Programs */
 
