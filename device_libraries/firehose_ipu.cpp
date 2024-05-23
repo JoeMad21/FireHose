@@ -96,7 +96,7 @@ poplar::Device getDevice(int hw_mode, int num_devices) {
     return device;
 }
 
-void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int num_tensors) {
+void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int num_tensors, int hw) {
 
     std::string db_name;
     layer myLayer;
@@ -110,7 +110,7 @@ void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params,
             poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
             break;
         case MAPPING::SET:
-            graph.setTileMapping(myLayer.tensors[i], i);
+            graph.setTileMapping(myLayer.tensors[i], !hw ? i : 0);
             break;
         default:
             poputil::mapTensorLinearly(graph, myLayer.tensors[i]);
@@ -202,12 +202,12 @@ void addStream(poplar::Graph& graph, std::vector<poplar::DataStream>& strm, std:
     return;
 }
 
-void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset) {
+void addVertex(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, std::vector<poplar::VertexRef>& vtx, int num_streams, int offset, int hw) {
 
     for (int i = 0; i < num_streams; i++) {
 
         vtx[i] = graph.addVertex(cps[i], "IOVertex");
-        graph.setTileMapping(vtx[i], i+offset);
+        graph.setTileMapping(vtx[i], !hw ? i+offset : 0);
     }
 
     return;
@@ -253,39 +253,39 @@ void connectEngineStream(poplar::Graph& graph, poplar::Engine& engine, std::vect
     return;
 }
 
-void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams, int mode) {
+void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams, int mode, int hw) {
     std::cout << "Building Model..." << std::endl;
     model myModel;
 
     switch(mode) {
         case COMPATSHAPE::TRIANGLEUP:
-            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
-            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
-            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1, hw);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1, hw);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2, hw);
             break;
 
         case COMPATSHAPE::TRIANGLEQR:
-            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
-            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
-            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1, hw);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2, hw);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2, hw);
             break;
 
         case COMPATSHAPE::TRIANGLEDOWN:
-            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2);
-            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
-            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2, hw);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2, hw);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1, hw);
             break;
 
         case COMPATSHAPE::SQUARE:
-            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2);
-            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2);
-            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2);
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 2, hw);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 2, hw);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 2, hw);
             break;
 
         case COMPATSHAPE::LINE:
-            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1);
-            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1);
-            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1);
+            buildLayer(graph, myModel, params, 0, MAPPING::LINEAR, 1, hw);
+            buildLayer(graph, myModel, params, 1, MAPPING::LINEAR, 1, hw);
+            buildLayer(graph, myModel, params, 2, MAPPING::LINEAR, 1, hw);
             break;
 
         default:
@@ -481,7 +481,7 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEQR, vm_device);
 
     // Add Variable Tensors
     // Not necessary
@@ -668,7 +668,7 @@ void matMul(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, vm_device);
 
     // Add Variable Tensors
     // Not necessary
@@ -868,7 +868,7 @@ void matAdd(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, vm_device);
 
     // Add Variable Tensors
     // Not necessary
@@ -1052,7 +1052,7 @@ void transpose(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::LINE);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::LINE, vm_device);
 
     // Add Variable Tensors
     // Not necessary
@@ -1099,7 +1099,7 @@ void transpose(boost::program_options::variables_map& vm) {
     for (int i = 0; i < vm_num_streams; i++) {
 
         vtx[i] = graph.addVertex(cps[i], "transposeVertex");
-        graph.setTileMapping(vtx[i], i+15);
+        graph.setTileMapping(vtx[i], !vm_hw ? i+15 : 0);
     }
 
     for(int i = 0; i < vm_num_streams; i++) {
@@ -1253,7 +1253,7 @@ void convolution(boost::program_options::variables_map& vm) {
     std::vector<model> myModels;
     std::pair<int,int> myParams = std::make_pair(vm_row, vm_col);
 
-    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN);
+    buildTensorTemplate(graph, myModels, myParams, vm_num_streams, COMPATSHAPE::TRIANGLEDOWN, vm_device);
 
     // Add Variable Tensors
     // Not necessary

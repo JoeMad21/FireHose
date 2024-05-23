@@ -67,7 +67,7 @@ void createIdentityMatrix(std::vector<float>& vec_id, int row, int col);
 
 poplar::Device getDevice(int hw_mode, int num_devices);
 
-void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int num_tensors);
+void buildLayer(poplar::Graph& graph, model& myModel, std::pair<int,int> params, int layer_id, int map, int num_tensors, int hw);
 
 void addComputeSet(poplar::Graph& graph, std::vector<poplar::ComputeSet>& cps, int num_streams, int IO);
 
@@ -79,7 +79,7 @@ void connectVertex(poplar::Graph& graph, std::vector<poplar::VertexRef>& vtx, st
 
 void connectEngineStream(poplar::Graph& graph, std::vector<float>& cpu, int num_streams, int num_port, int IO);
 
-void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams, int mode);
+void buildTensorTemplate(poplar::Graph& graph, std::vector<model>& myModels, std::pair<int,int> params, int num_streams, int mode, int hw);
 
 void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPattern& comPat, std::pair<int,int> params, int num_streams, int mode);
 
