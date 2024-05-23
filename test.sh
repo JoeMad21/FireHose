@@ -4,7 +4,7 @@ echo "STARTING"
 
 export POPLAR_ENGINE_OPTIONS='{"autoReport.all":"true", "autoReport.directory":"./report"}'
 
-example = '{"autoReport.directory":"./fout"}'
+example='{"autoReport.directory":"./fout"}'
 
 for task in {1..3}
 do
