@@ -589,15 +589,14 @@ void tensorDecomp(boost::program_options::variables_map& vm) {
 
         for (int i = 0; i < vm_row*vm_col; i++) {
             cpu_in0[0][i] = distribution(gen);
-            cpu_in1[0][i] = distribution(gen);
         }
 
-        printMatrix("Matrix A", cpu_in0[0], vm_col, 0, packet, 0);
-        printMatrix("Matrix B", cpu_in1[0], vm_col, 0, packet, 0);
+        printMatrix("Gen Matrix", cpu_in0[0], vm_col, 0, packet, 0);
 
         engine.run(0);
 
-        printMatrix("Result Matrix", cpu_out0[0], vm_col, 0, packet, 1);
+        printMatrix("QMatrix", cpu_out0[0], vm_col, 0, packet, 1);
+        printMatrix("RMatrix", cpu_out1[0], vm_col, 0, packet, 1);
     }
 
     // omp_set_num_threads(vm_num_streams*2);
