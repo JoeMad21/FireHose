@@ -92,8 +92,11 @@ int main(int argc, char *argv[]) {
             break;
     }
 
-    std::cout << "Finished in " << cpu_duration << " seconds [CPU Clock] " << std::endl;
-    std::cout << "Finished in " << wctduration.count() << " seconds [Wall Clock]" << std::endl;
+    std::ofstream fileStream("TimeReport.out", std::ios::app);
+    fileStream << "Report: CT" << vm["con_task"].as<int>() << " DIM" << vm["col"].as<int>() << std::endl;
+
+    fileStream << "Finished in " << cpu_duration << " seconds [CPU Clock] " << std::endl;
+    fileStream << "Finished in " << wctduration.count() << " seconds [Wall Clock]" << std::endl;
 
     return 0;
 }
