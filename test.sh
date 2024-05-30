@@ -15,7 +15,7 @@ echo "STARTING"
             sleep 2s
         
             # Submit the job
-            sbatch demo.batch ${task}
+            sbatch demo.batch ${task} ${dim}
         
             # Wait for the job to complete
             sleep 5m

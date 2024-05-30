@@ -9,5 +9,6 @@
 #SBATCH --output=ft_%j.log
 
 ct=$1
+dim=$2
 
-srun ./firehose --con_task $ct
+srun ./firehose --con_task $ct --col $dim --row $dim
