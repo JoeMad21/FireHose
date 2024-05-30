@@ -1,4 +1,7 @@
 #include "device_libraries/firehose_ipu.hpp"
+#include <cstdio>
+#include <ctime>
+#include <chrono>
 
 enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
 enum HARDWARE {IPU, MODEL, CPU};
@@ -41,27 +44,56 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
+    std::clock_t startcputime = std::clock();
+    double cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+    auto wcts = std::chrono::system_clock::now();
+    std::chrono::duration<double> wctduration = (std::chrono::system_clock::now() - wcts);
+
+
     switch(vm["con_task"].as<int>()) {
         case TASK::TENSOR_DECOMP:
+            startcputime = std::clock();
+            wcts = std::chrono::system_clock::now();
             tensorDecomp(vm);
+            cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+            wctduration = (std::chrono::system_clock::now() - wcts);
             break;
 
         case TASK::MAT_MUL:
+            startcputime = std::clock();
+            wcts = std::chrono::system_clock::now();
             matMul(vm);
+            cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+            wctduration = (std::chrono::system_clock::now() - wcts);
             break;
 
         case TASK::MAT_ADD:
+            startcputime = std::clock();
+            wcts = std::chrono::system_clock::now();
             matAdd(vm);
+            cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+            wctduration = (std::chrono::system_clock::now() - wcts);
             break;
 
         case TASK::TRANSPOSE:
+            startcputime = std::clock();
+            wcts = std::chrono::system_clock::now();
             transpose(vm);
+            cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+            wctduration = (std::chrono::system_clock::now() - wcts);
             break;
 
         case TASK::CONVOLUTION:
+            startcputime = std::clock();
+            wcts = std::chrono::system_clock::now();
             convolution(vm);
+            cpu_duration = (std::clock() - startcputime) / (double)CLOCKS_PER_SEC;
+            wctduration = (std::chrono::system_clock::now() - wcts);
             break;
     }
+
+    std::cout << "Finished in " << cpu_duration << " seconds [CPU Clock] " << std::endl;
+    std::cout << "Finished in " << wctduration.count() << " seconds [Wall Clock]" << std::endl;
 
     return 0;
 }
