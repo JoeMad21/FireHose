@@ -407,33 +407,33 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
 
     switch(mode) {
         case COMPATSHAPE::TRIANGLEUP:
-            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
-            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
-            addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.in0, params, 8, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 8, 0, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.out1, params, 8, 1, num_streams, IO::OUT);
             break;
         
         case COMPATSHAPE::TRIANGLEQR:
-            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
-            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
-            addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.in0, params, 8, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 8, 0, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.out1, params, 8, 1, num_streams, IO::OUT);
             break;
 
         case COMPATSHAPE::TRIANGLEDOWN:
-            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
-            addStream(graph, comPat.strm.in1, params, 2, 1, num_streams, IO::IN);
-            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.in0, params, 8, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.in1, params, 8, 1, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 8, 0, num_streams, IO::OUT);
             break;
 
         case COMPATSHAPE::SQUARE:
-            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
-            addStream(graph, comPat.strm.in1, params, 2, 1, num_streams, IO::IN);
-            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
-            addStream(graph, comPat.strm.out1, params, 2, 1, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.in0, params, 8, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.in1, params, 8, 1, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 8, 0, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.out1, params, 8, 1, num_streams, IO::OUT);
             break;
 
         case COMPATSHAPE::LINE:
-            addStream(graph, comPat.strm.in0, params, 2, 0, num_streams, IO::IN);
-            addStream(graph, comPat.strm.out0, params, 2, 0, num_streams, IO::OUT);
+            addStream(graph, comPat.strm.in0, params, 8, 0, num_streams, IO::IN);
+            addStream(graph, comPat.strm.out0, params, 8, 0, num_streams, IO::OUT);
             break;
 
         default:
@@ -1310,7 +1310,7 @@ void convolution(boost::program_options::variables_map& vm) {
     auto convp = poplin::ConvParams(poplar::FLOAT, 1, {3,3}, {2,2}, 1, 1, 1);
 
     poplar::OptionFlags streamOpts {
-      {"bufferingDepth", "2"},
+      {"bufferingDepth", "8"},
     };
 
     for(int i = 0; i < vm_num_streams; i++) {

@@ -9,7 +9,7 @@ do
         for dim in 2 4 8 16 32 64 128 256
         do
             # Set the directory dynamically based on task and dim
-            export POPLAR_ENGINE_OPTIONS='{"autoReport.all":"true", "autoReport.directory":"./reports/r'${run}'_t'${task}'_d'${dim}'"}'
+            export POPLAR_ENGINE_OPTIONS='{"autoReport.all":"true", "autoReport.directory":"./reports2/r'${run}'_t'${task}'_d'${dim}'"}'
             echo "Trial ${run} Running task ${task} with dimension ${dim}"
         
             sleep 2s
