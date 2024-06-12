@@ -6,7 +6,6 @@
 enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
 enum HARDWARE {IPU, MODEL, CPU};
 
-
 int main(int argc, char *argv[]) {
 
     namespace po = boost::program_options;

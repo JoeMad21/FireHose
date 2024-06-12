@@ -2,15 +2,15 @@
 
 echo "STARTING"
 
-#for run in {0..3}
-#do
+for run in {0..3}
+do
     for task in {0..3}
     do
         for dim in 2 4 8 16 32 64 128 256
         do
             # Set the directory dynamically based on task and dim
-            export POPLAR_ENGINE_OPTIONS='{"autoReport.all":"true", "autoReport.directory":"./reports/report_task'${task}'_dim'${dim}'"}'
-            echo "Running task ${task} with dimension ${dim}"
+            export POPLAR_ENGINE_OPTIONS='{"autoReport.all":"true", "autoReport.directory":"./reports/r'${run}'_t'${task}'_d'${dim}'"}'
+            echo "Trial ${run} Running task ${task} with dimension ${dim}"
         
             sleep 2s
         
@@ -24,6 +24,6 @@ echo "STARTING"
             make refresh
         done
     done
-#done
+done
 
 echo "DONE"
