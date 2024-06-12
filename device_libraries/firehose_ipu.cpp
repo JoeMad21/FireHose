@@ -406,6 +406,7 @@ void buildIOTemplate(poplar::Graph& graph, std::vector<model>& myModels, comPatt
     std::cout << "Adding Streams..." << std::endl;
 
     switch(mode) {
+        //Changed buffer depth
         case COMPATSHAPE::TRIANGLEUP:
             addStream(graph, comPat.strm.in0, params, 8, 0, num_streams, IO::IN);
             addStream(graph, comPat.strm.out0, params, 8, 0, num_streams, IO::OUT);
