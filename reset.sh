@@ -7,5 +7,3 @@ done
 for file in ./IPU_OUTPUTS*.out; do
   : > "$file"
 done
-
-: > "TimeReport.out"
