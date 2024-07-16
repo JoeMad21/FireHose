@@ -1,10 +1,12 @@
 #include "device_libraries/firehose_ipu.hpp"
+#include <string>
 #include <cstdio>
 #include <ctime>
 #include <chrono>
 
 enum TASK {TENSOR_DECOMP, MAT_MUL, MAT_ADD, TRANSPOSE, CONVOLUTION};
 enum HARDWARE {IPU, MODEL, CPU};
+enum COMPATSHAPE {TRIANGLEUP, TRIANGLEQR, TRIANGLEDOWN, SQUARE, LINE};
 
 int main(int argc, char *argv[]) {
 
@@ -12,27 +14,29 @@ int main(int argc, char *argv[]) {
 
     po::options_description desc("Options");
 
-    int device = HARDWARE::IPU;
-    int row = 3;
-    int col = 3;
-    int num_packets = 3;
-    int num_streams = 3;
-    int num_devices = 1;
-    int seed = 42;
+    long unsigned int device = HARDWARE::IPU;
+    long unsigned int dim = 3;
+    long unsigned int num_packets = 3;
+    long unsigned int num_streams = 3;
+    long unsigned int num_devices = 1;
+    long unsigned int seed = 42;
+    long unsigned int offset = 4;
     bool get_from_file = false;
-    int con_task = TASK::MAT_ADD;
+    long unsigned int experimental = 0;
+    long unsigned int con_task = TASK::MAT_ADD;
 
     desc.add_options()
         ("help", "produce help message")
-        ("device", po::value<int>(&device)->default_value(HARDWARE::IPU), "Device mode selected")
-        ("row", po::value<int>(&row)->default_value(3), "number of rows in matrices")
-        ("col", po::value<int>(&col)->default_value(3), "number of columns in matrices")
-        ("num_packets", po::value<int>(&num_packets)->default_value(3), "number of packets")
-        ("num_streams", po::value<int>(&num_streams)->default_value(3), "number of streams")
-        ("num_devices", po::value<int>(&num_devices)->default_value(1), "number of devices")
-        ("seed", po::value<int>(&seed)->default_value(42), "seed for random generation")
+        ("hw", po::value<long unsigned int>(&device)->default_value(HARDWARE::IPU), "Device mode selected")
+        ("dim", po::value<long unsigned int>(&out_dim)->default_value(3), "Matrices dimensions")
+        ("packets", po::value<long unsigned int>(&num_packets)->default_value(3), "number of packets")
+        ("streams", po::value<long unsigned int>(&num_streams)->default_value(3), "number of streams")
+        ("devices", po::value<long unsigned int>(&num_devices)->default_value(1), "number of devices")
+        ("seed", po::value<long unsigned int>(&seed)->default_value(42), "seed for random generation")
+        ("offset", po::value<long unsigned int>(&offset)->default_value(4), "value to offset tiles")
+        ("experimental", po::value<long unsigned int>(&seed)->default_value(0), "whether to use experimental configuration")
         ("get_from_file", po::value<bool>(&get_from_file)->default_value(false), "whether or not to read input from a file")
-        ("con_task", po::value<int>(&con_task)->default_value(TASK::MAT_MUL), "the chosen consumption task");
+        ("con_task", po::value<long unsigned int>(&con_task)->default_value(TASK::MAT_MUL), "the chosen consumption task");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -48,8 +52,7 @@ int main(int argc, char *argv[]) {
     auto wcts = std::chrono::system_clock::now();
     std::chrono::duration<double> wctduration = (std::chrono::system_clock::now() - wcts);
 
-
-    switch(vm["con_task"].as<int>()) {
+    switch(vm["con_task"].as<long unsigned int>()) {
         case TASK::TENSOR_DECOMP:
             startcputime = std::clock();
             wcts = std::chrono::system_clock::now();
@@ -92,7 +95,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::ofstream fileStream("TimeReport.out", std::ios::app);
-    fileStream << "Report: CT" << vm["con_task"].as<int>() << " DIM" << vm["col"].as<int>() << std::endl;
+    fileStream << "Report: CT" << vm["con_task"].as<long unsigned int>() << " DIM" << vm["col"].as<long unsigned int>() << std::endl;
 
     fileStream << "Finished in " << cpu_duration << " seconds [CPU Clock] " << std::endl;
     fileStream << "Finished in " << wctduration.count() << " seconds [Wall Clock]" << std::endl;
